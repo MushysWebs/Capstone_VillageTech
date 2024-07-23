@@ -18,12 +18,13 @@
     color: white;
     display: flex;
     flex-direction: column;
+    letter-spacing: 1px;
   }
   
   .sidebar nav ul {
     list-style-type: none;
     margin: 0;
-    margin-top: -8px;
+    margin-top: -5px;
     padding: 0;
   }
   
@@ -48,16 +49,16 @@
     display: flex;
     align-items: center;
     width: 100%;
-    margin-left: 20px;
+    margin-left: 25px;
   }
   
   .sidebar nav ul li.active {
-    font-weight: bold;
+    font-weight: light;
     color: #09ACE0;
     background-color: #FFFFFF;
     border-radius: 10px; 
     padding: 15px 15px 15px 1px;
-    margin-left: 2px;
+    margin-left: 8px;
     transition: all 0.3s ease;
   }
   
@@ -67,10 +68,12 @@
   
   .sidebar nav ul li:not(:first-child) {
     margin-bottom: 15px;
+    font-size: 18px;
   }
 
   .top-nav {
-    margin-left: 15px;
+    margin-left: 21px;
+    letter-spacing: 1px;
     background-color: white;
     padding: 18px 30px;
     display: flex;
@@ -95,7 +98,6 @@
     display: flex;
     align-items: center;
     gap: 13px;
-    padding-top: 14px;
   }
   
   .blue-button {
@@ -152,11 +154,13 @@
 
   .search-input:focus::placeholder {
     color: #96d4e9;
+    letter-spacing: 4px;
     transition: all 0.3s ease;
   }
   
   .search-input::placeholder {
     color: #09ACE0;
+    letter-spacing: 1px;
     transition: all 0.3s ease;
   }
   
@@ -283,7 +287,8 @@
     background-color: #363D3F;
     color: white;
   }
-  
+
   .dark .sidebar {
     background-color: #363D3F;
   }
+  

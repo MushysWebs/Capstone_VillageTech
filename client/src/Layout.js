@@ -25,7 +25,7 @@ const Layout = () => {
 
   return (
     <div className={`dashboard-container ${theme}`}>
-      <aside className="sidebar">
+      <aside className="sidebar nunito-light">
         <nav>
           <ul>
             <li className= {location.pathname === '/dashboard' ? 'active' : ''}>
@@ -73,7 +73,7 @@ const Layout = () => {
             </div>
           </div>
           <div className="header-right">
-            <button className="header-button">Save</button>
+            <button className="header-button blue-button">Save</button>
             <button className="notification-button" onClick={() => setShowNotifications(!showNotifications)}>
               <i className="fas fa-bell"></i>
             </button>
