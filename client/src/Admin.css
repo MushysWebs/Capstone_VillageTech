@@ -1,27 +1,130 @@
 .admin-content {
-    padding: 30px;
-  }
-  
-  .admin-sections {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-  }
-  
-  .admin-section {
-    background-color: #f0f0f0;
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  .admin-section h2 {
-    margin-bottom: 15px;
-    color: #09ACE0;
-  }
-  
-  .admin-section .action-button {
-    display: block;
-    width: 100%;
-    margin-bottom: 10px;
-  }
+  padding: 30px;
+}
+
+.staff-list-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.add-staff-button {
+  color: #09ACE0;
+  font-size: 14px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.results-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.card-content {
+  padding: 20px;
+}
+
+.view-filter-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.view-filter-button {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.staff-table th,
+.staff-table td {
+  text-align: left;
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.staff-table th {
+  font-weight: 600;
+  color: #333;
+}
+
+.staff-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.staff-name {
+  display: flex;
+  align-items: center;
+}
+
+.role-badge {
+  background-color: #E6F7FF;
+  color: #09ACE0;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.manage-schedule-button {
+  background-color: #09ACE0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+  float: right;
+}
+
+.dark .staff-list-card {
+  background-color: #363D3F;
+  color: white;
+}
+
+.dark .card-header {
+  border-bottom-color: #4a5256;
+}
+
+.dark .search-input,
+.dark .view-filter-button {
+  background-color: #2a3132;
+  border-color: #4a5256;
+  color: white;
+}
+
+.dark .staff-table th,
+.dark .staff-table td {
+  border-bottom-color: #4a5256;
+}
+
+.dark .role-badge {
+  background-color: #1e2b2d;
+}
+
+.dark .manage-schedule-button {
+  background-color: #1a7a9e;
+}

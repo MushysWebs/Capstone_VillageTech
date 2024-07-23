@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import './Dashboard.css';
+import AdminPage from './Admin'; 
 
 const Layout = () => {
   const [theme, setTheme] = useState('light');
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const location = useLocation();
 
   useEffect(() => {
@@ -17,12 +19,16 @@ const Layout = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  const handleGlobalSearch = (e) => {
+    setGlobalSearchTerm(e.target.value);
+  };
+
   return (
     <div className={`dashboard-container ${theme}`}>
       <aside className="sidebar">
         <nav>
           <ul>
-            <li className={location.pathname === '/dashboard' ? 'active' : ''}>
+            <li className= {location.pathname === '/dashboard' ? 'active' : ''}>
               <Link to="/dashboard"><i className="fas fa-home"></i> Dashboard</Link>
             </li>
             <li className={location.pathname === '/contacts' ? 'active' : ''}>
@@ -43,15 +49,27 @@ const Layout = () => {
       <main className="main-content">
         <header className="top-nav">
           <div className="header-left">
-          <Link to="/messages" className="header-button blue-button nunito-regular">
-    <i className="fas fa-envelope"></i> Messages
-  </Link>
-  <Link to="/admin" className="header-button blue-button nunito-regular">
-    <i className="fas fa-user-shield"></i> Admin
-  </Link>
+            <Link 
+              to="/messages" 
+              className={`header-button blue-button nunito-regular ${location.pathname === '/messages' ? 'active' : ''}`}
+            >
+              <i className="fas fa-envelope"></i> Messages
+            </Link>
+            <Link 
+              to="/admin" 
+              className={`header-button blue-button nunito-regular ${location.pathname === '/admin' ? 'active' : ''}`}
+            >
+              <i className="fas fa-user-shield"></i> Admin
+            </Link>
             <div className="search-container">
               <i className="fas fa-search search-icon"></i>
-              <input type="text" placeholder="Search" className="search-input nunito-regular" />
+              <input 
+                type="text" 
+                placeholder="Search" 
+                className="search-input nunito-regular" 
+                value={globalSearchTerm}
+                onChange={handleGlobalSearch}
+              />
             </div>
           </div>
           <div className="header-right">
@@ -62,9 +80,13 @@ const Layout = () => {
             <button className="user-button"><i className="fas fa-user"></i></button>
             <button className="settings-button" onClick={toggleTheme}><i className="fas fa-cog"></i></button>
             <span className="time-display">{currentTime.toLocaleTimeString()}</span>
-          </div>
+            </div>
         </header>
-        <Outlet />
+        {location.pathname === '/admin' ? (
+          <AdminPage globalSearchTerm={globalSearchTerm} />
+        ) : (
+          <Outlet />
+        )}
       </main>
       {showNotifications && (
         <aside className="notifications-panel">
