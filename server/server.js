@@ -2,10 +2,12 @@ require('dotenv').config();
 
 const db = require('./db');
 const express = require('express');
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 // Register a new user
 app.post("/api/v1/register", async (req, res) => {
