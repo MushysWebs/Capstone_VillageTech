@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
@@ -6,6 +7,7 @@ const Login = () => {
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -14,6 +16,8 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Login attempt with:', { employeeId, password });
+    // validation here
+    navigate('/dashboard');
   };
 
   return (

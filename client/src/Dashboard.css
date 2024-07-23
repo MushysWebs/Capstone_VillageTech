@@ -1,0 +1,260 @@
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 250px 1fr auto;
+    height: 100vh;
+    font-family: 'Nunito', sans-serif;
+  }
+  
+  .sidebar {
+    background-color: #09ACE0;
+    width: 73%;
+    padding: 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar nav ul {
+    list-style-type: none;
+    margin: 0;
+  }
+  
+  .sidebar nav ul li {
+    padding: 25px 0px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 19px;
+    font-size: 23px;
+    margin-left: -20px;
+  }
+  
+  .sidebar nav ul li i {
+    width: 15px;
+  }
+  
+  .sidebar nav ul li.active {
+    font-weight: bold;
+    color: #09ACE0;
+    background-color: #FFFFFF; /* Solid white background */
+    margin-left: -54px;
+    margin-bottom: 40px;
+    border-radius: 14px;
+    padding: 20px 30px;
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .top-nav {
+    background-color: white;
+    padding: 18px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    font-family: ;
+  }
+  
+  .header-button, .notification-button, .user-button, .settings-button, .theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 23px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding-top: 14px;
+  }
+  
+  .blue-button {
+    color: #09ACE0;
+  }
+  
+  .search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    color: #09ACE0;
+  }
+  
+  .search-input {
+    padding: 8px 15px 8px 35px;
+    border-radius: 20px;
+    border: none;
+    font-size: 23px;
+  }
+  
+  .search-input::placeholder {
+    color: #09ACE0;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+
+  
+  .time-display {
+    font-size: 24px;
+    padding-top: 6px;
+    color: #333;
+  }
+  
+  .dashboard-content {
+    padding: 30px;
+    overflow-y: auto;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 30px;
+  }
+  
+  .dashboard-header h1 {
+    margin-bottom: 15px;
+    font-size: 28px;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .action-button {
+    background-color: #09ACE0;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-right: 25px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .calendar-section {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .nav-button, .today-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .appointments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .appointment-card {
+    background-color: #E6F7FF;
+    border-left: 4px solid #09ACE0;
+    padding: 15px;
+    border-radius: 5px;
+  }
+  
+  .appointment-card h3 {
+    margin-top: 0;
+    color: #09ACE0;
+    font-size: 18px;
+  }
+  
+  .appointment-card p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  
+  .notifications-panel {
+    background-color: white;
+    padding: 20px;
+    border-left: 1px solid #e0e0e0;
+    width: 300px;
+    overflow-y: auto;
+  }
+  
+  .notification {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .notification h3 {
+    margin-top: 0;
+    color: #09ACE0;
+  }
+  
+  .notification p {
+    font-size: 14px;
+    margin: 5px 0;
+  }
+  
+  /* Dark mode styles */
+  .dark {
+    background-color: #363D3F;
+    color: white;
+  }
+  
+  .dark .top-nav,
+  .dark .dashboard-content,
+  .dark .calendar-section,
+  .dark .notifications-panel {
+    background-color: #2C3E50;
+    color: white;
+  }
+  
+  .dark .sidebar {
+    background-color: #34495E;
+  }
+  
+  .dark .appointment-card {
+    background-color: #4A5568;
+    border-left-color: #09ACE0;
+  }
+  
+  .dark .search-input {
+    background-color: #4A5568;
+    color: white;
+    border-color: #718096;
+  }
+  
+  .dark .header-button,
+  .dark .notification-button,
+  .dark .user-button,
+  .dark .settings-button,
+  .dark .theme-toggle,
+  .dark .time-display {
+    color: white;
+  }
