@@ -43,6 +43,7 @@
 .container {
     display: flex;
     height: 100vh;
+    padding-bottom: 100px;
   }
   
   .sidebar {
@@ -56,6 +57,7 @@
   .logo {
     width: 250px;
     height: auto;
+    margin-right: 10px;
   }
   
   .form-container {
@@ -64,13 +66,13 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding-bottom: 140px;
   }
   
   .center-logo {
     width: 160px;
     height: 160px;
-    padding-top: 15px;
+    padding-top: 0px;
   }
   
   .welcome-text {
