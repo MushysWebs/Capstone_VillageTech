@@ -41,6 +41,8 @@ npm start {starts the nodemon server after updating package.json scripts with th
 },
 
 ~-~ client side ~-~
-npm install create-react-app -g {installs the plugin to create app}
-
+npm install {install npm dependencies}
+npm install create-react-app -g  {installs the plugin to create app}
+npm install axios {For making https request}
+npm install cors {middleware}
 npx create-react-app . {Installs node modules client side}
