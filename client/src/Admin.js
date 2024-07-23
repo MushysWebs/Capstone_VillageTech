@@ -3,13 +3,20 @@ import './Admin.css';
 
 const AdminPage = ({ globalSearchTerm }) => {
   const [staffList, setStaffList] = useState([
+    
+    //create a staff table that stores personal information that links to the user id of the user table
+    //or include personal information of the staff in the user table
+    //then replace this
+
     { id: 1, name: 'Leonardo DiCaprio', email: 'leonardo@di.cap', phone: '(404) 314-9696', role: 'Veterinarian' },
-    { id: 2, name: 'Emma Stone', email: 'emma@stone.com', phone: '(404) 555-1234', role: 'Vet Tech' },
-    { id: 3, name: 'Brad Pitt', email: 'brad@pitt.com', phone: '(404) 555-5678', role: 'Receptionist' },
-    { id: 4, name: 'Meryl Streep', email: 'meryl@streep.com', phone: '(404) 555-9012', role: 'Other' },
+    { id: 2, name: 'Mark Wahlberg', email: 'wahl@berger.commm', phone: '(404) 555-1234', role: 'Vet Tech' },
+    { id: 3, name: 'Poo Pee', email: 'poo@pee.pee', phone: '(404) 555-5678', role: 'Receptionist' },
+    { id: 4, name: 'Hillary Clinton', email: 'hill@clint.cim', phone: '(404) 555-9012', role: 'Other' },
   ]);
 
+  
   const [roleFilter, setRoleFilter] = useState('All');
+  const [selectedStaff, setSelectedStaff] = useState(null);
 
   const filteredStaff = useMemo(() => {
     return staffList.filter(staff => 
@@ -19,6 +26,14 @@ const AdminPage = ({ globalSearchTerm }) => {
       (roleFilter === 'All' || staff.role === roleFilter)
     );
   }, [staffList, globalSearchTerm, roleFilter]);
+
+  const handleStaffClick = (staff) => {
+    setSelectedStaff(staff);
+  };
+
+  const closeStaffDetails = () => {
+    setSelectedStaff(null);
+  };
 
   return (
     <div className="admin-content">
@@ -71,7 +86,9 @@ const AdminPage = ({ globalSearchTerm }) => {
                   <td>{staff.phone}</td>
                   <td><span className="role-badge">{staff.role}</span></td>
                   <td>
-                    <button className="view-filter-button"><i className="fas fa-check-square"></i></button>
+                    <button className="view-filter-button" onClick={() => handleStaffClick(staff)}>
+                      <i className="fas fa-window-restore"></i>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -80,6 +97,49 @@ const AdminPage = ({ globalSearchTerm }) => {
         </div>
       </div>
       <button className="manage-schedule-button">Manage Schedule</button>
+
+      {selectedStaff && (
+        <div className="staff-details-overlay">
+          <div className="staff-details-content">
+            <button className="close-button" onClick={closeStaffDetails}>← Back</button>
+            <h2>Temporary placeholder design</h2>
+            <div className="staff-details-grid">
+              <div className="personal-details">
+                <h3>Personal Details <button className="edit-button">Edit</button></h3>
+                <img src="/floweronly.svg" alt={selectedStaff.name} className="staff-large-avatar" />
+                <p><strong>Name:</strong> {selectedStaff.name}</p>
+                <p><strong>Gender:</strong> {selectedStaff.gender}</p>
+                <p><strong>Date of Birth:</strong> {selectedStaff.dob}</p>
+                <p><strong>Role:</strong> {selectedStaff.role}</p>
+              </div>
+              <div className="upcoming-shifts">
+                <h3>Upcoming Shifts <button className="edit-button">Edit</button></h3>
+                <p>Thu, Jul 25</p>
+                <p>6:00 AM - 6:00 PM</p>
+                <p>Thu, Jul 25</p>
+                <p>6:00 AM - 6:00 PM</p>
+                <p>Thu, Jul 25</p>
+                <p>6:00 AM - 6:00 PM</p>
+                <p>Thu, Jul 25</p>
+                <p>6:00 AM - 6:00 PM</p>
+              </div>
+              <div className="address">
+                <h3>Address</h3>
+                <p><strong>Address Line:</strong> {selectedStaff.address}</p>
+                <p><strong>City:</strong> {selectedStaff.city}</p>
+                <p><strong>State:</strong> {selectedStaff.state}</p>
+                <p><strong>Country:</strong> {selectedStaff.country}</p>
+              </div>
+              <div className="contact-details">
+                <h3>Contact Details</h3>
+                <p><strong>Phone Number:</strong> {selectedStaff.phone}</p>
+                <p><strong>Email:</strong> {selectedStaff.email}</p>
+              </div>
+            </div>
+            <button className="delete-button">Delete</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
