@@ -62,7 +62,6 @@
     display: flex;
     align-items: center;
     gap: 40px;
-    font-family: ;
   }
   
   .header-button, .notification-button, .user-button, .settings-button, .theme-toggle {
@@ -231,12 +230,12 @@
   .dark .dashboard-content,
   .dark .calendar-section,
   .dark .notifications-panel {
-    background-color: #2C3E50;
+    background-color: #363D3F;
     color: white;
   }
   
   .dark .sidebar {
-    background-color: #34495E;
+    background-color: #363D3F;
   }
   
   .dark .appointment-card {
@@ -245,16 +244,31 @@
   }
   
   .dark .search-input {
-    background-color: #4A5568;
+    background-color: #363D3F;
     color: white;
     border-color: #718096;
   }
+
+  .dark .top-nav {
+    border-bottom: 1px solid #525C60;
+  }
   
+  .dark .sidebar nav ul li.active {
+    font-weight: bold;
+    color: white;
+    background-color: #4D5557;
+  }
+
   .dark .header-button,
   .dark .notification-button,
   .dark .user-button,
   .dark .settings-button,
   .dark .theme-toggle,
+  .dark .today-button,
+  .dark .nav-button,
+  .dark .search-input::placeholder,
+  .dark .search-input,
+  .dark .search-icon,
   .dark .time-display {
     color: white;
   }

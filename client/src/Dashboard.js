@@ -69,7 +69,7 @@ const Dashboard = () => {
           <div className="dashboard-header">
             <h1>PLACEHOLDER UI FOR DASHBOARD SCREEN</h1>
             <div className="header-actions">
-              <button className="action-button">Check In</button>
+              <button className="action-button">Clock In</button>
               <button className="action-button">View Hours</button>
             </div>
           </div>
