@@ -1,0 +1,204 @@
+.nunito-light {
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  .nunito-regular {
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  .nunito-semibold {
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+  }
+  
+  .nunito-bold {
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  .nunito-extrabold {
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 800;
+    font-style: normal;
+  }
+  
+  .nunito-black {
+    font-family: "Nunito", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 900;
+    font-style: normal;
+  }
+  
+.container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .sidebar {
+    width: 275px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  
+  .logo {
+    width: 250px;
+    height: auto;
+  }
+  
+  .form-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    position: relative;
+  }
+  
+  .center-logo {
+    width: 160px;
+    height: 160px;
+    padding-top: 15px;
+  }
+  
+  .welcome-text {
+    font-size: 32px;
+    margin-bottom: 66px;
+    margin-top: -5px;
+    color: #09ACE0;
+  }
+  
+  .form {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .input-group {
+    width: 120%;
+    margin-bottom: 10px;
+    margin-top: 23px;
+    margin-right: 110px;
+    position: relative;
+  }
+  
+  .input-label {
+    display: block;
+    margin-bottom: 20px;
+    color: #09ACE0;
+    font-size: 28px;
+    font-weight: 600;
+    padding-top: 10px;
+  }
+  
+  .input {
+    width: 120%;
+    padding: 16px 20px;
+    border-radius: 40px;
+    border: 2px solid #09ACE0;
+    color: #00A3E0;
+    outline: none;
+    font-size: 24px;
+  }
+  
+  .input::placeholder {
+    color: #09ACE0;
+    opacity: 0.7;
+  }
+  
+  .eye-icon {
+    position: absolute;
+    right: 20px;
+    top: 65%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .eye-icon i {
+    color: #09ACE0;
+    font-size: 24px;
+  }
+  
+  .button {
+    width: 115%;
+    padding: 16px;
+    color: #FFFFFF;
+    background-color: #09ACE0;
+    border: none;
+    border-radius: 33px;
+    cursor: pointer;
+    margin-top: 66px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  
+  .forgot-password {
+    font-size: 16px;
+    color: #09ACE0;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+  
+  .forgot-password:hover {
+    text-decoration: underline;
+  }
+  
+  .theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+  }
+  
+  .light-theme .sidebar {
+    background-color: #09ACE0;
+  }
+  
+  .dark-theme {
+    background-color: #C2C4C4;
+    color: #FFFFFF;
+  }
+  
+  .dark-theme .sidebar,
+  .dark-theme .button {
+    background-color: #363D3F;
+  }
+  
+  .dark-theme .welcome-text,
+  .dark-theme .input-label,
+  .dark-theme .forgot-password,
+  .dark-theme .input,
+  .dark-theme .input::placeholder,
+  .dark-theme .eye-icon {
+    color: #363D3F;
+  }
+  
+  .dark-theme .input {
+    border-color: #FFFFFF;
+  }
