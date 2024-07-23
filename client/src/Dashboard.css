@@ -36,13 +36,22 @@
   .sidebar nav ul li.active {
     font-weight: bold;
     color: #09ACE0;
-    background-color: #FFFFFF; /* Solid white background */
+    background-color: #FFFFFF;
     margin-left: -54px;
     margin-bottom: 40px;
     border-radius: 14px;
     padding: 20px 30px;
   }
-
+  
+  .sidebar nav ul li a {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 19px;
+    width: 100%;
+  }
+  
   .main-content {
     display: flex;
     flex-direction: column;
@@ -62,6 +71,7 @@
     display: flex;
     align-items: center;
     gap: 40px;
+    text-decoration: none;
   }
   
   .header-button, .notification-button, .user-button, .settings-button, .theme-toggle {
@@ -77,6 +87,15 @@
   }
   
   .blue-button {
+    color: #09ACE0;
+  }
+
+  .header-button.blue-button {
+    color: #09ACE0;
+    text-decoration: none;
+  }
+  
+  .dark .header-button.blue-button {
     color: #09ACE0;
   }
   
@@ -102,12 +121,6 @@
   .search-input::placeholder {
     color: #09ACE0;
   }
-  
-  .header-right {
-    display: flex;
-    align-items: center;
-  }
-
   
   .time-display {
     font-size: 24px;
@@ -220,7 +233,6 @@
     margin: 5px 0;
   }
   
-  /* Dark mode styles */
   .dark {
     background-color: #363D3F;
     color: white;
@@ -236,39 +248,4 @@
   
   .dark .sidebar {
     background-color: #363D3F;
-  }
-  
-  .dark .appointment-card {
-    background-color: #4A5568;
-    border-left-color: #09ACE0;
-  }
-  
-  .dark .search-input {
-    background-color: #363D3F;
-    color: white;
-    border-color: #718096;
-  }
-
-  .dark .top-nav {
-    border-bottom: 1px solid #525C60;
-  }
-  
-  .dark .sidebar nav ul li.active {
-    font-weight: bold;
-    color: white;
-    background-color: #4D5557;
-  }
-
-  .dark .header-button,
-  .dark .notification-button,
-  .dark .user-button,
-  .dark .settings-button,
-  .dark .theme-toggle,
-  .dark .today-button,
-  .dark .nav-button,
-  .dark .search-input::placeholder,
-  .dark .search-input,
-  .dark .search-icon,
-  .dark .time-display {
-    color: white;
   }
