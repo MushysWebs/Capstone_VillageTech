@@ -1,0 +1,149 @@
+.calendar-view {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Nunito', sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-header h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.calendar-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.action-button, .control-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #09ACE0;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.control-button {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.today-button {
+  background-color: #09ACE0;
+  color: white;
+}
+
+.view-select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.calendar-grid {
+  display: flex;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.time-column {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.time-marker {
+  height: 100px;
+  display: flex;
+  align-items: start;
+  justify-content: flex-end;
+  font-size: 12px;
+  color: #666;
+  padding-right: 10px;
+}
+
+.events-column {
+  flex-grow: 1;
+  position: relative;
+  border-left: 1px solid #e0e0e0;
+  height: 2400px;
+  overflow-x: auto;
+}
+
+.appointment {
+  position: absolute;
+  width: 190px;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.appointment.even {
+  background-color: #E6F7FF;
+  border-left: 4px solid #09ACE0;
+}
+
+.appointment.odd {
+  background-color: #F0FAFF;
+  border-left: 4px solid #0B8EC2;
+}
+
+.appointment h3 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+}
+
+.appointment p {
+  margin: 2px 0;
+}
+
+.current-time-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #09ACE0;
+  z-index: 10;
+}
+
+.dark .calendar-view {
+  background-color: #363D3F;
+  color: white;
+}
+
+.dark .appointment.even {
+  background-color: #2A3132;
+  border-left-color: #09ACE0;
+}
+
+.dark .appointment.odd {
+  background-color: #323A3B;
+  border-left-color: #0B8EC2;
+}
+
+.dark .time-marker {
+  color: #ccc;
+}
+
+.dark .control-button {
+  background-color: #4a5256;
+  color: white;
+}
+
+.dark .view-select {
+  background-color: #4a5256;
+  color: white;
+  border-color: #666;
+}
