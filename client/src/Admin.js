@@ -1,31 +1,31 @@
 import React, { useState, useMemo } from 'react';
 import './Admin.css';
+import AddStaffModal from './AddStaffModal'; // Import the modal component
 
 const AdminPage = ({ globalSearchTerm }) => {
   const [staffList, setStaffList] = useState([
-    
-    //create a staff table that stores personal information that links to the user id of the user table
-    //or include personal information of the staff in the user table
-    //then replace this
-
     { id: 1, name: 'Leonardo DiCaprio', email: 'leonardo@di.cap', phone: '(404) 314-9696', role: 'Veterinarian' },
     { id: 2, name: 'Mark Wahlberg', email: 'wahl@berger.commm', phone: '(404) 555-1234', role: 'Vet Tech' },
     { id: 3, name: 'Poo Pee', email: 'poo@pee.pee', phone: '(404) 555-5678', role: 'Receptionist' },
     { id: 4, name: 'Hillary Clinton', email: 'hill@clint.cim', phone: '(404) 555-9012', role: 'Other' },
   ]);
 
-  
   const [roleFilter, setRoleFilter] = useState('All');
   const [selectedStaff, setSelectedStaff] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
   const filteredStaff = useMemo(() => {
-    return staffList.filter(staff => 
-      (staff.name.toLowerCase().includes(globalSearchTerm.toLowerCase()) ||
-       staff.email.toLowerCase().includes(globalSearchTerm.toLowerCase()) ||
-       staff.phone.includes(globalSearchTerm)) &&
+    const searchTerm = globalSearchTerm || ''; // Ensure globalSearchTerm is a string
+
+    return staffList.filter(staff =>
+      ((staff.name ? staff.name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+        (staff.email ? staff.email.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+        (staff.phone ? staff.phone.includes(searchTerm) : false)) &&
       (roleFilter === 'All' || staff.role === roleFilter)
     );
   }, [staffList, globalSearchTerm, roleFilter]);
+
+
 
   const handleStaffClick = (staff) => {
     setSelectedStaff(staff);
@@ -35,13 +35,25 @@ const AdminPage = ({ globalSearchTerm }) => {
     setSelectedStaff(null);
   };
 
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const addNewStaff = (newStaff) => {
+    setStaffList([...staffList, newStaff]);
+  };
+
   return (
     <div className="admin-content">
       <div className="staff-list-card">
         <div className="card-header">
           <div>
             <h2 className="card-title">Staff List</h2>
-            <button className="add-staff-button">Add Staff</button>
+            <button className="add-staff-button" onClick={openModal}>Add Staff</button>
           </div>
           <div className="results-count">
             Showing {filteredStaff.length} of {staffList.length} results
@@ -50,9 +62,9 @@ const AdminPage = ({ globalSearchTerm }) => {
         <div className="card-content">
           <div className="search-filter-container">
             <div className="view-filter-buttons">
-              <select 
-                className="view-filter-button" 
-                value={roleFilter} 
+              <select
+                className="view-filter-button"
+                value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
               >
                 <option value="All">All Roles</option>
@@ -140,6 +152,12 @@ const AdminPage = ({ globalSearchTerm }) => {
           </div>
         </div>
       )}
+
+      <AddStaffModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onAddStaff={addNewStaff}
+      />
     </div>
   );
 };
