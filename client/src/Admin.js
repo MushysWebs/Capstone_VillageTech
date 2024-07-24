@@ -15,13 +15,17 @@ const AdminPage = ({ globalSearchTerm }) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
   const filteredStaff = useMemo(() => {
+    const searchTerm = globalSearchTerm || ''; // Ensure globalSearchTerm is a string
+
     return staffList.filter(staff =>
-      (staff.name.toLowerCase().includes(globalSearchTerm.toLowerCase()) ||
-        staff.email.toLowerCase().includes(globalSearchTerm.toLowerCase()) ||
-        staff.phone.includes(globalSearchTerm)) &&
+      ((staff.name ? staff.name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+        (staff.email ? staff.email.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+        (staff.phone ? staff.phone.includes(searchTerm) : false)) &&
       (roleFilter === 'All' || staff.role === roleFilter)
     );
   }, [staffList, globalSearchTerm, roleFilter]);
+
+
 
   const handleStaffClick = (staff) => {
     setSelectedStaff(staff);

@@ -5,6 +5,7 @@ import './AddStaffModal.css';
 const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState(''); // State for messages
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,11 +20,19 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
       });
 
       if (response.data.status === 'success') {
+        setMessage('Staff added successfully');
         console.log("Staff added successfully:", response.data.data);
         onAddStaff(response.data.data); // Notify parent component of the new staff
-        onClose(); // Close the modal
+        setUsername('');
+        setPassword('');
+        setTimeout(() => onClose(), 2000); // Close the modal after a short delay
       }
     } catch (error) {
+      if (error.response && error.response.data.message) {
+        setMessage(error.response.data.message); // Show error message from server
+      } else {
+        setMessage('An error occurred. Please try again.'); // Fallback error message
+      }
       console.error('Error adding staff:', error);
     }
   };
@@ -56,6 +65,7 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           <button type="submit" className="submit-button">Add</button>
           <button type="button" className="close-button" onClick={onClose}>Cancel</button>
         </form>
+        {message && <p className="message">{message}</p>} {/* Display the message */}
       </div>
     </div>
   );
