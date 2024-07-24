@@ -78,13 +78,13 @@
   position: relative;
   border-left: 1px solid #e0e0e0;
   height: 2400px;
-  overflow-x: auto;
+  overflow-y: auto;
 }
 
 .appointment {
   position: absolute;
   width: 190px;
-  padding: 5px;
+  padding: 5px 5px 0px 5px;
   border-radius: 4px;
   font-size: 12px;
   overflow: hidden;
@@ -101,12 +101,17 @@
 }
 
 .appointment h3 {
-  margin: 0 0 5px 0;
+  margin: 0 0 3px 0;
   font-size: 14px;
 }
 
 .appointment p {
   margin: 2px 0;
+}
+
+.appointment.highlighted {
+  background-color: #fffeac;
+  border-left: 4px solid #ffd13c;
 }
 
 .current-time-line {
