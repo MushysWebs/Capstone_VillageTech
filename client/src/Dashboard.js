@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './Dashboard.css';
 import CalendarView from './CalendarView';
 
-const Dashboard = () => {
-    return (
-      <div className="dashboard-content">
-        <CalendarView />
-      </div>
-    );
-  };
-
+const Dashboard = ({ globalSearchTerm }) => {
+  return (
+    <div className="dashboard-content">
+      <CalendarView searchTerm={globalSearchTerm} />
+    </div>
+  );
+};
 
 export default Dashboard;

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Dashboard.css';
-import AdminPage from './Admin'; 
+import AdminPage from './Admin';
+import Dashboard from './Dashboard';
 
 const Layout = () => {
   const [theme, setTheme] = useState('light');
@@ -15,12 +16,46 @@ const Layout = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const searchContainerStyles = {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: theme === 'dark' ? '#363D3F' : 'transparent',
+  };
+
+  const searchInputStyles = {
+    padding: '8px 15px 8px 35px',
+    borderRadius: '20px',
+    border: 'none',
+    fontSize: '20px',
+    marginLeft: '10px',
+    backgroundColor: theme === 'dark' ? '#363D3F' : 'transparent',
+    color: theme === 'dark' ? 'white' : '#09ACE0',
+    outline: 'none',
+    boxShadow: 'none',
+  };
+
+  const searchIconStyles = {
+    color: theme === 'dark' ? 'white' : '#09ACE0',
+    position: 'absolute',
+    left: '10px',
+    transition: 'all 0.3s ease',
+  };
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   const handleGlobalSearch = (e) => {
     setGlobalSearchTerm(e.target.value);
+  };
+
+  const renderMainContent = () => {
+    if (location.pathname === '/admin') {
+      return <AdminPage globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === '/dashboard') {
+      return <Dashboard globalSearchTerm={globalSearchTerm} />;
+    }
+    return null;
   };
 
   return (
@@ -61,14 +96,15 @@ const Layout = () => {
             >
               <i className="fas fa-user-shield"></i> Admin
             </Link>
-            <div className="search-container">
-              <i className="fas fa-search search-icon"></i>
+            <div className="search-container" style={searchContainerStyles}>
+              <i className="fas fa-search search-icon" style={searchIconStyles}></i>
               <input 
                 type="text" 
                 placeholder="Search" 
                 className="search-input nunito-regular" 
                 value={globalSearchTerm}
                 onChange={handleGlobalSearch}
+                style={searchInputStyles}
               />
             </div>
           </div>
@@ -82,11 +118,7 @@ const Layout = () => {
             <span className="time-display">{currentTime.toLocaleTimeString()}</span>
             </div>
         </header>
-        {location.pathname === '/admin' ? (
-          <AdminPage globalSearchTerm={globalSearchTerm} />
-        ) : (
-          <Outlet />
-        )}
+        {renderMainContent()}
       </main>
       {showNotifications && (
         <aside className="notifications-panel">
