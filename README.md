@@ -47,14 +47,3 @@ npm install create-react-app -g  {installs the plugin to create app}
 npm install axios {For making https request}
 npm install cors {middleware}
 npx create-react-app . {Installs node modules client side}
-
-
-
-// Updated July 25, 2024
-
-~-~ client side ~-~
-npm install react-cookie
-npm install jsonwebtoken
-
-~-~ server side side ~-~
-npm install jsonwebtoken
