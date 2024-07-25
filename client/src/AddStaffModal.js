@@ -5,38 +5,43 @@ import './AddStaffModal.css';
 const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState(''); // State for messages
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('Veterinarian');
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submit button clicked");
-    console.log("Username:", username);
-    console.log("Password:", password);
-
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
     try {
       const response = await axios.post('http://localhost:3007/api/v1/register', {
         username,
-        password
+        password,
+        name,
+        email,
+        phone,
+        role,
       });
-
+    
       if (response.data.status === 'success') {
-        setMessage('Staff added successfully');
-        console.log("Staff added successfully:", response.data.data);
-        onAddStaff(response.data.data); // Notify parent component of the new staff
-        setUsername('');
-        setPassword('');
-        setTimeout(() => onClose(), 2000); // Close the modal after a short delay
+        onAddStaff(response.data.data); // Pass new staff data to AdminPage
+        onClose();
+      } else {
+        setError('Unexpected response format');
       }
     } catch (error) {
-      if (error.response && error.response.data.message) {
-        setMessage(error.response.data.message); // Show error message from server
-      } else {
-        setMessage('An error occurred. Please try again.'); // Fallback error message
-      }
       console.error('Error adding staff:', error);
+      setError('An error occurred while adding the staff member');
     }
   };
-
+  
   if (!isOpen) return null;
 
   return (
@@ -62,10 +67,55 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
               required
             />
           </div>
+          <div className="form-group">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Phone Number</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Role</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)} required>
+              <option value="Veterinarian">Veterinarian</option>
+              <option value="Vet Tech">Vet Tech</option>
+              <option value="Receptionist">Receptionist</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          {error && <p className="error-message">{error}</p>}
           <button type="submit" className="submit-button">Add</button>
           <button type="button" className="close-button" onClick={onClose}>Cancel</button>
         </form>
-        {message && <p className="message">{message}</p>} {/* Display the message */}
       </div>
     </div>
   );

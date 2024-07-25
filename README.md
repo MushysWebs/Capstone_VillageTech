@@ -10,9 +10,6 @@ password VARCHAR(255) NOT NULL,
 last_login TIMESTAMP
 );
 
-INSERT INTO users (id,username, password, last_login)
-VALUES 
-(1, 'alex, 'password', '2024-07-23 12:00:00'),
 
 ~-~ Server side ~-~
 

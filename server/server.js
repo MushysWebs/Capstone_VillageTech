@@ -11,7 +11,7 @@ app.use(cors());
 
 // Register a new user
 app.post("/api/v1/register", async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, name, email, phone, role } = req.body;
     try {
         // Check if the username already exists
         const userCheck = await db.query("SELECT * FROM users WHERE username = $1", [username]);
@@ -22,10 +22,10 @@ app.post("/api/v1/register", async (req, res) => {
         // Hash the password using bcrypt
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert the new user into the database with the hashed password
+        // Insert the new user into the database with all the provided details
         const results = await db.query(
-            "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *",
-            [username, hashedPassword]
+            "INSERT INTO users (username, password, name, email, phone, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [username, hashedPassword, name, email, phone, role]
         );
         res.status(201).json({ status: "success", data: results.rows[0] });
     } catch (err) {
@@ -33,6 +33,7 @@ app.post("/api/v1/register", async (req, res) => {
         res.status(500).json({ status: "error", message: "Internal Server Error" });
     }
 });
+
 
 // Login a user
 app.post("/api/v1/login", async (req, res) => {
@@ -52,6 +53,21 @@ app.post("/api/v1/login", async (req, res) => {
         } else {
             res.status(401).json({ status: "error", message: "Invalid credentials" });
         }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ status: "error", message: "Internal Server Error" });
+    }
+});
+
+
+// Get all users (staff)
+app.get("/api/v1/staff", async (req, res) => {
+    try {
+        const results = await db.query("SELECT * FROM users");
+        res.status(200).json({
+            status: "success",
+            data: results.rows
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ status: "error", message: "Internal Server Error" });
