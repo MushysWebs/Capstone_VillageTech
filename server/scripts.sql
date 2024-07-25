@@ -1,6 +1,6 @@
 
 -- Creates database called capstone
-CREATE DATABASE capstone
+CREATE DATABASE capstone;
 
 -- Creates a user table
 CREATE TABLE users (

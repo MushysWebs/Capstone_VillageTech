@@ -9,16 +9,16 @@ const AdminPage = ({ globalSearchTerm }) => {
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchStaff = async () => {
-      try {
-        const response = await axios.get('http://localhost:3007/api/v1/staff');
-        setStaffList(response.data.data);
-      } catch (error) {
-        console.error('Error fetching staff data:', error);
-      }
-    };
+  const fetchStaff = async () => {
+    try {
+      const response = await axios.get('http://localhost:3007/api/v1/staff');
+      setStaffList(response.data.data);
+    } catch (error) {
+      console.error('Error fetching staff data:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchStaff();
   }, []);
 
@@ -32,14 +32,6 @@ const AdminPage = ({ globalSearchTerm }) => {
     );
   }, [staffList, globalSearchTerm, roleFilter]);
 
-  const handleStaffClick = (staff) => {
-    setSelectedStaff(staff);
-  };
-
-  const closeStaffDetails = () => {
-    setSelectedStaff(null);
-  };
-
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -48,28 +40,8 @@ const AdminPage = ({ globalSearchTerm }) => {
     setIsModalOpen(false);
   };
 
-  const addNewStaff = async (newStaff) => {
-    try {
-      const response = await axios.post('http://localhost:3007/api/v1/register', newStaff);
-
-      if (response.data.status === 'success') {
-        // Refetch the staff list to update the UI
-        const fetchStaff = async () => {
-          try {
-            const response = await axios.get('http://localhost:3007/api/v1/staff');
-            setStaffList(response.data.data);
-          } catch (error) {
-            console.error('Error fetching staff data:', error);
-          }
-        };
-        fetchStaff();
-        closeModal();
-      } else {
-        console.error('Unexpected response format:', response.data);
-      }
-    } catch (error) {
-      console.error('Error adding new staff:', error);
-    }
+  const addNewStaff = (newStaff) => {
+    fetchStaff(); // Refresh staff list after adding new staff
   };
 
   return (
@@ -123,7 +95,7 @@ const AdminPage = ({ globalSearchTerm }) => {
                   <td>{staff.phone}</td>
                   <td><span className="role-badge">{staff.role}</span></td>
                   <td>
-                    <button className="view-filter-button" onClick={() => handleStaffClick(staff)}>
+                    <button className="view-filter-button" onClick={() => setSelectedStaff(staff)}>
                       <i className="fas fa-window-restore"></i>
                     </button>
                   </td>
@@ -138,12 +110,11 @@ const AdminPage = ({ globalSearchTerm }) => {
       {selectedStaff && (
         <div className="staff-details-overlay">
           <div className="staff-details-content">
-            <button className="close-button" onClick={closeStaffDetails}>X</button>
+            <button className="close-button" onClick={() => setSelectedStaff(null)}>X</button>
             <h2>{selectedStaff.name}</h2>
             <p>Email: {selectedStaff.email}</p>
             <p>Phone: {selectedStaff.phone}</p>
             <p>Role: {selectedStaff.role}</p>
-            {/* Add more details if necessary */}
           </div>
         </div>
       )}

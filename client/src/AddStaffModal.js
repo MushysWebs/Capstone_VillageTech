@@ -14,12 +14,12 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    
+
     try {
       const response = await axios.post('http://localhost:3007/api/v1/register', {
         username,
@@ -29,9 +29,9 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
         phone,
         role,
       });
-    
+
       if (response.data.status === 'success') {
-        onAddStaff(response.data.data); // Pass new staff data to AdminPage
+        onAddStaff(response.data.data); // Notify parent component
         onClose();
       } else {
         setError('Unexpected response format');
@@ -41,7 +41,7 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
       setError('An error occurred while adding the staff member');
     }
   };
-  
+
   if (!isOpen) return null;
 
   return (
