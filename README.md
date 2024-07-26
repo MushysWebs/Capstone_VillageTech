@@ -1,8 +1,5 @@
 # July 25, 2024
-AuthGuard has been implemented please run this command on both server and client side to install jsonwebtoken
-
-~-~ server side ~-~<br>
-npm install<br>
+AuthGuard has been implemented please run this command on server side to install jsonwebtoken
 
 ~-~ server side ~-~<br>
 npm install<br>
