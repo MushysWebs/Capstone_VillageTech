@@ -29,10 +29,10 @@ PGPORT=5432<br>
 PGDATABASE=myprojects<br>
 )
 
-npm install nodemon {nodemon autosaves and reloads server when changes are made}(<br>)
-npm install express pg dotenv {manage envrionment variables}(<br>)
-npm install bcrypt {encrypts and hashs the password for saftey reason}(<br>)
-npm nodemon server.js {Starts the server}(<br>)
+npm install nodemon {nodemon autosaves and reloads server when changes are made}<br>
+npm install express pg dotenv {manage envrionment variables}<br>
+npm install bcrypt {encrypts and hashs the password for saftey reason}<br>
+npm nodemon server.js {Starts the server}<br>
 
 npm start {starts the nodemon server after updating package.json scripts with the start script below}
 "scripts": {<br>
