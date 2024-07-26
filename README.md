@@ -1,15 +1,13 @@
+# July 25, 2024
+AuthGuard has been implemented please run this command on both server and client side to install jsonwebtoken
+
+~-~ server side ~-~<br>
+npm install<br>
+
+~-~ server side ~-~<br>
+npm install<br>
+
 # Capstone_VillageTech
-
-##~-~ Creating the Database ~-~
-CREATE DATABASE capstone;
-
-CREATE TABLE users (
-id SERIAL PRIMARY KEY,
-username VARCHAR(255) NOT NULL UNIQUE,
-password VARCHAR(255) NOT NULL,
-last_login TIMESTAMP
-);
-
 
 ## ~-~ Server side ~-~
 
@@ -45,13 +43,3 @@ npm install create-react-app -g  {installs the plugin to create app}<br>
 npm install axios {For making https request}<br>
 npm install cors {middleware}<br>
 npx create-react-app . {Installs node modules client side}<br>
-
-
-# July 25, 2024
-AuthGuard has been implemented please run this command on both server and client side to install jsonwebtoken
-
-~-~ server side ~-~<br>
-npm install<br>
-
-~-~ server side ~-~<br>
-npm install<br>
