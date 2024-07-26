@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import './Dashboard.css';
 import AdminPage from './Admin';
 import Dashboard from './Dashboard';
+import AuthGuard from './components/auth/AuthGuard';
 
 const Layout = () => {
   const [theme, setTheme] = useState('light');
@@ -59,6 +60,7 @@ const Layout = () => {
   };
 
   return (
+    <AuthGuard>
     <div className={`dashboard-container ${theme}`}>
       <aside className="sidebar nunito-light">
         <nav>
@@ -136,6 +138,7 @@ const Layout = () => {
         </aside>
       )}
     </div>
+    </AuthGuard>
   );
 };
 
