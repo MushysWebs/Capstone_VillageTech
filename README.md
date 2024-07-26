@@ -1,6 +1,6 @@
 # Capstone_VillageTech
 
-~-~ Creating the Database ~-~
+##~-~ Creating the Database ~-~
 CREATE DATABASE capstone;
 
 CREATE TABLE users (
@@ -11,49 +11,47 @@ last_login TIMESTAMP
 );
 
 
-~-~ Server side ~-~
+## ~-~ Server side ~-~
 
-cd server {change drives to server to install necessary dependancies}
+cd server {change drives to server to install necessary dependancies}<br>
 
-npm init -y {Creates package.json}
+npm init -y {Creates package.json}<br>
 
-npm install express {installs express}
+npm install express {installs express}<br>
 
-Create .env file (
-PORT = 3007 # Port number for the server
+## Create .env file <br>
+PORT = 3007 # Port number for the server<br>
 
-PGUSER=postgres {or your database user if you've made one}
-PGPASSWORD={Your postgres password}
-PGHOST=localhost
-PGPORT=5432
-PGDATABASE=myprojects
+PGUSER=postgres {or your database user if you've made one}<br>
+PGPASSWORD={Your postgres password}<br>
+PGHOST=localhost<br>
+PGPORT=5432<br>
+PGDATABASE=myprojects<br>
 )
 
-npm install nodemon {nodemon autosaves and reloads server when changes are made}
+npm install nodemon {nodemon autosaves and reloads server when changes are made}(<br>)
+npm install express pg dotenv {manage envrionment variables}(<br>)
+npm install bcrypt {encrypts and hashs the password for saftey reason}(<br>)
+npm nodemon server.js {Starts the server}(<br>)
 
-npm install express pg dotenv {manage envrionment variables}
-
-npm install bcrypt {encrypts and hashs the password for saftey reason}
-
-npm nodemon server.js {Starts the server}
 npm start {starts the nodemon server after updating package.json scripts with the start script below}
-"scripts": {
-"start": "nodemon server.js"
-},
+"scripts": {<br>
+"start": "nodemon server.js"<br>
+},<br>
 
-~-~ client side ~-~
-npm install {install npm dependencies}
-npm install create-react-app -g  {installs the plugin to create app}
-npm install axios {For making https request}
-npm install cors {middleware}
-npx create-react-app . {Installs node modules client side}
+## ~-~ client side ~-~
+npm install {install npm dependencies}<br>
+npm install create-react-app -g  {installs the plugin to create app}<br>
+npm install axios {For making https request}<br>
+npm install cors {middleware}<br>
+npx create-react-app . {Installs node modules client side}<br>
 
 
-July 25, 2024
+# July 25, 2024
 AuthGuard has been implemented please run this command on both server and client side to install jsonwebtoken
 
-~-~ server side ~-~
-npm install
+~-~ server side ~-~<br>
+npm install<br>
 
-~-~ server side ~-~
-npm install
+~-~ server side ~-~<br>
+npm install<br>
