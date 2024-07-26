@@ -47,3 +47,13 @@ npm install create-react-app -g  {installs the plugin to create app}
 npm install axios {For making https request}
 npm install cors {middleware}
 npx create-react-app . {Installs node modules client side}
+
+
+July 25, 2024
+AuthGuard has been implemented please run this command on both server and client side to install jsonwebtoken
+
+~-~ server side ~-~
+npm install
+
+~-~ server side ~-~
+npm install

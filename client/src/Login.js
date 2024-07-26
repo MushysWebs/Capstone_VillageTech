@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
@@ -10,6 +10,13 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -26,7 +33,8 @@ const Login = () => {
       });
 
       if (response.data.status === 'success') {
-        console.log('Login successful:', response.data);
+        const { token } = response.data;
+        localStorage.setItem('authToken', token);
         navigate('/dashboard'); // Redirect to dashboard
       } else {
         setError(response.data.message || 'Login failed');

@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const app = express();
+const jwt = require('jsonwebtoken');
 
 app.use(express.json());
 app.use(cors());
@@ -46,7 +47,20 @@ app.post("/api/v1/login", async (req, res) => {
             if (passwordMatch) {
                 // Update the last login time
                 await db.query("UPDATE users SET last_login = NOW() WHERE username = $1", [username]);
-                res.status(200).json({ status: "success", data: user });
+
+                // Generate a JWT token
+                const token = jwt.sign(
+                    { userId: user.id, username: user.username, role: user.role }, // Payload
+                    'secret', // Secret key
+                    { expiresIn: '1h' } // Token expiration time
+                );
+
+                // Send the token in the response
+                res.status(200).json({
+                    status: "success",
+                    data: user,
+                    token // Include the token in the response
+                });
             } else {
                 res.status(401).json({ status: "error", message: "Invalid credentials" });
             }
@@ -58,6 +72,7 @@ app.post("/api/v1/login", async (req, res) => {
         res.status(500).json({ status: "error", message: "Internal Server Error" });
     }
 });
+
 
 
 // Get all users (staff)
