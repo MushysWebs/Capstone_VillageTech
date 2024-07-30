@@ -4,6 +4,7 @@ import './Dashboard.css';
 import AdminPage from './Admin';
 import Dashboard from './Dashboard';
 import AuthGuard from './components/auth/AuthGuard';
+import SignoutButton from './components/auth/SignOut';
 
 const Layout = () => {
   const [theme, setTheme] = useState('light');
@@ -118,6 +119,7 @@ const Layout = () => {
             <button className="user-button"><i className="fas fa-user"></i></button>
             <button className="settings-button" onClick={toggleTheme}><i className="fas fa-cog"></i></button>
             <span className="time-display">{currentTime.toLocaleTimeString()}</span>
+            <SignoutButton/>
             </div>
         </header>
         {renderMainContent()}
