@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import { useCookies } from 'react-cookie';
-import supabase from './supabaseClient';
+import { supabase } from './supabaseClient';
 
 const Login = () => {
   const [theme, setTheme] = useState('light');
@@ -17,12 +17,15 @@ const Login = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
-  // Using cookies to store authToken 
   useEffect(() => {
-    if (cookies.authToken) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [cookies, navigate]);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/dashboard', { replace: true });
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
