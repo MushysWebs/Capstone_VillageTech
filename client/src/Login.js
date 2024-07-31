@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './Login.css';
-import { useCookies } from 'react-cookie';
-import { supabase } from './supabaseClient';
 
 const Login = () => {
   const [theme, setTheme] = useState('light');
@@ -11,21 +10,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const [cookies, setCookie] = useCookies(['authToken']);
+  const supabase = useSupabaseClient();
+  const session = useSession();
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/dashboard', { replace: true });
-      }
-    };
-    checkSession();
-  }, [navigate]);
+    if (session) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [session, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,22 +29,18 @@ const Login = () => {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: employeeId,
+        email: `${employeeId}@yourdomain.com`, // Adjust this based on your Supabase setup
         password: password,
       });
 
-      if (error) {
-        setError(error.message || 'Login failed');
-        return;
-      }
+      if (error) throw error;
 
       if (data.session) {
-        setCookie('authToken', data.session.access_token, { path: '/' });
         navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error during login:', error);
-      setError('An error occurred. Please try again.');
+      setError(error.message || 'An error occurred. Please try again.');
     }
   };
 
