@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import supabase from './supabaseClient';
 import './AddStaffModal.css';
 
 const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
@@ -21,20 +21,27 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3007/api/v1/register', {
-        username,
-        password,
-        name,
-        email,
-        phone,
-        role,
+      const { data, error } = await supabase.auth.signUp({
+        email: username,
+        password: password,
+        options: {
+          data: {
+            name: name,
+            email: email,
+            phone: phone,
+            role: role,
+          },
+        },
       });
 
-      if (response.data.status === 'success') {
-        onAddStaff(response.data.data); // Notify parent component
+      if (error) {
+        setError(error.message || 'An error occurred while adding the staff member');
+        return;
+      }
+
+      if (data.user) {
+        onAddStaff(data.user); // Notify parent component
         onClose();
-      } else {
-        setError('Unexpected response format');
       }
     } catch (error) {
       console.error('Error adding staff:', error);
