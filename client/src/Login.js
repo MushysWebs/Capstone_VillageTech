@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './Login.css';
 
+
 const Login = () => {
   const [theme, setTheme] = useState('light');
   const [employeeId, setEmployeeId] = useState('');
