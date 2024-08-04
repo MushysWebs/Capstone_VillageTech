@@ -30,7 +30,7 @@ const Login = () => {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: `${employeeId}@yourdomain.com`, // Adjust this based on your Supabase setup
+        email: employeeId,
         password: password,
       });
 
