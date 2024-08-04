@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import './AddStaffModal.css';
+import { supabase } from './supabaseClient';
 
 const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
   const [username, setUsername] = useState('');
@@ -21,20 +21,26 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3007/api/v1/register', {
-        username,
-        password,
-        name,
-        email,
-        phone,
-        role,
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email,
+        password: password,
       });
 
-      if (response.data.status === 'success') {
-        onAddStaff(response.data.data); // Notify parent component
+      if (signUpError) throw signUpError;
+
+      if (data && data.user) {
+        const { error: insertError } = await supabase
+          .from('staff')
+          .insert([
+            { username, name, email, phone, role, user_id: data.user.id }
+          ]);
+
+        if (insertError) throw insertError;
+
+        onAddStaff({ username, name, email, phone, role, user_id: data.user.id });
         onClose();
       } else {
-        setError('Unexpected response format');
+        throw new Error('User creation failed');
       }
     } catch (error) {
       console.error('Error adding staff:', error);

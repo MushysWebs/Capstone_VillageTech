@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+import { supabase } from './supabaseClient';
 import './Login.css';
-import { useCookies } from 'react-cookie'
 
 const Login = () => {
   const [theme, setTheme] = useState('light');
@@ -18,61 +18,19 @@ const Login = () => {
   };
 
   // Using cookies to store authToken 
-  useEffect(() => {
-    if (cookies.authToken) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [cookies, navigate]);
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('authToken');
-  //   if (token) {
-  //     navigate('/dashboard', { replace: true });
-  //   }
-  // }, [navigate]);
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   console.log('Login attempt with:', { employeeId, password });
-
-  //   try {
-  //     const response = await axios.post('http://localhost:3007/api/v1/login', {
-  //       username: employeeId,
-  //       password: password,
-  //     });
-
-  //     if (response.data.status === 'success') {
-  //       const { token } = response.data;
-  //       localStorage.setItem('authToken', token);
-  //       navigate('/dashboard'); // Redirect to dashboard
-  //     } else {
-  //       setError(response.data.message || 'Login failed');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error during login:', error);
-  //     setError('Incorrect username or password');
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login attempt with:', { employeeId, password });
-
     try {
-      const response = await axios.post('http://localhost:3007/api/v1/login', {
-        username: employeeId,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: employeeId,
         password: password,
       });
 
+      if (error) throw error;
+
       // Set authToken in Cookie
-      if (response.data.status === 'success') {
-        const { token } = response.data;
-        // Store the token in a cookie
-        setCookie('authToken', token, { path: '/' });
-        navigate('/dashboard'); // Redirect to dashboard
-      } else {
-        setError(response.data.message || 'Login failed');
-      }
+      setCookie('authToken', data.session.access_token, { path: '/' });
+      navigate('/dashboard');
     } catch (error) {
       console.error('Error during login:', error);
       setError('Incorrect username or password');
