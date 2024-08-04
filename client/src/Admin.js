@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import { supabase } from './supabaseClient';
 import './Admin.css';
 import AddStaffModal from './AddStaffModal';
 import AuthGuard from './components/auth/AuthGuard';
@@ -12,8 +12,12 @@ const AdminPage = ({ globalSearchTerm }) => {
 
   const fetchStaff = async () => {
     try {
-      const response = await axios.get('http://localhost:3007/api/v1/staff');
-      setStaffList(response.data.data);
+      const { data, error } = await supabase
+        .from('staff')
+        .select('*');
+
+      if (error) throw error;
+      setStaffList(data);
     } catch (error) {
       console.error('Error fetching staff data:', error);
     }
