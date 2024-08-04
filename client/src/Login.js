@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
+import { useCookies } from 'react-cookie';
+import { supabase } from './supabaseClient';
 import './Login.css';
-
 
 const Login = () => {
   const [theme, setTheme] = useState('light');
@@ -11,23 +11,15 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const supabase = useSupabaseClient();
-  const session = useSession();
+  const [cookies, setCookie] = useCookies(['authToken']);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
-  useEffect(() => {
-    if (session) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [session, navigate]);
-
+  // Using cookies to store authToken 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login attempt with:', { employeeId, password });
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: employeeId,
@@ -36,12 +28,12 @@ const Login = () => {
 
       if (error) throw error;
 
-      if (data.session) {
-        navigate('/dashboard');
-      }
+      // Set authToken in Cookie
+      setCookie('authToken', data.session.access_token, { path: '/' });
+      navigate('/dashboard');
     } catch (error) {
       console.error('Error during login:', error);
-      setError(error.message || 'An error occurred. Please try again.');
+      setError('Incorrect username or password');
     }
   };
 
