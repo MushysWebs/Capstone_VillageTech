@@ -15,6 +15,12 @@ const MessagingPage = () => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    if (session?.user?.id) {
+      fetchCurrentUserStaff(session.user.id);
+    }
+  }, [session]);
+
+  useEffect(() => {
     console.log("Session:", session);
     console.log("Supabase client:", supabase);
     if (supabase && session) {
