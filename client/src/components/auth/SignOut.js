@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCookies } from 'react-cookie';
-import { supabase } from './supabaseClient'; 
+import { supabase } from '../..//supabaseClient'; 
 
 const SignoutButton = () => {
     const [cookies, setCookie, removeCookie] = useCookies(['AuthToken']);
