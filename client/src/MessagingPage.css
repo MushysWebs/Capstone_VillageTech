@@ -1,19 +1,19 @@
 .messaging-page {
     display: flex;
     height: calc(100vh - 60px);
-    background-color: #363D3F;
-    color: white;
+    background-color: #ffffff;
+    color: #333;
   }
   
   .contacts-list {
     width: 250px;
-    border-right: 1px solid #4A5052;
+    border-right: 1px solid #e0e0e0;
     overflow-y: auto;
   }
   
   .contacts-header {
     padding: 15px;
-    border-bottom: 1px solid #4A5052;
+    border-bottom: 1px solid #e0e0e0;
   }
   
   .contact-item {
@@ -23,7 +23,7 @@
   }
   
   .contact-item:hover, .contact-item.active {
-    background-color: #4A5052;
+    background-color: #f0f0f0;
   }
   
   .contact-avatar {
@@ -41,7 +41,7 @@
   
   .chat-header {
     padding: 15px;
-    border-bottom: 1px solid #4A5052;
+    border-bottom: 1px solid #e0e0e0;
   }
   
   .messages-container {
@@ -59,27 +59,28 @@
   
   .message.sent {
     background-color: #09ACE0;
+    color: white;
     align-self: flex-end;
   }
   
   .message.received {
-    background-color: #4A5052;
+    background-color: #f0f0f0;
     align-self: flex-start;
   }
   
   .message-input {
     display: flex;
     padding: 15px;
-    border-top: 1px solid #4A5052;
+    border-top: 1px solid #e0e0e0;
   }
   
   .message-input input {
     flex: 1;
     padding: 10px;
-    border: none;
+    border: 1px solid #e0e0e0;
     border-radius: 20px;
-    background-color: #4A5052;
-    color: white;
+    background-color: #ffffff;
+    color: #333;
   }
   
   .message-input button {
@@ -94,15 +95,15 @@
   
   .email-area {
     width: 300px;
-    border-left: 1px solid #4A5052;
+    border-left: 1px solid #e0e0e0;
     padding: 15px;
   }
   
   .email-input {
     width: 100%;
     padding: 10px;
-    border: none;
+    border: 1px solid #e0e0e0;
     border-radius: 20px;
-    background-color: #4A5052;
-    color: white;
+    background-color: #ffffff;
+    color: #333;
   }
