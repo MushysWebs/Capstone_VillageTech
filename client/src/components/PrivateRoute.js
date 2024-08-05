@@ -1,15 +1,19 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
+import { useSession } from '@supabase/auth-helpers-react';
 
 const PrivateRoute = () => {
-  const [cookies] = useCookies(['authToken']);
+  const session = useSession();
 
-  if (!cookies.authToken) {
-    // If there's no auth token, redirect to login page
+  if (session === undefined) {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
     return <Navigate to="/" replace />;
   }
+
   return <Outlet />;
 };
 
-export default PrivateRoute
+export default PrivateRoute;

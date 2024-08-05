@@ -4,14 +4,12 @@ import { useSupabaseClient, useSessionContext } from '@supabase/auth-helpers-rea
 import './Login.css';
 
 const Login = () => {
-  const [theme, setTheme] = useState('light');
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const supabase = useSupabaseClient();
-  const { session } = useSessionContext();
+  const session = useSession();
 
   useEffect(() => {
     if (session) {
@@ -25,6 +23,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: employeeId,
