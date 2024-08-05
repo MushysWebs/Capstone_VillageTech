@@ -4,6 +4,7 @@ import './Dashboard.css';
 import AdminPage from './Admin';
 import Dashboard from './Dashboard';
 import AuthGuard from './components/auth/AuthGuard';
+import MessagingPage from './MessagingPage';
 import SignoutButton from './components/auth/SignOut';
 
 const Layout = () => {
@@ -56,6 +57,8 @@ const Layout = () => {
       return <AdminPage globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === '/dashboard') {
       return <Dashboard globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === '/messages') {
+      return <MessagingPage />;
     }
     return null;
   };
