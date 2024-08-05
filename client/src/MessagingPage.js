@@ -15,10 +15,26 @@ const MessagingPage = () => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (session?.user?.id) {
-      fetchCurrentUserStaff(session.user.id);
+    console.log("Session:", session);
+    console.log("Supabase client:", supabase);
+    if (supabase && session) {
+      fetchStaff();
+      setupSubscription();
+    } else {
+      console.log("Supabase or session not available");
     }
-  }, [session]);
+  }, [supabase, session]);
+
+  const setupSubscription = () => {
+    const subscription = supabase
+      .channel('public:messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, handleNewMessage)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  };
 
   const fetchCurrentUserStaff = async (userId) => {
     const { data, error } = await supabase
@@ -38,7 +54,7 @@ const MessagingPage = () => {
     try {
       const { data, error } = await supabase
         .from('staff')
-        .select('*, user_id');  // Make sure to select user_id
+        .select('*, user_id'); 
       if (error) throw error;
       setStaff(data || []);
     } catch (error) {
