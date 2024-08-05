@@ -5,7 +5,7 @@ import Layout from './Layout';
 import Dashboard from './Dashboard';
 import Admin from './Admin';
 import MessagingPage from './MessagingPage';
-import PrivateRoute from './PrivateRoute';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
