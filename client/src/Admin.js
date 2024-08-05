@@ -4,7 +4,7 @@ import './Admin.css';
 import AddStaffModal from './AddStaffModal';
 import AuthGuard from './components/auth/AuthGuard';
 
-const AdminPage = ({ globalSearchTerm }) => {
+const Admin = ({ globalSearchTerm }) => {
   const [staffList, setStaffList] = useState([]);
   const [roleFilter, setRoleFilter] = useState('All');
   const [selectedStaff, setSelectedStaff] = useState(null);
@@ -30,7 +30,7 @@ const AdminPage = ({ globalSearchTerm }) => {
   const filteredStaff = useMemo(() => {
     const searchTerm = globalSearchTerm || '';
     return staffList.filter(staff =>
-      ((staff.name ? staff.name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+      ((staff.full_name ? staff.full_name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
         (staff.email ? staff.email.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
         (staff.phone ? staff.phone.includes(searchTerm) : false)) &&
       (roleFilter === 'All' || staff.role === roleFilter)
@@ -85,6 +85,7 @@ const AdminPage = ({ globalSearchTerm }) => {
                   <th>Email</th>
                   <th>Phone Number</th>
                   <th>Role</th>
+                  <th>Status</th>
                   <th></th>
                 </tr>
               </thead>
@@ -93,13 +94,14 @@ const AdminPage = ({ globalSearchTerm }) => {
                   <tr key={staff.id}>
                     <td>
                       <div className="staff-name">
-                        <img src="/floweronly.svg" alt={staff.name} className="staff-avatar" />
-                        {staff.name}
+                        <img src={staff.photo_url || "/floweronly.svg"} alt={staff.full_name} className="staff-avatar" />
+                        {staff.full_name}
                       </div>
                     </td>
                     <td>{staff.email}</td>
                     <td>{staff.phone}</td>
                     <td><span className="role-badge">{staff.role}</span></td>
+                    <td><span className={`status-badge ${staff.status.toLowerCase()}`}>{staff.status}</span></td>
                     <td>
                       <button className="view-filter-button" onClick={() => setSelectedStaff(staff)}>
                         <i className="fas fa-window-restore"></i>
@@ -117,10 +119,20 @@ const AdminPage = ({ globalSearchTerm }) => {
           <div className="staff-details-overlay">
             <div className="staff-details-content">
               <button className="close-button" onClick={() => setSelectedStaff(null)}>X</button>
-              <h2>{selectedStaff.name}</h2>
+              <h2>{selectedStaff.full_name}</h2>
+              <p>First Name: {selectedStaff.first_name}</p>
+              <p>Last Name: {selectedStaff.last_name}</p>
               <p>Email: {selectedStaff.email}</p>
               <p>Phone: {selectedStaff.phone}</p>
+              <p>Secondary Phone: {selectedStaff.secondary_phone || 'N/A'}</p>
+              <p>Fax: {selectedStaff.fax || 'N/A'}</p>
+              <p>Landline: {selectedStaff.landline || 'N/A'}</p>
               <p>Role: {selectedStaff.role}</p>
+              <p>Hire Date: {selectedStaff.hire_date || 'N/A'}</p>
+              <p>Status: {selectedStaff.status}</p>
+              <p>Address: {selectedStaff.address || 'N/A'}</p>
+              <p>Emergency Contact: {selectedStaff.emergency_contact || 'N/A'}</p>
+              <p>Notes: {selectedStaff.notes || 'N/A'}</p>
             </div>
           </div>
         )}
@@ -135,4 +147,4 @@ const AdminPage = ({ globalSearchTerm }) => {
   );
 };
 
-export default AdminPage;
+export default Admin;
