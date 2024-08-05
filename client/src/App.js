@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from './supabaseClient';
 import Login from './Login';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
@@ -9,18 +11,20 @@ import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route element={<PrivateRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/messages" element={<MessagingPage />} />
+    <SessionContextProvider supabaseClient={supabase}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route element={<PrivateRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/messages" element={<MessagingPage />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </SessionContextProvider>
   );
 }
 

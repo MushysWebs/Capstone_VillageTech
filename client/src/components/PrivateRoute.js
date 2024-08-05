@@ -9,8 +9,6 @@ const PrivateRoute = () => {
     // If there's no auth token, redirect to login page
     return <Navigate to="/" replace />;
   }
-
-  // If there is a token, render the child routes
   return <Outlet />;
 };
 
