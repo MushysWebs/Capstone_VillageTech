@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { supabase } from './supabaseClient';
+import { supabase } from '../../supabaseClient';
 
 const AuthGuard = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
