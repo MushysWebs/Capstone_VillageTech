@@ -4,6 +4,7 @@ import Login from './Login';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
 import Admin from './Admin';
+import MessagingPage from './MessagingPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/messages" element={<MessagingPage />} />
           {/* Add other routes here */}
         </Route>
       </Routes>
