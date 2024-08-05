@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from './supabaseClient';
 import Login from './Login';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
@@ -10,8 +10,6 @@ import MessagingPage from './MessagingPage';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
-  const supabase = createClientComponentClient();
-
   return (
     <SessionContextProvider supabaseClient={supabase}>
       <Router>
