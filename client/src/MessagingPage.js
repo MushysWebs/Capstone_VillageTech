@@ -8,22 +8,21 @@ const MessagingPage = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [error, setError] = useState(null);
   const supabase = useSupabaseClient();
   const session = useSession();
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    console.log("Session:", session);
+    console.log("Supabase client:", supabase);
     if (supabase && session) {
       fetchStaff();
       setupSubscription();
+    } else {
+      console.log("Supabase or session not available");
     }
   }, [supabase, session]);
-
-  useEffect(() => {
-    if (selectedStaff && session) {
-      fetchMessages();
-    }
-  }, [selectedStaff, session]);
 
   const setupSubscription = () => {
     const subscription = supabase
@@ -38,11 +37,14 @@ const MessagingPage = () => {
 
   const fetchStaff = async () => {
     try {
+      console.log("Fetching staff...");
       const { data, error } = await supabase.from('staff').select('*');
       if (error) throw error;
+      console.log("Fetched staff data:", data);
       setStaff(data || []);
     } catch (error) {
       console.error('Error fetching staff:', error.message);
+      setError('Failed to fetch staff. Please try again.');
     }
   };
 
@@ -93,6 +95,8 @@ const MessagingPage = () => {
         <div className="contacts-header">
           <h2>Chat</h2>
         </div>
+        {error && <p className="error-message">{error}</p>}
+        {staff.length === 0 && !error && <p>No staff members found.</p>}
         {staff.map(s => (
           <div
             key={s.id}

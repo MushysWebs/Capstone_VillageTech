@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
-import { supabase } from './supabaseClient';
+import { useSupabaseClient, useSessionContext } from '@supabase/auth-helpers-react';
 import './Login.css';
 
 const Login = () => {
@@ -11,14 +10,14 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const [cookies, setCookie] = useCookies(['authToken']);
+  const supabase = useSupabaseClient();
+  const { session } = useSessionContext();
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
-    if (cookies.authToken) {
+    if (session) {
       navigate('/dashboard');
     }
-  }, [cookies.authToken, navigate]);
+  }, [session, navigate]);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -27,22 +26,20 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: employeeId,
         password: password,
       });
 
       if (error) throw error;
 
-      // Set authToken in Cookie
-      setCookie('authToken', data.session.access_token, { path: '/' });
       navigate('/dashboard');
     } catch (error) {
       console.error('Error during login:', error);
       setError('Incorrect username or password');
     }
   };
-  
+
   return (
     <div className={`container ${theme}-theme nunito-light`}>
       <div className="sidebar">
