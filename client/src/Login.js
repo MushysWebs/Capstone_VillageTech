@@ -13,11 +13,17 @@ const Login = () => {
   const navigate = useNavigate();
   const [cookies, setCookie] = useCookies(['authToken']);
 
+  useEffect(() => {
+    // If user is already logged in, redirect to dashboard
+    if (cookies.authToken) {
+      navigate('/dashboard');
+    }
+  }, [cookies.authToken, navigate]);
+
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
-  // Using cookies to store authToken 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -36,7 +42,7 @@ const Login = () => {
       setError('Incorrect username or password');
     }
   };
-
+  
   return (
     <div className={`container ${theme}-theme nunito-light`}>
       <div className="sidebar">
