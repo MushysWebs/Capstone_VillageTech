@@ -1,13 +1,15 @@
 import React from 'react';
 import { useCookies } from 'react-cookie';
+import { supabase } from './supabaseClient'; 
 
 const SignoutButton = () => {
     const [cookies, setCookie, removeCookie] = useCookies(['AuthToken']);
 
-    const signOut = () => {
+    const signOut = async () => {
         console.log('Signing out');
-        removeCookie('authToken', { path: '/' }); // Add path or other attributes if needed
-        window.location.reload(); // Reload the page to apply changes
+        await supabase.auth.signOut();
+        removeCookie('authToken', { path: '/' }); 
+        window.location.href = '/login'; 
     };
 
     return (
