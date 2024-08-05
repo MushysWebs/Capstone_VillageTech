@@ -9,80 +9,51 @@ const MessagingPage = () => {
   const [newMessage, setNewMessage] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [error, setError] = useState(null);
-  const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserStaff, setCurrentUserStaff] = useState(null);
   const supabase = useSupabaseClient();
   const session = useSession();
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (session?.user?.id) {
-      setCurrentUserId(session.user.id);
+      fetchCurrentUserStaff(session.user.id);
     }
   }, [session]);
-  
-  useEffect(() => {
-    console.log("Session:", session);
-    console.log("Supabase client:", supabase);
-    if (supabase && session) {
-      fetchStaff();
-      setupSubscription();
+
+  const fetchCurrentUserStaff = async (userId) => {
+    const { data, error } = await supabase
+      .from('staff')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching current user staff:', error);
     } else {
-      console.log("Supabase or session not available");
+      setCurrentUserStaff(data);
     }
-  }, [supabase, session]);
-
-  const setupSubscription = () => {
-    const subscription = supabase
-      .channel('public:messages')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, handleNewMessage)
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
   };
 
   const fetchStaff = async () => {
     try {
-      console.log("Fetching staff...");
-      const { data, error } = await supabase.from('staff').select('*');
+      const { data, error } = await supabase
+        .from('staff')
+        .select('*, user_id');  // Make sure to select user_id
       if (error) throw error;
-      console.log("Fetched staff data:", data);
       setStaff(data || []);
     } catch (error) {
       console.error('Error fetching staff:', error.message);
-      setError('Failed to fetch staff. Please try again.');
     }
-  };
-
-  const fetchMessages = async () => {
-    if (!selectedStaff || !session.user) return;
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .or(`sender_id.eq.${session.user.id},sender_id.eq.${selectedStaff.id}`)
-        .or(`recipient_id.eq.${session.user.id},recipient_id.eq.${selectedStaff.id}`);
-      if (error) throw error;
-      setMessages(data || []);
-    } catch (error) {
-      console.error('Error fetching messages:', error.message);
-    }
-  };
-
-  const handleNewMessage = (payload) => {
-    setMessages(prevMessages => [...prevMessages, payload.new]);
   };
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedStaff || !currentUserId) return;
+    if (!newMessage.trim() || !selectedStaff || !currentUserStaff) return;
 
     console.log('Sending message with:', {
       content: newMessage,
-      sender_id: currentUserId,
-      recipient_id: selectedStaff.id
+      sender_id: currentUserStaff.user_id,
+      recipient_id: selectedStaff.user_id
     });
 
     try {
@@ -91,8 +62,8 @@ const MessagingPage = () => {
         .insert([
           { 
             content: newMessage, 
-            sender_id: currentUserId, 
-            recipient_id: selectedStaff.id 
+            sender_id: currentUserStaff.user_id, 
+            recipient_id: selectedStaff.user_id 
           }
         ])
         .select();
