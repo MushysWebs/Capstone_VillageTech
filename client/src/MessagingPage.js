@@ -9,10 +9,17 @@ const MessagingPage = () => {
   const [newMessage, setNewMessage] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [error, setError] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const supabase = useSupabaseClient();
   const session = useSession();
   const messagesEndRef = useRef(null);
 
+  useEffect(() => {
+    if (session?.user?.id) {
+      setCurrentUserId(session.user.id);
+    }
+  }, [session]);
+  
   useEffect(() => {
     console.log("Session:", session);
     console.log("Supabase client:", supabase);
@@ -70,22 +77,36 @@ const MessagingPage = () => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedStaff || !session.user) return;
+    if (!newMessage.trim() || !selectedStaff || !currentUserId) return;
+
+    console.log('Sending message with:', {
+      content: newMessage,
+      sender_id: currentUserId,
+      recipient_id: selectedStaff.id
+    });
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .insert([
           { 
             content: newMessage, 
-            sender_id: session.user.id, 
+            sender_id: currentUserId, 
             recipient_id: selectedStaff.id 
           }
-        ]);
-      if (error) throw error;
+        ])
+        .select();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(error.message || 'Failed to send message');
+      }
+
+      console.log('Message sent successfully:', data);
       setNewMessage('');
     } catch (error) {
-      console.error('Error sending message:', error.message);
+      console.error('Error sending message:', error);
+      setError(error.message || 'Failed to send message');
     }
   };
 
