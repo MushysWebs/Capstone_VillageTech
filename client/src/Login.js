@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSupabaseClient, useSessionContext } from '@supabase/auth-helpers-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import './Login.css';
 
 const Login = () => {
+  const [theme, setTheme] = useState('light');
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const supabase = useSupabaseClient();
-  const session = useSession();
 
   useEffect(() => {
-    if (session) {
-      navigate('/dashboard');
-    }
-  }, [session, navigate]);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/dashboard');
+      }
+    };
+    checkSession();
+  }, [navigate, supabase.auth]);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
