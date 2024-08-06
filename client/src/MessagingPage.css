@@ -7,9 +7,52 @@
   }
   
   .contacts-list {
-    width: 300px;
+    width: 250px;
     border-right: 1px solid #e0e0e0;
     overflow-y: auto;
+    padding: 10px;
+  }
+  
+  .contacts-list h2 {
+    margin-bottom: 20px;
+  }
+  
+  .contact-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .contact-item:hover, .contact-item.active {
+    background-color: #f0f0f0;
+  }
+  
+  .contact-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #0084ff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .contact-info {
+    flex: 1;
+  }
+  
+  .contact-name {
+    font-weight: bold;
+  }
+  
+  .contact-role {
+    font-size: 0.8em;
+    color: #888;
   }
   
   .chat-area {
@@ -27,6 +70,9 @@
   
   .back-button {
     margin-right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
   
   .messages-container {
@@ -39,6 +85,7 @@
     text-align: center;
     margin: 20px 0;
     color: #888;
+    font-size: 0.8em;
   }
   
   .message {
@@ -68,7 +115,7 @@
   }
   
   .message-timestamp {
-    font-size: 0.8em;
+    font-size: 0.7em;
     color: #888;
     margin-top: 5px;
   }

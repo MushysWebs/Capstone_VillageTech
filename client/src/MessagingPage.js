@@ -130,9 +130,7 @@ const MessagingPage = () => {
   return (
     <div className="messaging-page">
       <div className="contacts-list">
-        <div className="contacts-header">
-          <h2>Chat</h2>
-        </div>
+        <h2>Chat</h2>
         {error && <p className="error-message">{error}</p>}
         {staff.length === 0 && !error && <p>No staff members found.</p>}
         {staff.map(s => (
@@ -141,8 +139,11 @@ const MessagingPage = () => {
             className={`contact-item ${selectedStaff?.id === s.id ? 'active' : ''}`}
             onClick={() => setSelectedStaff(s)}
           >
-            <img src={s.photo_url || "/floweronly.svg"} alt={s.full_name} className="contact-avatar" />
-            {s.full_name}
+            <div className="contact-avatar">{s.full_name.charAt(0)}</div>
+            <div className="contact-info">
+              <div className="contact-name">{s.full_name}</div>
+              <div className="contact-role">{s.role}</div>
+            </div>
           </div>
         ))}
       </div>
@@ -152,7 +153,6 @@ const MessagingPage = () => {
             <div className="chat-header">
               <button className="back-button">Back</button>
               <h2>{selectedStaff.full_name}</h2>
-              <span>Active now</span>
             </div>
             <div className="messages-container">
               {Object.entries(groupMessagesByDate(messages)).map(([date, dateMessages]) => (
