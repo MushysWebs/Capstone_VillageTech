@@ -128,7 +128,7 @@ const CalendarView = ({ searchTerm, firstName }) => {
   return (
     <div className="calendar-view">
       <div className="calendar-header">
-        <h1>Hello, {firstName || 'User'}!</h1>
+        <h1>Hello, {firstName}!</h1>
         <div className="header-buttons">
           <button className="action-button">Clock In</button>
           <button className="action-button">View Hours</button>

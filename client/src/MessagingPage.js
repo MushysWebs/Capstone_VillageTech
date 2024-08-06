@@ -23,6 +23,7 @@ const MessagingPage = () => {
   useEffect(() => {
     if (selectedStaff && currentUserStaff) {
       fetchMessages();
+      markMessagesAsRead();
     }
   }, [selectedStaff, currentUserStaff]);
 
@@ -118,6 +119,21 @@ const MessagingPage = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       setError(error.message || 'Failed to send message');
+    }
+  };
+
+  const markMessagesAsRead = async () => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('recipient_id', session.user.id)
+        .eq('sender_id', selectedStaff.user_id)
+        .eq('read', false);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
     }
   };
 

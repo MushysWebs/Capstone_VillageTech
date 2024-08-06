@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './Dashboard.css';
 import AdminPage from './Admin';
 import Dashboard from './Dashboard';
@@ -12,12 +13,48 @@ const Layout = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const location = useLocation();
+  const supabase = useSupabaseClient();
+  const session = useSession();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      checkUnreadMessages();
+      const subscription = supabase
+        .channel('public:messages')
+        .on('INSERT', payload => {
+          if (payload.new.recipient_id === session.user.id) {
+            setUnreadMessages(prev => prev + 1);
+          }
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(subscription);
+      };
+    }
+  }, [session, supabase]);
+
+  const checkUnreadMessages = async () => {
+    const { count, error } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('recipient_id', session.user.id)
+      .eq('read', false);
+
+    if (error) {
+      console.error('Error checking unread messages:', error);
+    } else {
+      setUnreadMessages(count || 0);
+    }
+  };
+
 
   const searchContainerStyles = {
     position: 'relative',
@@ -117,8 +154,9 @@ const Layout = () => {
           <div className="header-right">
             <button className="header-button blue-button">Save</button>
             <button className="notification-button" onClick={() => setShowNotifications(!showNotifications)}>
-              <i className="fas fa-bell"></i>
-            </button>
+                <i className="fas fa-bell"></i>
+                {unreadMessages > 0 && <span className="notification-badge">{unreadMessages}</span>}
+              </button>
             <button className="user-button"><i className="fas fa-user"></i></button>
             <button className="settings-button" onClick={toggleTheme}><i className="fas fa-cog"></i></button>
             <span className="time-display">{currentTime.toLocaleTimeString()}</span>
