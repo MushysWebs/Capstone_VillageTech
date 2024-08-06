@@ -48,8 +48,22 @@ const Layout = () => {
         })
         .subscribe();
 
+      const handleUpdateUnreadMessages = (event) => {
+        const senderId = event.detail?.senderId;
+        if (senderId) {
+          setUnreadMessages(prev => 
+            Array.isArray(prev) ? prev.filter(msg => msg.sender_id !== senderId) : []
+          );
+        } else {
+          checkUnreadMessages();
+        }
+      };
+
+      window.addEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
+
       return () => {
         supabase.removeChannel(subscription);
+        window.removeEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
       };
     }
   }, [session, supabase]);

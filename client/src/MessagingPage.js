@@ -140,12 +140,12 @@ const MessagingPage = () => {
 
       if (error) throw error;
 
-      const event = new CustomEvent('unreadMessagesUpdated');
-      window.dispatchEvent(event);
+      window.dispatchEvent(new CustomEvent('updateUnreadMessages', {
+        detail: { senderId: selectedStaff.user_id }
+      }));
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
-    window.dispatchEvent(new CustomEvent('updateUnreadMessages'));
   };
 
   const scrollToBottom = () => {
