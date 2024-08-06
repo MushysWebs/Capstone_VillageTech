@@ -40,6 +40,28 @@ const MessagingPage = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    }).toUpperCase();
+  };
+
+  const groupMessagesByDate = (messages) => {
+    const grouped = {};
+    messages.forEach(message => {
+      const date = new Date(message.created_at).toDateString();
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(message);
+    });
+    return grouped;
+  };
+
   const fetchStaff = async () => {
     try {
       const { data, error } = await supabase
@@ -128,12 +150,24 @@ const MessagingPage = () => {
         {selectedStaff ? (
           <>
             <div className="chat-header">
+              <button className="back-button">Back</button>
               <h2>{selectedStaff.full_name}</h2>
+              <span>Active now</span>
             </div>
             <div className="messages-container">
-              {messages.map(message => (
-                <div key={message.id} className={`message ${message.sender_id === currentUserStaff.user_id ? 'sent' : 'received'}`}>
-                  {message.content}
+              {Object.entries(groupMessagesByDate(messages)).map(([date, dateMessages]) => (
+                <div key={date}>
+                  <div className="date-separator">{formatDate(date)}</div>
+                  {dateMessages.map(message => (
+                    <div key={message.id} className={`message ${message.sender_id === currentUserStaff.user_id ? 'sent' : 'received'}`}>
+                      <div className="message-content">
+                        {message.content}
+                      </div>
+                      <div className="message-timestamp">
+                        {formatDate(message.created_at)}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
               <div ref={messagesEndRef} />
@@ -143,7 +177,7 @@ const MessagingPage = () => {
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Write a message..."
+                placeholder="Type a message..."
               />
               <button type="submit">Send</button>
             </form>
