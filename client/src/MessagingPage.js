@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
+import { useLocation } from 'react-router-dom';
 import './MessagingPage.css';
 
 const MessagingPage = () => {
@@ -12,6 +13,7 @@ const MessagingPage = () => {
   const supabase = useSupabaseClient();
   const session = useSession();
   const messagesEndRef = useRef(null);
+  const location = useLocation();
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -21,16 +23,25 @@ const MessagingPage = () => {
   }, [session]);
 
   useEffect(() => {
+    if (location.state?.selectedStaffId) {
+      const selectedStaff = staff.find(s => s.user_id === location.state.selectedStaffId);
+      if (selectedStaff) {
+        setSelectedStaff(selectedStaff);
+      }
+    }
+  }, [staff, location.state]);
+
+  useEffect(() => {
     if (selectedStaff && currentUserStaff) {
       fetchMessages();
     }
   }, [selectedStaff, currentUserStaff]);
 
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 && selectedStaff) {
       markMessagesAsRead();
     }
-  }, [messages]);
+  }, [messages, selectedStaff]);
 
   const fetchCurrentUserStaff = async (userId) => {
     const { data, error } = await supabase
@@ -83,6 +94,8 @@ const MessagingPage = () => {
   };
 
   const fetchMessages = async () => {
+    if (!currentUserStaff || !selectedStaff) return;
+
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -92,7 +105,6 @@ const MessagingPage = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      console.log('Fetched messages:', data);
       setMessages(data || []);
     } catch (error) {
       console.error('Error fetching messages:', error.message);
@@ -111,16 +123,16 @@ const MessagingPage = () => {
           { 
             content: newMessage, 
             sender_id: currentUserStaff.user_id, 
-            recipient_id: selectedStaff.user_id 
+            recipient_id: selectedStaff.user_id,
+            read: false
           }
         ])
         .select();
 
       if (error) throw error;
 
-      console.log('Message sent successfully:', data);
       setNewMessage('');
-      fetchMessages();
+      setMessages(prevMessages => [...prevMessages, data[0]]);
     } catch (error) {
       console.error('Error sending message:', error);
       setError(error.message || 'Failed to send message');
@@ -130,19 +142,27 @@ const MessagingPage = () => {
   const markMessagesAsRead = async () => {
     if (!session?.user?.id || !selectedStaff) return;
 
+    const unreadMessages = messages.filter(msg => 
+      msg.recipient_id === session.user.id && !msg.read
+    );
+
+    if (unreadMessages.length === 0) return;
+
     try {
       const { error } = await supabase
         .from('messages')
         .update({ read: true })
-        .eq('recipient_id', session.user.id)
-        .eq('sender_id', selectedStaff.user_id)
-        .eq('read', false);
+        .in('id', unreadMessages.map(msg => msg.id));
 
       if (error) throw error;
 
-      window.dispatchEvent(new CustomEvent('updateUnreadMessages', {
-        detail: { senderId: selectedStaff.user_id }
-      }));
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          unreadMessages.some(unread => unread.id === msg.id) 
+            ? { ...msg, read: true } 
+            : msg
+        )
+      );
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
@@ -175,12 +195,11 @@ const MessagingPage = () => {
         ))}
       </div>
       <div className="chat-area">
-        {selectedStaff ? (
-          <>
-            <div className="chat-header">
-              <button className="back-button">Back</button>
-              <h2>{selectedStaff.full_name}</h2>
-            </div>
+      {selectedStaff ? (
+        <>
+          <div className="chat-header">
+            <h2>{selectedStaff.full_name}</h2>
+          </div>
             <div className="messages-container">
               {Object.entries(groupMessagesByDate(messages)).map(([date, dateMessages]) => (
                 <div key={date}>

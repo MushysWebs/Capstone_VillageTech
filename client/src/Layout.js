@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './Dashboard.css';
 import AdminPage from './Admin';
@@ -15,6 +15,7 @@ const Layout = () => {
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const [unreadMessages, setUnreadMessages] = useState([]);
   const location = useLocation();
+  const navigate = useNavigate();
   const supabase = useSupabaseClient();
   const session = useSession();
 
@@ -25,45 +26,24 @@ const Layout = () => {
 
 
   useEffect(() => {
-    const handleUpdateUnreadMessages = () => {
-      checkUnreadMessages();
-    };
-  
-    window.addEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
-  
-    return () => {
-      window.removeEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
-    };
-  }, []);
-
-  useEffect(() => {
     if (session?.user?.id) {
       checkUnreadMessages();
       const subscription = supabase
         .channel('public:messages')
         .on('INSERT', payload => {
           if (payload.new.recipient_id === session.user.id) {
-            setUnreadMessages(prev => Array.isArray(prev) ? [...prev, payload.new] : [payload.new]);
+            setUnreadMessages(prev => [...prev, payload.new]);
+          }
+        })
+        .on('UPDATE', payload => {
+          if (payload.new.recipient_id === session.user.id && payload.new.read) {
+            setUnreadMessages(prev => prev.filter(msg => msg.id !== payload.new.id));
           }
         })
         .subscribe();
 
-      const handleUpdateUnreadMessages = (event) => {
-        const senderId = event.detail?.senderId;
-        if (senderId) {
-          setUnreadMessages(prev => 
-            Array.isArray(prev) ? prev.filter(msg => msg.sender_id !== senderId) : []
-          );
-        } else {
-          checkUnreadMessages();
-        }
-      };
-
-      window.addEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
-
       return () => {
         supabase.removeChannel(subscription);
-        window.removeEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
       };
     }
   }, [session, supabase]);
@@ -74,7 +54,7 @@ const Layout = () => {
     try {
       const { data, error } = await supabase
         .from('messages')
-        .select('*')
+        .select('*, sender:staff!sender_id(full_name)')
         .eq('recipient_id', session.user.id)
         .eq('read', false)
         .order('created_at', { ascending: false });
@@ -90,8 +70,13 @@ const Layout = () => {
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications) {
-      checkUnreadMessages(); 
+      checkUnreadMessages();
     }
+  };
+
+  const handleMessageClick = (senderId) => {
+    navigate('/messages', { state: { selectedStaffId: senderId } });
+    setShowNotifications(false);
   };
 
   const formatDate = (dateString) => {
@@ -204,7 +189,7 @@ const Layout = () => {
             <button className="header-button blue-button">Save</button>
             <button className="notification-button" onClick={handleNotificationClick}>
                 <i className="fas fa-bell"></i>
-                {Array.isArray(unreadMessages) && unreadMessages.length > 0 && (
+                {unreadMessages.length > 0 && (
                   <span className="notification-badge">{unreadMessages.length}</span>
                 )}
               </button>
@@ -219,18 +204,16 @@ const Layout = () => {
       {showNotifications && (
           <aside className="notifications-panel">
             <h2>Notifications</h2>
-            {Array.isArray(unreadMessages) && unreadMessages.length === 0 ? (
+            {unreadMessages.length === 0 ? (
               <p>No new notifications</p>
-            ) : Array.isArray(unreadMessages) ? (
+            ) : (
               unreadMessages.map((message) => (
-                <div key={message.id} className="notification">
-                  <h3>New message</h3>
+                <div key={message.id} className="notification" onClick={() => handleMessageClick(message.sender_id)}>
+                  <h3>New message from {message.sender.full_name}</h3>
                   <p>{message.content.substring(0, 50)}...</p>
                   <p><i className="far fa-clock"></i> {formatDate(message.created_at)}</p>
                 </div>
               ))
-            ) : (
-              <p>Error loading notifications</p>
             )}
           </aside>
         )}
