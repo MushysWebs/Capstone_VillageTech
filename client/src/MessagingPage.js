@@ -156,6 +156,8 @@ const MessagingPage = () => {
 
       if (error) throw error;
 
+      console.log('Messages marked as read:', unreadMessages.map(msg => msg.id));
+
       setMessages(prevMessages => 
         prevMessages.map(msg => 
           unreadMessages.some(unread => unread.id === msg.id) 

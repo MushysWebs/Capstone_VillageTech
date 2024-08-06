@@ -37,19 +37,18 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     }
   
     try {
-      // Sign up the user
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      const { data: authData, error: createUserError } = await supabase.auth.admin.createUser({
         email: formData.email,
         password: formData.password,
+        email_confirm: true
       });
   
-      if (signUpError) {
-        console.error('User signup error:', signUpError);
-        throw signUpError;
+      if (createUserError) {
+        console.error('User creation error:', createUserError);
+        throw createUserError;
       }
   
       if (authData && authData.user) {
-        // Prepare staff data
         const staffData = {
           user_id: authData.user.id,
           first_name: formData.first_name,
@@ -67,7 +66,6 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           notes: formData.notes
         };
   
-        // Insert staff data
         const { data: insertData, error: insertError } = await supabase
           .from('staff')
           .insert([staffData]);
