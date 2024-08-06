@@ -1,7 +1,7 @@
-import React, { useState, useEffect , useRef} from 'react';
+import React, { useState, useEffect } from 'react';
 import './CalendarView.css';
 
-const CalendarView = ({ searchTerm }) => {
+const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([
     { id: 1, title: 'Eye Replacement', start: new Date(2024, 6, 23, 9, 0), end: new Date(2024, 6, 23, 11, 0), patient: 'Ponzu', doctor: 'Dr. M' },
@@ -128,7 +128,7 @@ const CalendarView = ({ searchTerm }) => {
   return (
     <div className="calendar-view">
       <div className="calendar-header">
-      <h1>Hello, {userFirstName}!</h1>
+        <h1>Hello, {firstName || 'User'}!</h1>
         <div className="header-buttons">
           <button className="action-button">Clock In</button>
           <button className="action-button">View Hours</button>

@@ -1,17 +1,38 @@
-// Dashboard.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './Dashboard.css';
 import CalendarView from './CalendarView';
 import AuthGuard from './components/auth/AuthGuard';
-import { useSession } from '@supabase/auth-helpers-react';
 
 const Dashboard = ({ globalSearchTerm }) => {
+  const [firstName, setFirstName] = useState('');
+  const supabase = useSupabaseClient();
   const session = useSession();
-  const userFirstName = session?.user?.user_metadata?.first_name || 'User';
+
+  useEffect(() => {
+    async function fetchUserName() {
+      if (session?.user?.id) {
+        const { data, error } = await supabase
+          .from('staff')
+          .select('first_name')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (data) {
+          setFirstName(data.first_name);
+        } else if (error) {
+          console.error('Error fetching user name:', error);
+        }
+      }
+    }
+
+    fetchUserName();
+  }, [session, supabase]);
+
   return (
     <AuthGuard>
       <div className="dashboard-content">
-        <CalendarView searchTerm={globalSearchTerm} userFirstName={userFirstName}/>
+        <CalendarView searchTerm={globalSearchTerm} firstName={firstName} />
       </div>
     </AuthGuard>
   );
