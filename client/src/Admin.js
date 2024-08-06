@@ -9,6 +9,7 @@ const Admin = ({ globalSearchTerm }) => {
   const [roleFilter, setRoleFilter] = useState('All');
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   const fetchStaff = async () => {
     try {
@@ -46,7 +47,26 @@ const Admin = ({ globalSearchTerm }) => {
   };
 
   const addNewStaff = (newStaff) => {
-    fetchStaff(); // Refresh staff list after adding new staff
+    fetchStaff(); 
+  };
+
+  const handleDeleteStaff = async () => {
+    if (!selectedStaff) return;
+
+    try {
+      const { error } = await supabase
+        .from('staff')
+        .delete()
+        .eq('id', selectedStaff.id);
+
+      if (error) throw error;
+
+      setStaffList(staffList.filter(staff => staff.id !== selectedStaff.id));
+      setSelectedStaff(null);
+    } catch (error) {
+      console.error('Error deleting staff member:', error);
+      setDeleteError(`Failed to delete staff member: ${error.message}`);
+    }
   };
 
   return (
@@ -133,6 +153,15 @@ const Admin = ({ globalSearchTerm }) => {
               <p>Address: {selectedStaff.address || 'N/A'}</p>
               <p>Emergency Contact: {selectedStaff.emergency_contact || 'N/A'}</p>
               <p>Notes: {selectedStaff.notes || 'N/A'}</p>
+              
+              <button 
+                className="delete-staff-button" 
+                onClick={handleDeleteStaff}
+              >
+                Delete Staff Member
+              </button>
+              
+              {deleteError && <p className="error-message">{deleteError}</p>}
             </div>
           </div>
         )}
