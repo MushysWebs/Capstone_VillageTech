@@ -145,6 +145,7 @@ const MessagingPage = () => {
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
+    window.dispatchEvent(new CustomEvent('updateUnreadMessages'));
   };
 
   const scrollToBottom = () => {

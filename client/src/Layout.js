@@ -13,7 +13,7 @@ const Layout = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
-  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState([]);
   const location = useLocation();
   const supabase = useSupabaseClient();
   const session = useSession();
@@ -23,15 +23,16 @@ const Layout = () => {
     return () => clearInterval(timer);
   }, []);
 
+
   useEffect(() => {
-    const handleUnreadMessagesUpdate = () => {
+    const handleUpdateUnreadMessages = () => {
       checkUnreadMessages();
     };
   
-    window.addEventListener('unreadMessagesUpdated', handleUnreadMessagesUpdate);
+    window.addEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
   
     return () => {
-      window.removeEventListener('unreadMessagesUpdated', handleUnreadMessagesUpdate);
+      window.removeEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
     };
   }, []);
 
@@ -42,7 +43,7 @@ const Layout = () => {
         .channel('public:messages')
         .on('INSERT', payload => {
           if (payload.new.recipient_id === session.user.id) {
-            setUnreadMessages(prev => [...prev, payload.new]);
+            setUnreadMessages(prev => Array.isArray(prev) ? [...prev, payload.new] : [payload.new]);
           }
         })
         .subscribe();
@@ -54,23 +55,28 @@ const Layout = () => {
   }, [session, supabase]);
 
   const checkUnreadMessages = async () => {
-    const { count, error } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('recipient_id', session.user.id)
-      .eq('read', false);
+    if (!session?.user?.id) return;
 
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('recipient_id', session.user.id)
+        .eq('read', false)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUnreadMessages(data || []);
+    } catch (error) {
       console.error('Error checking unread messages:', error);
-    } else {
-      setUnreadMessages(count || 0);
+      setUnreadMessages([]);
     }
   };
 
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications) {
-      checkUnreadMessages();
+      checkUnreadMessages(); 
     }
   };
 
@@ -184,8 +190,10 @@ const Layout = () => {
             <button className="header-button blue-button">Save</button>
             <button className="notification-button" onClick={handleNotificationClick}>
                 <i className="fas fa-bell"></i>
-                {unreadMessages.length > 0 && <span className="notification-badge">{unreadMessages.length}</span>}
-            </button>
+                {Array.isArray(unreadMessages) && unreadMessages.length > 0 && (
+                  <span className="notification-badge">{unreadMessages.length}</span>
+                )}
+              </button>
             <button className="user-button"><i className="fas fa-user"></i></button>
             <button className="settings-button" onClick={toggleTheme}><i className="fas fa-cog"></i></button>
             <span className="time-display">{currentTime.toLocaleTimeString()}</span>
@@ -197,9 +205,9 @@ const Layout = () => {
       {showNotifications && (
           <aside className="notifications-panel">
             <h2>Notifications</h2>
-            {unreadMessages.length === 0 ? (
+            {Array.isArray(unreadMessages) && unreadMessages.length === 0 ? (
               <p>No new notifications</p>
-            ) : (
+            ) : Array.isArray(unreadMessages) ? (
               unreadMessages.map((message) => (
                 <div key={message.id} className="notification">
                   <h3>New message</h3>
@@ -207,6 +215,8 @@ const Layout = () => {
                   <p><i className="far fa-clock"></i> {formatDate(message.created_at)}</p>
                 </div>
               ))
+            ) : (
+              <p>Error loading notifications</p>
             )}
           </aside>
         )}
