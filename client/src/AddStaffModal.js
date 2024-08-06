@@ -37,36 +37,26 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     }
   
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('No active session. Please log in again.');
-      }
 
-      const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}/auth/v1/admin/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          email_confirm: true
-        }),
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+          }
+        }
       });
+  
+      if (signUpError) throw signUpError;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.msg || 'Failed to create user');
-      }
+      if (authData && authData.user) {
 
-      const userData = await response.json();
+        await supabase.auth.signOut();
 
-      if (userData && userData.id) {
         const staffData = {
-          user_id: userData.id,
+          user_id: authData.user.id,
           first_name: formData.first_name,
           last_name: formData.last_name,
           email: formData.email,
@@ -81,15 +71,12 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           emergency_contact: formData.emergency_contact,
           notes: formData.notes
         };
-  
+
         const { data: insertData, error: insertError } = await supabase
           .from('staff')
           .insert([staffData]);
   
-        if (insertError) {
-          console.error('Staff data insertion error:', insertError);
-          throw insertError;
-        }
+        if (insertError) throw insertError;
   
         console.log('Staff data inserted successfully:', insertData);
         onAddStaff(staffData);
