@@ -128,7 +128,7 @@ const CalendarView = ({ searchTerm }) => {
   return (
     <div className="calendar-view">
       <div className="calendar-header">
-        <h1>Hello, Logan! This is a placeholder page for the dashboard with the calender concept.</h1>
+      <h1>Hello, {userFirstName}!</h1>
         <div className="header-buttons">
           <button className="action-button">Clock In</button>
           <button className="action-button">View Hours</button>
