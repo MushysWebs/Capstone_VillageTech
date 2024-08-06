@@ -7,7 +7,6 @@ const MessagingPage = () => {
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [newEmail, setNewEmail] = useState('');
   const [error, setError] = useState(null);
   const [currentUserStaff, setCurrentUserStaff] = useState(null);
   const supabase = useSupabaseClient();
@@ -20,6 +19,12 @@ const MessagingPage = () => {
       fetchStaff();
     }
   }, [session]);
+
+  useEffect(() => {
+    if (selectedStaff && currentUserStaff) {
+      fetchMessages();
+    }
+  }, [selectedStaff, currentUserStaff]);
 
   const fetchCurrentUserStaff = async (userId) => {
     const { data, error } = await supabase
@@ -49,16 +54,27 @@ const MessagingPage = () => {
     }
   };
 
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`sender_id.eq.${currentUserStaff.user_id},sender_id.eq.${selectedStaff.user_id}`)
+        .or(`recipient_id.eq.${currentUserStaff.user_id},recipient_id.eq.${selectedStaff.user_id}`)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      console.log('Fetched messages:', data);
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error.message);
+      setError('Failed to fetch messages');
+    }
+  };
 
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedStaff || !currentUserStaff) return;
-
-    console.log('Sending message with:', {
-      content: newMessage,
-      sender_id: currentUserStaff.user_id,
-      recipient_id: selectedStaff.user_id
-    });
 
     try {
       const { data, error } = await supabase
@@ -72,18 +88,22 @@ const MessagingPage = () => {
         ])
         .select();
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw new Error(error.message || 'Failed to send message');
-      }
+      if (error) throw error;
 
       console.log('Message sent successfully:', data);
       setNewMessage('');
+      fetchMessages();
     } catch (error) {
       console.error('Error sending message:', error);
       setError(error.message || 'Failed to send message');
     }
   };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messages]);
 
   return (
     <div className="messaging-page">
@@ -112,7 +132,7 @@ const MessagingPage = () => {
             </div>
             <div className="messages-container">
               {messages.map(message => (
-                <div key={message.id} className={`message ${message.sender_id === session.user.id ? 'sent' : 'received'}`}>
+                <div key={message.id} className={`message ${message.sender_id === currentUserStaff.user_id ? 'sent' : 'received'}`}>
                   {message.content}
                 </div>
               ))}
@@ -131,16 +151,6 @@ const MessagingPage = () => {
         ) : (
           <p>Select a staff member to start messaging</p>
         )}
-      </div>
-      <div className="email-area">
-        <h2>Village Vet ({session?.user?.email})</h2>
-        <input
-          type="text"
-          value={newEmail}
-          onChange={(e) => setNewEmail(e.target.value)}
-          placeholder="Write email..."
-          className="email-input"
-        />
       </div>
     </div>
   );
