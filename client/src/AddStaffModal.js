@@ -14,6 +14,7 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     role: 'Veterinarian',
     hire_date: '',
     status: 'Active',
+    specialty: '',
     address: '',
     emergency_contact: '',
     notes: '',
@@ -36,21 +37,19 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     }
   
     try {
-      // Sign up the new user
+      // Sign up the user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-          }
-        }
       });
   
-      if (signUpError) throw signUpError;
-
+      if (signUpError) {
+        console.error('User signup error:', signUpError);
+        throw signUpError;
+      }
+  
       if (authData && authData.user) {
+        // Prepare staff data
         const staffData = {
           user_id: authData.user.id,
           first_name: formData.first_name,
@@ -68,17 +67,19 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           notes: formData.notes
         };
   
+        // Insert staff data
         const { data: insertData, error: insertError } = await supabase
           .from('staff')
           .insert([staffData]);
   
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Staff data insertion error:', insertError);
+          throw insertError;
+        }
   
         console.log('Staff data inserted successfully:', insertData);
         onAddStaff(staffData);
-        onClose();
-
-        // SIGN OUT THE NEW USER FOR TESTING PURPOSES, UPDATE THIS TO REGISTER USERS LATER.
+        onClose()
         await supabase.auth.signOut();
       } else {
         throw new Error('User creation succeeded but user data is missing');
@@ -96,7 +97,6 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
       <div className="modal-content">
         <h2>Add Staff Member</h2>
         <form onSubmit={handleSubmit}>
-          {/* Form fields */}
           <div className="form-group">
             <label>First Name</label>
             <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} required />
