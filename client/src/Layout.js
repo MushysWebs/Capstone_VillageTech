@@ -19,8 +19,20 @@ const Layout = () => {
   const session = useSession();
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleUnreadMessagesUpdate = () => {
+      checkUnreadMessages();
+    };
+  
+    window.addEventListener('unreadMessagesUpdated', handleUnreadMessagesUpdate);
+  
+    return () => {
+      window.removeEventListener('unreadMessagesUpdated', handleUnreadMessagesUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -30,7 +42,7 @@ const Layout = () => {
         .channel('public:messages')
         .on('INSERT', payload => {
           if (payload.new.recipient_id === session.user.id) {
-            setUnreadMessages(prev => prev + 1);
+            setUnreadMessages(prev => [...prev, payload.new]);
           }
         })
         .subscribe();
@@ -53,6 +65,23 @@ const Layout = () => {
     } else {
       setUnreadMessages(count || 0);
     }
+  };
+
+  const handleNotificationClick = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      checkUnreadMessages();
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
   };
 
 
@@ -153,10 +182,10 @@ const Layout = () => {
           </div>
           <div className="header-right">
             <button className="header-button blue-button">Save</button>
-            <button className="notification-button" onClick={() => setShowNotifications(!showNotifications)}>
+            <button className="notification-button" onClick={handleNotificationClick}>
                 <i className="fas fa-bell"></i>
-                {unreadMessages > 0 && <span className="notification-badge">{unreadMessages}</span>}
-              </button>
+                {unreadMessages.length > 0 && <span className="notification-badge">{unreadMessages.length}</span>}
+            </button>
             <button className="user-button"><i className="fas fa-user"></i></button>
             <button className="settings-button" onClick={toggleTheme}><i className="fas fa-cog"></i></button>
             <span className="time-display">{currentTime.toLocaleTimeString()}</span>
@@ -166,21 +195,22 @@ const Layout = () => {
         {renderMainContent()}
       </main>
       {showNotifications && (
-        <aside className="notifications-panel">
-          <h2>Notifications</h2>
-          <div className="notification">
-            <h3>temporary notifications</h3>
-            <p>connect me to the database</p>
-            <p><i className="far fa-clock"></i> Today | 10:45 AM</p>
-          </div>
-          <div className="notification">
-            <h3>also..</h3>
-            <p>"turn the calendar to a scroller"</p>
-            <p><i className="far fa-clock"></i> Yesterday | 04:34 PM</p>
-          </div>
-        </aside>
-      )}
-    </div>
+          <aside className="notifications-panel">
+            <h2>Notifications</h2>
+            {unreadMessages.length === 0 ? (
+              <p>No new notifications</p>
+            ) : (
+              unreadMessages.map((message) => (
+                <div key={message.id} className="notification">
+                  <h3>New message</h3>
+                  <p>{message.content.substring(0, 50)}...</p>
+                  <p><i className="far fa-clock"></i> {formatDate(message.created_at)}</p>
+                </div>
+              ))
+            )}
+          </aside>
+        )}
+      </div>
     </AuthGuard>
   );
 };

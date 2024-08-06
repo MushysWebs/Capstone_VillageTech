@@ -23,9 +23,14 @@ const MessagingPage = () => {
   useEffect(() => {
     if (selectedStaff && currentUserStaff) {
       fetchMessages();
-      markMessagesAsRead();
     }
   }, [selectedStaff, currentUserStaff]);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      markMessagesAsRead();
+    }
+  }, [messages]);
 
   const fetchCurrentUserStaff = async (userId) => {
     const { data, error } = await supabase
@@ -123,6 +128,8 @@ const MessagingPage = () => {
   };
 
   const markMessagesAsRead = async () => {
+    if (!session?.user?.id || !selectedStaff) return;
+
     try {
       const { error } = await supabase
         .from('messages')
@@ -132,6 +139,9 @@ const MessagingPage = () => {
         .eq('read', false);
 
       if (error) throw error;
+
+      const event = new CustomEvent('unreadMessagesUpdated');
+      window.dispatchEvent(event);
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }
