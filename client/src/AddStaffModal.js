@@ -37,20 +37,36 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     }
   
     try {
-      const { data: authData, error: createUserError } = await supabase.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        email_confirm: true
-      });
-  
-      if (createUserError) {
-        console.error('User creation error:', createUserError);
-        throw createUserError;
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session. Please log in again.');
       }
-  
-      if (authData && authData.user) {
+
+      const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}/auth/v1/admin/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          email_confirm: true
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || 'Failed to create user');
+      }
+
+      const userData = await response.json();
+
+      if (userData && userData.id) {
         const staffData = {
-          user_id: authData.user.id,
+          user_id: userData.id,
           first_name: formData.first_name,
           last_name: formData.last_name,
           email: formData.email,
