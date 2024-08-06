@@ -129,7 +129,7 @@ const MessagingPage = () => {
 
   const markMessagesAsRead = async () => {
     if (!session?.user?.id || !selectedStaff) return;
-
+  
     try {
       const { error } = await supabase
         .from('messages')
@@ -137,9 +137,11 @@ const MessagingPage = () => {
         .eq('recipient_id', session.user.id)
         .eq('sender_id', selectedStaff.user_id)
         .eq('read', false);
-
+  
       if (error) throw error;
-
+  
+      setUnreadMessages(prev => prev.filter(msg => msg.sender_id !== selectedStaff.user_id));
+  
       window.dispatchEvent(new CustomEvent('updateUnreadMessages', {
         detail: { senderId: selectedStaff.user_id }
       }));

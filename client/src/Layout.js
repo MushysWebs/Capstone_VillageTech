@@ -37,31 +37,35 @@ const Layout = () => {
   }, []);
 
   useEffect(() => {
+    let debounceTimeout;
     if (session?.user?.id) {
       checkUnreadMessages();
+  
       const subscription = supabase
         .channel('public:messages')
         .on('INSERT', payload => {
           if (payload.new.recipient_id === session.user.id) {
-            setUnreadMessages(prev => Array.isArray(prev) ? [...prev, payload.new] : [payload.new]);
+            setUnreadMessages(prev => [...prev, payload.new]);
           }
         })
         .subscribe();
-
+  
       const handleUpdateUnreadMessages = (event) => {
-        const senderId = event.detail?.senderId;
-        if (senderId) {
-          setUnreadMessages(prev => 
-            Array.isArray(prev) ? prev.filter(msg => msg.sender_id !== senderId) : []
-          );
-        } else {
-          checkUnreadMessages();
-        }
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+          const senderId = event.detail?.senderId;
+          if (senderId) {
+            setUnreadMessages(prev => prev.filter(msg => msg.sender_id !== senderId));
+          } else {
+            checkUnreadMessages();
+          }
+        }, 300);
       };
-
+  
       window.addEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
-
+  
       return () => {
+        clearTimeout(debounceTimeout);
         supabase.removeChannel(subscription);
         window.removeEventListener('updateUnreadMessages', handleUpdateUnreadMessages);
       };
