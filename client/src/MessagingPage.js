@@ -17,6 +17,7 @@ const MessagingPage = () => {
   useEffect(() => {
     if (session?.user?.id) {
       fetchCurrentUserStaff(session.user.id);
+      fetchStaff();
     }
   }, [session]);
 
@@ -38,13 +39,16 @@ const MessagingPage = () => {
     try {
       const { data, error } = await supabase
         .from('staff')
-        .select('*, user_id');  // Make sure to select user_id
+        .select('*');
       if (error) throw error;
+      console.log('Fetched staff:', data);
       setStaff(data || []);
     } catch (error) {
       console.error('Error fetching staff:', error.message);
+      setError('Failed to fetch staff members');
     }
   };
+
 
   const sendMessage = async (e) => {
     e.preventDefault();
