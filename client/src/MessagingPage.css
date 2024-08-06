@@ -3,7 +3,7 @@
     height: calc(100vh - 60px);
     background-color: #ffffff;
     color: #333;
-    margin-left: 18px;
+    margin-left: 20px;
   }
   
   .contacts-list {
@@ -33,7 +33,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #0084ff;
+    background-color: #09ACE0;
     color: white;
     display: flex;
     align-items: center;
@@ -110,7 +110,7 @@
   }
   
   .message.sent .message-content {
-    background-color: #0084ff;
+    background-color: #09ACE0;
     color: white;
   }
   
@@ -140,7 +140,7 @@
   .message-input button {
     margin-left: 10px;
     padding: 10px 20px;
-    background-color: #0084ff;
+    background-color: #09ACE0;
     color: white;
     border: none;
     border-radius: 20px;
