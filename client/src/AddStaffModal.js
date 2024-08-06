@@ -14,7 +14,6 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     role: 'Veterinarian',
     hire_date: '',
     status: 'Active',
-    specialty: '',
     address: '',
     emergency_contact: '',
     notes: '',
@@ -37,7 +36,7 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     }
   
     try {
-
+      // Sign up the new user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -52,9 +51,6 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
       if (signUpError) throw signUpError;
 
       if (authData && authData.user) {
-
-        await supabase.auth.signOut();
-
         const staffData = {
           user_id: authData.user.id,
           first_name: formData.first_name,
@@ -71,7 +67,7 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           emergency_contact: formData.emergency_contact,
           notes: formData.notes
         };
-
+  
         const { data: insertData, error: insertError } = await supabase
           .from('staff')
           .insert([staffData]);
@@ -81,6 +77,9 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
         console.log('Staff data inserted successfully:', insertData);
         onAddStaff(staffData);
         onClose();
+
+        // SIGN OUT THE NEW USER FOR TESTING PURPOSES, UPDATE THIS TO REGISTER USERS LATER.
+        await supabase.auth.signOut();
       } else {
         throw new Error('User creation succeeded but user data is missing');
       }
@@ -97,6 +96,7 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
       <div className="modal-content">
         <h2>Add Staff Member</h2>
         <form onSubmit={handleSubmit}>
+          {/* Form fields */}
           <div className="form-group">
             <label>First Name</label>
             <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} required />
