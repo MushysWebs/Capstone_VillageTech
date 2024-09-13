@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './AddStaffModal.css';
-import { supabase } from './supabaseClient';
+import { supabase } from '../routes/supabaseClient';
 
 const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
   const [formData, setFormData] = useState({
@@ -30,24 +30,24 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-  
+
     try {
       // Sign up the user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
       });
-  
+
       if (signUpError) {
         console.error('User signup error:', signUpError);
         throw signUpError;
       }
-  
+
       if (authData && authData.user) {
         // Prepare staff data
         const staffData = {
@@ -66,17 +66,17 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           emergency_contact: formData.emergency_contact,
           notes: formData.notes
         };
-  
+
         // Insert staff data
         const { data: insertData, error: insertError } = await supabase
           .from('staff')
           .insert([staffData]);
-  
+
         if (insertError) {
           console.error('Staff data insertion error:', insertError);
           throw insertError;
         }
-  
+
         console.log('Staff data inserted successfully:', insertData);
         onAddStaff(staffData);
         onClose()

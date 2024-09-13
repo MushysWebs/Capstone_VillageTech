@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from '../../components/routes/supabaseClient';
 import './Admin.css';
-import AddStaffModal from './AddStaffModal';
-import AuthGuard from './components/auth/AuthGuard';
+import AddStaffModal from '../../components/addStaffModal/AddStaffModal';
+import AuthGuard from '../../components/auth/AuthGuard';
 
 const Admin = ({ globalSearchTerm }) => {
   const [staffList, setStaffList] = useState([]);
@@ -47,7 +47,7 @@ const Admin = ({ globalSearchTerm }) => {
   };
 
   const addNewStaff = (newStaff) => {
-    fetchStaff(); 
+    fetchStaff();
   };
 
   const handleDeleteStaff = async () => {
@@ -153,14 +153,14 @@ const Admin = ({ globalSearchTerm }) => {
               <p>Address: {selectedStaff.address || 'N/A'}</p>
               <p>Emergency Contact: {selectedStaff.emergency_contact || 'N/A'}</p>
               <p>Notes: {selectedStaff.notes || 'N/A'}</p>
-              
-              <button 
-                className="delete-staff-button" 
+
+              <button
+                className="delete-staff-button"
                 onClick={handleDeleteStaff}
               >
                 Delete Staff Member
               </button>
-              
+
               {deleteError && <p className="error-message">{deleteError}</p>}
             </div>
           </div>

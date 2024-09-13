@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { supabase } from './supabaseClient';
-import Login from './Login';
+import { supabase } from './components/routes/supabaseClient';
+import Login from './pages/login/Login';
 import Layout from './Layout';
-import Dashboard from './Dashboard';
-import Admin from './Admin';
-import MessagingPage from './MessagingPage';
+import Dashboard from './pages/dashboard/Dashboard';
+import Admin from './pages/admin/Admin';
+import MessagingPage from './pages/message/MessagingPage';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {

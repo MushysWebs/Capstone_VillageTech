@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './Dashboard.css';
-import CalendarView from './CalendarView';
-import AuthGuard from './components/auth/AuthGuard';
+import CalendarView from './calendarView/CalendarView';
+import AuthGuard from '../../components/auth/AuthGuard';
 
 const Dashboard = ({ globalSearchTerm }) => {
   const [firstName, setFirstName] = useState('');
