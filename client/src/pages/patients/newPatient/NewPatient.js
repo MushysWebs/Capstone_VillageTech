@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './NewPatient.css';
+import { supabase } from '../../../components/routes/supabaseClient';
 
 const NewPatient = () => {
     const [patientDetails, setPatientDetails] = useState({
-        ownerName: '',
+        ownerFirstName: '',
+        ownerLastName: '',
         patientName: '',
         code: '',
         microchipNumber: '',
@@ -35,14 +37,30 @@ const NewPatient = () => {
     const [animalNotes, setAnimalNotes] = useState('');
     const [tags, setTags] = useState({ general: '', reminder: '' });
     const [imagePreview, setImagePreview] = useState(null);
+    const [errors, setErrors] = useState({});
+
+    const validateInput = (name, value) => {
+        let error = '';
+
+        if (name === 'weight' || name === 'age') {
+            if (value !== '' && isNaN(value)) {
+                error = 'Must be a number';
+            }
+        } else if (value.trim() === '') {
+            error = 'This field is required';
+        }
+
+        return error;
+    };
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        if (type === 'checkbox') {
-            setPatientDetails((prevDetails) => ({ ...prevDetails, [name]: checked }));
-        } else {
-            setPatientDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
-        }
+        const newValue = type === 'checkbox' ? checked : value;
+
+        const error = validateInput(name, newValue);
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+
+        setPatientDetails((prevDetails) => ({ ...prevDetails, [name]: newValue }));
     };
 
     const handleOtherDetailsChange = (e) => {
@@ -56,9 +74,7 @@ const NewPatient = () => {
 
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                setImagePreview(e.target.result);
-            };
+            reader.onload = (e) => setImagePreview(e.target.result);
             reader.readAsDataURL(file);
         }
     };
@@ -68,9 +84,74 @@ const NewPatient = () => {
         setTags((prevTags) => ({ ...prevTags, [name]: value }));
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const hasErrors = Object.values(errors).some((error) => error);
+        if (hasErrors) {
+            alert('Please correct the errors before submitting');
+            return;
+        }
+
+        try {
+            const { data: ownerData, error: ownerError } = await supabase
+                .from('owners')
+                .insert([
+                    {
+                        first_name: patientDetails.ownerFirstName,
+                        last_name: patientDetails.ownerLastName,
+                        email: 'owner@example.com',
+                        phone_number: '1234567890',
+                    },
+                ])
+                .select();
+
+            if (ownerError) {
+                console.error('Error inserting owner:', ownerError);
+                alert(`Error adding owner: ${ownerError.message}`);
+                return;
+            }
+
+            const ownerId = ownerData[0].id;
+
+            const patientDataToInsert = {
+                owner_id: ownerId,
+                name: patientDetails.patientName,
+                microchip_number: patientDetails.microchipNumber || null,
+                weight: patientDetails.weight !== '' ? parseFloat(patientDetails.weight) : null,
+                rabies_number: patientDetails.rabiesNumber || null,
+                age: patientDetails.age !== '' ? parseInt(patientDetails.age) : null,
+                date_of_birth: patientDetails.dateOfBirth || null,
+                gender: patientDetails.gender,
+                species: patientDetails.species,
+                breed: patientDetails.breed || null,
+                color: patientDetails.color || null,
+                resuscitate: patientDetails.resuscitate,
+                advanced_life_support: patientDetails.advancedLifeSupport,
+                deceased: patientDetails.deceased,
+                notes: animalNotes || null,
+            };
+
+            const { data: patientData, error: patientError } = await supabase
+                .from('patients')
+                .insert([patientDataToInsert])
+                .select();
+
+            if (patientError) {
+                console.error('Error inserting patient:', patientError.details || patientError.message || patientError);
+                alert(`Error adding new patient: ${patientError.details || patientError.message}`);
+                return;
+            }
+
+            alert('New patient created successfully!');
+        } catch (error) {
+            console.error('Error creating new patient:', error.message || error);
+            alert(`Failed to create new patient: ${error.message}`);
+        }
+    };
+
     return (
         <div className="new-patient-page">
-            {/* Add the patient navigation buttons */}
             <header className="patient-header">
                 <div className="patient-tabs">
                     <Link to="/patient/clinical" className="tab-button">Clinical</Link>
@@ -87,82 +168,84 @@ const NewPatient = () => {
                 <h1>New Patient</h1>
             </div>
 
-            <div className="new-patient-grid">
-                {/* Patient Details Section */}
+            <form className="new-patient-grid" onSubmit={handleSubmit}>
                 <div className="details-section">
                     <h2>Pet Details</h2>
-                    <label>Owner</label>
-                    <input type="text" name="ownerName" value={patientDetails.ownerName} onChange={handleInputChange} />
 
-                    <label>Patient Name</label>
-                    <input type="text" name="patientName" value={patientDetails.patientName} onChange={handleInputChange} />
-
-                    <label>Code</label>
-                    <input type="text" name="code" value={patientDetails.code} onChange={handleInputChange} />
-
-                    <label>Microchip Number</label>
-                    <input type="text" name="microchipNumber" value={patientDetails.microchipNumber} onChange={handleInputChange} />
-
-                    <label>Weight</label>
-                    <input type="number" name="weight" value={patientDetails.weight} onChange={handleInputChange} />
-
-                    <label>Rabies Number</label>
-                    <input type="text" name="rabiesNumber" value={patientDetails.rabiesNumber} onChange={handleInputChange} />
-
-                    <label>Date of Birth</label>
-                    <input type="date" name="dateOfBirth" value={patientDetails.dateOfBirth} onChange={handleInputChange} />
+                    {[
+                        { label: 'Owner First Name', name: 'ownerFirstName', type: 'text' },
+                        { label: 'Owner Last Name', name: 'ownerLastName', type: 'text' },
+                        { label: 'Patient Name', name: 'patientName', type: 'text' },
+                        { label: 'Code', name: 'code', type: 'text' },
+                        { label: 'Microchip Number', name: 'microchipNumber', type: 'text' },
+                        { label: 'Weight in lb', name: 'weight', type: 'text' },
+                        { label: 'Rabies Number', name: 'rabiesNumber', type: 'text' },
+                        { label: 'Age', name: 'age', type: 'text' },
+                        { label: 'Date of Birth', name: 'dateOfBirth', type: 'date' },
+                        { label: 'Species', name: 'species', type: 'text' },
+                        { label: 'Breed', name: 'breed', type: 'text' },
+                        { label: 'Color', name: 'color', type: 'text' }
+                    ].map(({ label, name, type }) => (
+                        <div key={name} className="input-wrapper">
+                            <label>{label} {errors[name] && <span className="error-message-inline">{errors[name]}</span>}</label>
+                            <input
+                                type={type}
+                                name={name}
+                                value={patientDetails[name]}
+                                onChange={handleInputChange}
+                                className={errors[name] ? 'input-error' : ''}
+                            />
+                        </div>
+                    ))}
 
                     <label>Gender</label>
-                    <select name="gender" value={patientDetails.gender} onChange={handleInputChange}>
+                    <select
+                        name="gender"
+                        value={patientDetails.gender}
+                        onChange={handleInputChange}
+                        className={errors.gender ? 'input-error' : ''}
+                    >
                         <option value="male">Male</option>
                         <option value="female">Female</option>
                         <option value="unknown">Transcended Being</option>
                     </select>
-
-                    <label>Species</label>
-                    <input type="text" name="species" value={patientDetails.species} onChange={handleInputChange} />
-
-                    <label>Breed</label>
-                    <input type="text" name="breed" value={patientDetails.breed} onChange={handleInputChange} />
-
-                    <label>Color</label>
-                    <input type="text" name="color" value={patientDetails.color} onChange={handleInputChange} />
+                    {errors.gender && <span className="error-message-inline">{errors.gender}</span>}
 
                     <label>Resuscitate</label>
                     <select
                         name="resuscitate"
                         value={patientDetails.resuscitate ? 'yes' : 'no'}
-                        onChange={(e) => setPatientDetails(prevDetails => ({ ...prevDetails, resuscitate: e.target.value === 'yes' }))}>
+                        onChange={(e) => setPatientDetails((prevDetails) => ({ ...prevDetails, resuscitate: e.target.value === 'yes' }))}
+                    >
                         <option value="yes">Yes</option>
                         <option value="no">No</option>
                     </select>
                 </div>
 
-                {/* Other Details Section */}
                 <div className="other-details-section">
                     <h2>Other Details</h2>
-
-                    <label>Insurance Supplier</label>
-                    <input type="text" name="insuranceSupplier" value={otherDetails.insuranceSupplier} onChange={handleOtherDetailsChange} />
-
-                    <label>Insurance Number</label>
-                    <input type="text" name="insuranceNumber" value={otherDetails.insuranceNumber} onChange={handleOtherDetailsChange} />
-
-                    <label>Referring Clinic</label>
-                    <input type="text" name="referringClinic" value={otherDetails.referringClinic} onChange={handleOtherDetailsChange} />
-
-                    <label>Referring Vet</label>
-                    <input type="text" name="referringVet" value={otherDetails.referringVet} onChange={handleOtherDetailsChange} />
-
-                    <label>Preferred Doctor</label>
-                    <input type="text" name="preferredDoctor" value={otherDetails.preferredDoctor} onChange={handleOtherDetailsChange} />
-
-                    <label>Second Preferred Doctor</label>
-                    <input type="text" name="secondPreferredDoctor" value={otherDetails.secondPreferredDoctor} onChange={handleOtherDetailsChange} />
+                    {[
+                        { label: 'Insurance Supplier', name: 'insuranceSupplier' },
+                        { label: 'Insurance Number', name: 'insuranceNumber' },
+                        { label: 'Referring Clinic', name: 'referringClinic' },
+                        { label: 'Referring Vet', name: 'referringVet' },
+                        { label: 'Preferred Doctor', name: 'preferredDoctor' },
+                        { label: 'Second Preferred Doctor', name: 'secondPreferredDoctor' }
+                    ].map(({ label, name }) => (
+                        <div key={name} className="input-wrapper">
+                            <label>{label} {errors[name] && <span className="error-message-inline">{errors[name]}</span>}</label>
+                            <input
+                                type="text"
+                                name={name}
+                                value={otherDetails[name]}
+                                onChange={handleOtherDetailsChange}
+                                className={errors[name] ? 'input-error' : ''}
+                            />
+                        </div>
+                    ))}
 
                     <label>Upload Image</label>
                     <input type="file" name="image" onChange={handleImageChange} />
-
                     {imagePreview && (
                         <div className="image-preview-container">
                             <img src={imagePreview} alt="Preview" className="image-preview" />
@@ -170,24 +253,45 @@ const NewPatient = () => {
                     )}
                 </div>
 
-                {/* Additional Info Section */}
                 <div className="additional-info-section">
                     <h2>Additional Information</h2>
                     <div className="notes-subsection">
                         <h3>Animal Notes</h3>
-                        <textarea name="animalNotes" value={animalNotes} onChange={(e) => setAnimalNotes(e.target.value)} />
+                        <textarea
+                            name="animalNotes"
+                            value={animalNotes}
+                            onChange={(e) => setAnimalNotes(e.target.value)}
+                            className={errors.animalNotes ? 'input-error' : ''}
+                        />
+                        {errors.animalNotes && <span className="error-message-inline">{errors.animalNotes}</span>}
                     </div>
 
                     <div className="tags-subsection">
                         <h3>Tags</h3>
-                        <label>General</label>
-                        <input type="text" name="general" value={tags.general} onChange={handleTagsChange} />
+                        {[
+                            { label: 'General', name: 'general' },
+                            { label: 'Reminder', name: 'reminder' }
+                        ].map(({ label, name }) => (
+                            <div key={name} className="input-wrapper">
+                                <label>{label} {errors[name] && <span className="error-message-inline">{errors[name]}</span>}</label>
+                                <input
+                                    type="text"
+                                    name={name}
+                                    value={tags[name]}
+                                    onChange={handleTagsChange}
+                                    className={errors[name] ? 'input-error' : ''}
+                                />
 
-                        <label>Reminder</label>
-                        <input type="text" name="reminder" value={tags.reminder} onChange={handleTagsChange} />
+                            </div>
+
+                        ))}
+                        <button type="submit" className="create-patient-button">Create Patient</button>
                     </div>
                 </div>
-            </div>
+
+
+
+            </form>
         </div>
     );
 };

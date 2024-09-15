@@ -91,6 +91,51 @@ select {
   margin-bottom: 20px;
 }
 
+.input-wrapper {
+  margin-bottom: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-wrapper label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-message-inline {
+  color: red;
+  font-size: 0.8em;
+  margin-left: 10px;
+}
+
+.input-error {
+  border: 1px solid red;
+}
+
+.input-wrapper.error {
+  margin-bottom: 5px;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.8em;
+}
+
+.create-patient-button {
+  background-color: #09ace0;
+  color: white;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.create-patient-button:hover {
+  background-color: #0a9ecf;
+}
+
 /* Responsive behavior for smaller screens */
 @media (max-width: 1200px) {
   .new-patient-grid {
