@@ -1,19 +1,38 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
+import React, { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { supabase } from '../routes/supabaseClient';
 
 const AuthGuard = ({ children }) => {
-  const navigate = useNavigate();
-  const [cookies] = useCookies(['authToken']);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!cookies.authToken) {
-      // Redirect to login page if no token is found
-      navigate('/', { replace: true });
-    }
-  }, [cookies, navigate]);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    };
 
-  return cookies.authToken ? children : null;
+    checkSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 export default AuthGuard;

@@ -15,9 +15,12 @@
 }
 
 .calendar-header h1 {
+  display: flex;
+  align-items: center;
   font-size: 24px;
   margin: 0;
 }
+
 
 .calendar-controls {
   display: flex;

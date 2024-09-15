@@ -29,6 +29,25 @@
   border: none;
 }
 
+.delete-staff-button {
+  background-color: #fd5151;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.delete-staff-button:hover {
+  background-color: #ff3232;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
 .results-count {
   font-size: 14px;
   color: #666;

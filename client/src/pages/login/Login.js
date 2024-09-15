@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import './Login.css';
-import { useCookies } from 'react-cookie'
 
 const Login = () => {
   const [theme, setTheme] = useState('light');
@@ -11,68 +10,34 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const [cookies, setCookie] = useCookies(['authToken']);
+  const supabase = useSupabaseClient();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/dashboard');
+      }
+    };
+    checkSession();
+  }, [navigate, supabase.auth]);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
-  // Using cookies to store authToken 
-  useEffect(() => {
-    if (cookies.authToken) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [cookies, navigate]);
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('authToken');
-  //   if (token) {
-  //     navigate('/dashboard', { replace: true });
-  //   }
-  // }, [navigate]);
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   console.log('Login attempt with:', { employeeId, password });
-
-  //   try {
-  //     const response = await axios.post('http://localhost:3007/api/v1/login', {
-  //       username: employeeId,
-  //       password: password,
-  //     });
-
-  //     if (response.data.status === 'success') {
-  //       const { token } = response.data;
-  //       localStorage.setItem('authToken', token);
-  //       navigate('/dashboard'); // Redirect to dashboard
-  //     } else {
-  //       setError(response.data.message || 'Login failed');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error during login:', error);
-  //     setError('Incorrect username or password');
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login attempt with:', { employeeId, password });
-
+    setError('');
     try {
-      const response = await axios.post('http://localhost:3007/api/v1/login', {
-        username: employeeId,
+      const { error } = await supabase.auth.signInWithPassword({
+        email: employeeId,
         password: password,
       });
 
-      // Set authToken in Cookie
-      if (response.data.status === 'success') {
-        const { token } = response.data;
-        // Store the token in a cookie
-        setCookie('authToken', token, { path: '/' });
-        navigate('/dashboard'); // Redirect to dashboard
-      } else {
-        setError(response.data.message || 'Login failed');
-      }
+      if (error) throw error;
+
+      navigate('/dashboard');
     } catch (error) {
       console.error('Error during login:', error);
       setError('Incorrect username or password');

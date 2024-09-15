@@ -1,7 +1,7 @@
-import React, { useState, useEffect , useRef} from 'react';
+import React, { useState, useEffect } from 'react';
 import './CalendarView.css';
 
-const CalendarView = ({ searchTerm }) => {
+const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([
     { id: 1, title: 'Eye Replacement', start: new Date(2024, 6, 23, 9, 0), end: new Date(2024, 6, 23, 11, 0), patient: 'Ponzu', doctor: 'Dr. M' },
@@ -125,10 +125,36 @@ const CalendarView = ({ searchTerm }) => {
     };
   };
 
+  // masking delayed name retrieval
+  const TypingAnimation = ({ text, speed = 100 }) => {
+    const [displayedText, setDisplayedText] = useState('');
+  
+    useEffect(() => {
+      let i = 0;
+      const timer = setInterval(() => {
+        if (i < text.length) {
+          setDisplayedText(text.slice(0, i + 1));
+          i++;
+        } else {
+          clearInterval(timer);
+        }
+      }, speed);
+  
+      return () => clearInterval(timer);
+    }, [text, speed]);
+  
+    return (
+      <span className="typing-animation" style={{ minWidth: `${text.length}ch` }}>
+        {displayedText}
+      </span>
+    );
+  };
   return (
     <div className="calendar-view">
       <div className="calendar-header">
-        <h1>Hello, Logan! This is a placeholder page for the dashboard with the calender concept.</h1>
+      <h1>
+      Hello,&nbsp;<TypingAnimation text={`${firstName}!`} speed={150} />
+        </h1>
         <div className="header-buttons">
           <button className="action-button">Clock In</button>
           <button className="action-button">View Hours</button>
