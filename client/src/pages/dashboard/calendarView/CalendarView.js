@@ -125,10 +125,36 @@ const CalendarView = ({ searchTerm, firstName }) => {
     };
   };
 
+  // masking delayed name retrieval
+  const TypingAnimation = ({ text, speed = 150 }) => {
+    const [displayedText, setDisplayedText] = useState('');
+  
+    useEffect(() => {
+      let i = 0;
+      const timer = setInterval(() => {
+        if (i < text.length) {
+          setDisplayedText(text.slice(0, i + 1));
+          i++;
+        } else {
+          clearInterval(timer);
+        }
+      }, speed);
+  
+      return () => clearInterval(timer);
+    }, [text, speed]);
+  
+    return (
+      <span className="typing-animation" style={{ minWidth: `${text.length}ch` }}>
+        {displayedText}
+      </span>
+    );
+  };
   return (
     <div className="calendar-view">
       <div className="calendar-header">
-        <h1>Hello, {firstName}!</h1>
+      <h1>
+      Hello,&nbsp;<TypingAnimation text={`${firstName}!`} speed={150} />
+        </h1>
         <div className="header-buttons">
           <button className="action-button">Clock In</button>
           <button className="action-button">View Hours</button>

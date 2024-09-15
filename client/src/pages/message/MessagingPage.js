@@ -178,25 +178,25 @@ const MessagingPage = () => {
 
   return (
     <div className="messaging-page">
-      <div className="contacts-list">
-        <h2>Chat</h2>
-        {error && <p className="error-message">{error}</p>}
-        {staff.length === 0 && !error && <p>No staff members found.</p>}
-        {staff.map(s => (
-          <div
-            key={s.id}
-            className={`contact-item ${selectedStaff?.id === s.id ? 'active' : ''}`}
-            onClick={() => setSelectedStaff(s)}
-          >
-            <div className="contact-avatar">{s.full_name.charAt(0)}</div>
-            <div className="contact-info">
-              <div className="contact-name">{s.full_name}</div>
-              <div className="contact-role">{s.role}</div>
-            </div>
+    <div className="mcontacts-list">
+      <h2>Chat</h2>
+      {error && <p className="error-message">{error}</p>}
+      {staff.length === 0 && !error && <p>No staff members found.</p>}
+      {staff.map(s => (
+        <div
+          key={s.id}
+          className={`mcontact-item ${selectedStaff?.id === s.id ? 'active' : ''}`}
+          onClick={() => setSelectedStaff(s)}
+        >
+          <div className="mcontact-avatar">{s.full_name.charAt(0)}</div>
+          <div className="mcontact-info">
+            <div className="mcontact-name">{s.full_name}</div>
+            <div className="mcontact-role">{s.role}</div>
           </div>
-        ))}
-      </div>
-      <div className="chat-area">
+        </div>
+      ))}
+    </div>
+    <div className="chat-area">
       {selectedStaff ? (
         <>
           <div className="chat-header">
