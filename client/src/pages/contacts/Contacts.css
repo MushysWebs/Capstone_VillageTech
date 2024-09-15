@@ -38,7 +38,7 @@ body {
 }
 
 .contact-item.active {
-  background-color: #3498db;
+  background-color: #09ACE0;
   color: white;
 }
 
@@ -101,7 +101,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
-  background-color: #3498db;
+  background-color: #09ACE0;
   border: none;
   border-radius: 6px;
   font-size: 0.9rem;
