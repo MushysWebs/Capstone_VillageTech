@@ -1,186 +1,186 @@
 .messaging-page {
-    display: flex;
-    height: calc(100vh - 60px);
-    background-color: #ffffff;
-    color: #333;
-    margin-left: 20px;
-  }
-  
-  .contacts-list {
-    width: 250px;
-    border-right: 1px solid #e0e0e0;
-    overflow-y: auto;
-    padding: 10px;
-  }
-  
-  .contacts-list h2 {
-    margin-bottom: 20px;
-  }
-  
-  .contact-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .contact-item:hover, .contact-item.active {
-    background-color: #f0f0f0;
-  }
-  
-  .contact-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #09ACE0;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    margin-right: 10px;
-  }
-  
-  .contact-info {
-    flex: 1;
-  }
-  
-  .contact-name {
-    font-weight: bold;
-  }
-  
-  .contact-role {
-    font-size: 0.8em;
-    color: #888;
-  }
-  
-  .chat-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .chat-header {
-    padding: 10px;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-  }
-  
-  .back-button {
-    margin-right: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .messages-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-  }
-  
-  .date-separator {
-    text-align: center;
-    margin: 20px 0;
-    color: #888;
-    font-size: 0.8em;
-  }
-  
-  .message {
-    max-width: 70%;
-    margin-bottom: 10px;
-    clear: both;
-  }
-  
-  .message.sent {
-    float: right;
-  }
-  
-  .message.received {
-    float: left;
-  }
-  
-  .message-content {
-    padding: 10px;
-    border-radius: 20px;
-    background-color: #f0f0f0;
-    display: inline-block;
-  }
-  
-  .message.sent .message-content {
-    background-color: #09ACE0;
-    color: white;
-  }
-  
-  .message-timestamp {
-    font-size: 0.7em;
-    color: #888;
-    margin-top: 5px;
-  }
-  
-  .message.sent .message-timestamp {
-    text-align: right;
-  }
-  
-  .message-input {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #e0e0e0;
-  }
-  
-  .message-input input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 20px;
-  }
-  
-  .message-input button {
-    margin-left: 10px;
-    padding: 10px 20px;
-    background-color: #09ACE0;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-  }
+  display: flex;
+  height: calc(100vh - 60px);
+  background-color: #ffffff;
+  color: #333;
+  margin-left: 20px;
+}
 
-  .notifications-panel {
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    width: 300px;
-    max-height: 400px;
-    overflow-y: auto;
-    background-color: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 1000;
-  }
-  
-  .notifications-panel h2 {
-    padding: 10px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .notification {
-    padding: 10px;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .notification:last-child {
-    border-bottom: none;
-  }
-  
-  .notification h3 {
-    margin: 0;
-    font-size: 16px;
-  }
-  
-  .notification p {
-    margin: 5px 0;
-    font-size: 14px;
-  }
+.mcontacts-list {
+  width: 250px;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.mcontacts-list h2 {
+  margin-bottom: 20px;
+}
+
+.mcontact-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.mcontact-item:hover, .mcontact-item.active {
+  background-color: #f0f0f0;
+}
+
+.mcontact-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #09ACE0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.mcontact-info {
+  flex: 1;
+}
+
+.mcontact-name {
+  font-weight: bold;
+}
+
+.mcontact-role {
+  font-size: 0.8em;
+  color: #888;
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+}
+
+.back-button {
+  margin-right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.date-separator {
+  text-align: center;
+  margin: 20px 0;
+  color: #888;
+  font-size: 0.8em;
+}
+
+.message {
+  max-width: 70%;
+  margin-bottom: 10px;
+  clear: both;
+}
+
+.message.sent {
+  float: right;
+}
+
+.message.received {
+  float: left;
+}
+
+.message-content {
+  padding: 10px;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  display: inline-block;
+}
+
+.message.sent .message-content {
+  background-color: #09ACE0;
+  color: white;
+}
+
+.message-timestamp {
+  font-size: 0.7em;
+  color: #888;
+  margin-top: 5px;
+}
+
+.message.sent .message-timestamp {
+  text-align: right;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.message-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+}
+
+.message-input button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #09ACE0;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.notifications-panel {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.notifications-panel h2 {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.notification {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.notification:last-child {
+  border-bottom: none;
+}
+
+.notification h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.notification p {
+  margin: 5px 0;
+  font-size: 14px;
+}

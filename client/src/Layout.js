@@ -4,11 +4,13 @@ import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './pages/dashboard/Dashboard.css';
 import AdminPage from './pages/admin/Admin';
 import Dashboard from './pages/dashboard/Dashboard';
+import Contacts from './pages/contacts/Contacts';
 import AuthGuard from './components/auth/AuthGuard';
 import MessagingPage from './pages/message/MessagingPage';
 import SignoutButton from './components/auth/SignOut';
 import NewPatient from './pages/patients/newPatient/NewPatient';
 import PatientMain from './pages/patients/patientMain/PatientMain';
+
 
 const Layout = () => {
   const [theme, setTheme] = useState('light');
@@ -132,6 +134,8 @@ const Layout = () => {
       return <Dashboard globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === '/messages') {
       return <MessagingPage />;
+    } else if (location.pathname === '/contacts') {
+      return <Contacts globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === '/newPatient') {
       return <NewPatient />;
     } else if (location.pathname === '/patient') {

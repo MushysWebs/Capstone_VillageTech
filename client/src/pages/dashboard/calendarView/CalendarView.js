@@ -126,7 +126,7 @@ const CalendarView = ({ searchTerm, firstName }) => {
   };
 
   // masking delayed name retrieval
-  const TypingAnimation = ({ text, speed = 100 }) => {
+  const TypingAnimation = ({ text, speed = 150 }) => {
     const [displayedText, setDisplayedText] = useState('');
   
     useEffect(() => {

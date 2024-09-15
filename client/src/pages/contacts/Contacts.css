@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f5f7fa;
+  color: #34495e;
+}
+
+.contacts-page {
+  display: flex;
+  height: calc(100vh - 60px);
+  margin-left: 20px;
+}
+
+.contacts-sidebar {
+  width: 300px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-right: 1px solid #e0e6ed;
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.contacts-list {
+  padding: 1rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+  background-color: #eef2f7;
+}
+
+.contact-item.active {
+  background-color: #09ACE0;
+  color: white;
+}
+
+.contact-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 1rem;
+  object-fit: cover;
+}
+
+.contact-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.contacts-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.contact-header-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-right: 2rem;
+  object-fit: cover;
+}
+
+.contact-header-info h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.contact-header-info p {
+  color: #7f8c8d;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #09ACE0;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #2980b9;
+}
+
+.action-button svg {
+  margin-right: 0.5rem;
+}
+
+.pets-section,
+.invoices-section {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pets-section h3,
+.invoices-section h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.pet-card {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.pet-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pet-card img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+}
+
+.pet-card h4 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.pet-card p {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  margin-bottom: 0.25rem;
+}
+
+.invoices-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.invoices-table th,
+.invoices-table td {
+  padding: 1rem;
+  text-align: left;
+}
+
+.invoices-table th {
+  font-weight: 500;
+  color: #7f8c8d;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.invoices-table tr {
+  background-color: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.invoices-table tr:hover {
+  background-color: #eef2f7;
+}
+
+@media (max-width: 768px) {
+  .contacts-page {
+    flex-direction: column;
+  }
+
+  .contacts-sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e6ed;
+  }
+
+  .contacts-main {
+    padding: 1rem;
+  }
+
+  .contact-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .contact-header-avatar {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .pets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .invoices-table {
+    font-size: 0.8rem;
+  }
+}
