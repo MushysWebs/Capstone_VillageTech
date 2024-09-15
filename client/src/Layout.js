@@ -8,6 +8,8 @@ import Contacts from './pages/contacts/Contacts';
 import AuthGuard from './components/auth/AuthGuard';
 import MessagingPage from './pages/message/MessagingPage';
 import SignoutButton from './components/auth/SignOut';
+import NewPatient from './pages/patients/newPatient/NewPatient';
+import PatientMain from './pages/patients/patientMain/PatientMain';
 
 
 const Layout = () => {
@@ -134,6 +136,10 @@ const Layout = () => {
       return <MessagingPage />;
     } else if (location.pathname === '/contacts') {
       return <Contacts globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === '/newPatient') {
+      return <NewPatient />;
+    } else if (location.pathname === '/patient') {
+      return <PatientMain />;
     }
     return null;
   };
@@ -150,9 +156,10 @@ const Layout = () => {
               <li className={location.pathname === '/contacts' ? 'active' : ''}>
                 <Link to="/contacts"><i className="fas fa-address-book"></i> Contacts</Link>
               </li>
-              <li className={location.pathname === '/patients' ? 'active' : ''}>
-                <Link to="/patients"><i className="fas fa-user"></i> Patients</Link>
+              <li className={location.pathname === '/patient' ? 'active' : ''}>
+                <Link to="/patient"><i className="fas fa-user"></i> Patients</Link>
               </li>
+
               <li className={location.pathname === '/financial' ? 'active' : ''}>
                 <Link to="/financial"><i className="fas fa-dollar-sign"></i> Financial</Link>
               </li>

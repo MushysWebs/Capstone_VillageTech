@@ -1,0 +1,109 @@
+/* General styles for the New Patient page */
+.new-patient-page {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.new-patient-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Consistent button alignment */
+.patient-header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.patient-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e6e6e6;
+  color: black;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.tab-button:hover {
+  background-color: #bfbfbf;
+}
+
+/* Grid layout for the sections */
+.new-patient-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+/* Section styles */
+.details-section,
+.other-details-section,
+.additional-info-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Make inputs and textareas take up the full width */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Image preview styling */
+.image-preview-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-preview {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Subsection styles for Additional Information */
+.additional-info-section .notes-subsection,
+.additional-info-section .tags-subsection {
+  margin-bottom: 20px;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 1200px) {
+  .new-patient-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .new-patient-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .new-patient-page {
+    margin-left: 0;
+  }
+}
