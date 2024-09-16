@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Edit2, X, Save, Clock, Calendar, Send } from 'lucide-react';
+import { Edit2, X, Save, Clock, Calendar, Send, Camera} from 'lucide-react';
 import './Contacts.css';
 
 const Contacts = ({ globalSearchTerm }) => {
@@ -12,6 +12,8 @@ const Contacts = ({ globalSearchTerm }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContact, setEditedContact] = useState(null);
   const [error, setError] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
 
   useEffect(() => {
@@ -92,12 +94,51 @@ const Contacts = ({ globalSearchTerm }) => {
     setEditedContact({ ...selectedContact });
   };
 
+  const handleProfilePictureClick = () => {
+    if (isEditing) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `profile_pictures/${fileName}`;
+
+        let { error: uploadError } = await supabase.storage
+          .from('contacts')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: { publicUrl }, error: urlError } = supabase.storage
+          .from('contacts')
+          .getPublicUrl(filePath);
+
+        if (urlError) {
+          throw urlError;
+        }
+
+        setProfilePicture(publicUrl);
+        setEditedContact(prev => ({ ...prev, profile_picture_url: publicUrl }));
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setError('Failed to upload profile picture: ' + error.message);
+      }
+    }
+  };
+
   const handleCancel = () => {
     setIsEditing(false);
     setEditedContact(null);
   };
 
-  const handleSave = async () => {
+    const handleSave = async () => {
     try {
       if (!editedContact || !editedContact.id) {
         throw new Error('No contact selected for editing');
@@ -105,7 +146,10 @@ const Contacts = ({ globalSearchTerm }) => {
 
       const { data, error } = await supabase
         .from('owners')
-        .update(editedContact)
+        .update({
+          ...editedContact,
+          profile_picture_url: profilePicture || editedContact.profile_picture_url
+        })
         .eq('id', editedContact.id)
         .select()
         .single();
@@ -131,7 +175,7 @@ const Contacts = ({ globalSearchTerm }) => {
 
       setIsEditing(false);
       setEditedContact(null);
-      setError(null);  
+      setError(null);
     } catch (error) {
       console.error('Error updating contact:', error);
       setError('Failed to update contact: ' + error.message);
@@ -171,7 +215,11 @@ const Contacts = ({ globalSearchTerm }) => {
               className={`contact-item ${selectedContact?.id === contact.id ? 'active' : ''}`}
               onClick={() => setSelectedContact(contact)}
             >
-              <img src={`/api/placeholder/80/80`} alt={`${contact.first_name} ${contact.last_name}`} className="contact-avatar" />
+              <img 
+                src={contact.profile_picture_url || `/api/placeholder/80/80`} 
+                alt={`${contact.first_name} ${contact.last_name}`} 
+                className="contact-avatar" 
+              />
               <span className="contact-name">{`${contact.first_name} ${contact.last_name}`}</span>
             </div>
           ))}
@@ -183,7 +231,25 @@ const Contacts = ({ globalSearchTerm }) => {
         {selectedContact && (
           <>
             <div className={`contact-header ${isEditing ? 'editable' : ''}`}>
-              <img src={`/api/placeholder/80/80`} alt={`${selectedContact.first_name} ${selectedContact.last_name}`} className="contact-header-avatar" />
+              <div className="profile-picture-container" onClick={handleProfilePictureClick}>
+                <img 
+                  src={profilePicture || selectedContact.profile_picture_url || `/api/placeholder/80/80`} 
+                  alt={`${selectedContact.first_name} ${selectedContact.last_name}`} 
+                  className="contact-header-avatar" 
+                />
+                {isEditing && (
+                  <div className="profile-picture-overlay">
+                    <Camera size={24} />
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileChange} 
+                  style={{ display: 'none' }} 
+                  accept="image/*"
+                />
+              </div>
               <div className="contact-header-info">
                 <h2>{`${selectedContact.first_name} ${selectedContact.last_name}`}</h2>
                 {isEditing ? (
