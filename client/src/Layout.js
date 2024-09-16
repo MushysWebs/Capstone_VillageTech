@@ -187,7 +187,17 @@ const Layout = () => {
               >
                 <i className="fas fa-user-shield" draggable="false"></i> <span draggable="false">Admin</span>
               </Link>
-              {/* ... (search container remains unchanged) */}
+              <div className="search-container" style={searchContainerStyles}>
+                <i className="fas fa-search search-icon" style={searchIconStyles}></i>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className="search-input nunito-regular"
+                  value={globalSearchTerm}
+                  onChange={handleGlobalSearch}
+                  style={searchInputStyles}
+                />
+              </div>
             </div>
             <div className="header-right">
               <button className="header-button blue-button" draggable="false">
