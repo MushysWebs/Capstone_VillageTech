@@ -21,6 +21,8 @@ const Contacts = ({ globalSearchTerm }) => {
   useEffect(() => {
     if (selectedContact) {
       fetchPatients(selectedContact.id);
+      setIsEditing(false);
+      setEditedContact(null);
     }
   }, [selectedContact]);
 
@@ -135,6 +137,19 @@ const Contacts = ({ globalSearchTerm }) => {
       setError('Failed to update contact: ' + error.message);
     }
   };
+
+  /* If currently editing, ask for confirmation before switching. Uncomment and add into return() if you want, but I'm not a fan.
+  const handleContactSelect = (contact) => {
+    if (isEditing) {
+      if (window.confirm("You have unsaved changes. Are you sure you want to switch contacts?")) {
+        setSelectedContact(contact);
+        setIsEditing(false);
+        setEditedContact(null);
+      }
+    } else {
+      setSelectedContact(contact);
+    }
+  }; */
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
