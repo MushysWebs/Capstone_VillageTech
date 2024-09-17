@@ -6,10 +6,9 @@ import AddEstimateModal from '../../../components/addEstimateModal/AddEstimateMo
 
 const Financial = () => {
     const [financialData, setFinancialData] = useState([]);
-    const [isModalOpen, setIsModalOpen, onAddEstimate] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     
     
-
     // Fetch financial data from Supabase
     useEffect(() => {
         const fetchFinancialData = async () => {
