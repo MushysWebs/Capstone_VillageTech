@@ -11,6 +11,7 @@ import MessagingPage from './pages/message/MessagingPage';
 import PrivateRoute from './components/PrivateRoute';
 import NewPatient from './pages/patients/newPatient/NewPatient';
 import PatientMain from './pages/patients/patientMain/PatientMain';
+import Financial from './pages/patients/financial/Financial'
 
 
 function App() {
@@ -21,14 +22,15 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route element={<PrivateRoute />}>
 
-          <Route element={<Layout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/messages" element={<MessagingPage />} />
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="/patient" element={<PatientMain />} />
-            <Route path="/newPatient" element={<NewPatient />} />
-          </Route>
+            <Route element={<Layout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/messages" element={<MessagingPage />} />
+              <Route path="/contacts" element={<Contacts />} />
+              <Route path="/patient" element={<PatientMain />} />
+              <Route path="/newPatient" element={<NewPatient />} />
+              <Route path="/financial" element={<Financial />} />
+            </Route>
 
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

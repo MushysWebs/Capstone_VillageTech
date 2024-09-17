@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Edit2, Clock, Calendar, Send } from 'lucide-react';
+import { Edit2, X, Save, Clock, Calendar, Send, Camera} from 'lucide-react';
 import './Contacts.css';
 
 const Contacts = ({ globalSearchTerm }) => {
@@ -9,7 +9,11 @@ const Contacts = ({ globalSearchTerm }) => {
   const [contacts, setContacts] = useState([]);
   const [patients, setPatients] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContact, setEditedContact] = useState(null);
   const [error, setError] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
 
   useEffect(() => {
@@ -19,6 +23,8 @@ const Contacts = ({ globalSearchTerm }) => {
   useEffect(() => {
     if (selectedContact) {
       fetchPatients(selectedContact.id);
+      setIsEditing(false);
+      setEditedContact(null);
     }
   }, [selectedContact]);
 
@@ -36,11 +42,14 @@ const Contacts = ({ globalSearchTerm }) => {
     setFilteredContacts(filtered);
   }, [globalSearchTerm, contacts]);
 
+  const sortedPatients = patients.sort((a, b) => a.id - b.id);
+
   const fetchContacts = async () => {
     try {
       const { data, error } = await supabase
         .from('owners')
-        .select('*');
+        .select('*')
+        .order('id');
       
       if (error) throw error;
       setContacts(data);
@@ -80,6 +89,117 @@ const Contacts = ({ globalSearchTerm }) => {
     }
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedContact({ ...selectedContact });
+  };
+
+  const handleProfilePictureClick = () => {
+    if (isEditing) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `profile_pictures/${fileName}`;
+
+        let { error: uploadError } = await supabase.storage
+          .from('contacts')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: { publicUrl }, error: urlError } = supabase.storage
+          .from('contacts')
+          .getPublicUrl(filePath);
+
+        if (urlError) {
+          throw urlError;
+        }
+
+        setProfilePicture(publicUrl);
+        setEditedContact(prev => ({ ...prev, profile_picture_url: publicUrl }));
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setError('Failed to upload profile picture: ' + error.message);
+      }
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedContact(null);
+  };
+
+    const handleSave = async () => {
+    try {
+      if (!editedContact || !editedContact.id) {
+        throw new Error('No contact selected for editing');
+      }
+
+      const { data, error } = await supabase
+        .from('owners')
+        .update({
+          ...editedContact,
+          profile_picture_url: profilePicture || editedContact.profile_picture_url
+        })
+        .eq('id', editedContact.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update the contacts list
+      setContacts(prevContacts =>
+        prevContacts.map(contact =>
+          contact.id === data.id ? data : contact
+        )
+      );
+
+      // Update the selected contact
+      setSelectedContact(data);
+
+      // Update filtered contacts
+      setFilteredContacts(prevFiltered =>
+        prevFiltered.map(contact =>
+          contact.id === data.id ? data : contact
+        )
+      );
+
+      setIsEditing(false);
+      setEditedContact(null);
+      setError(null);
+    } catch (error) {
+      console.error('Error updating contact:', error);
+      setError('Failed to update contact: ' + error.message);
+    }
+  };
+
+  /* If currently editing, ask for confirmation before switching. Uncomment and add into return() if you want, but I'm not a fan.
+  const handleContactSelect = (contact) => {
+    if (isEditing) {
+      if (window.confirm("You have unsaved changes. Are you sure you want to switch contacts?")) {
+        setSelectedContact(contact);
+        setIsEditing(false);
+        setEditedContact(null);
+      }
+    } else {
+      setSelectedContact(contact);
+    }
+  }; */
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedContact(prev => ({ ...prev, [name]: value }));
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB'); 
@@ -95,7 +215,11 @@ const Contacts = ({ globalSearchTerm }) => {
               className={`contact-item ${selectedContact?.id === contact.id ? 'active' : ''}`}
               onClick={() => setSelectedContact(contact)}
             >
-              <img src={`/api/placeholder/80/80`} alt={`${contact.first_name} ${contact.last_name}`} className="contact-avatar" />
+              <img 
+                src={contact.profile_picture_url || `/api/placeholder/80/80`} 
+                alt={`${contact.first_name} ${contact.last_name}`} 
+                className="contact-avatar" 
+              />
               <span className="contact-name">{`${contact.first_name} ${contact.last_name}`}</span>
             </div>
           ))}
@@ -104,22 +228,65 @@ const Contacts = ({ globalSearchTerm }) => {
 
       <div className="contacts-main">
         {error && <div className="error-message">{error}</div>}
-        {selectedContact ? (
+        {selectedContact && (
           <>
-            <div className="contact-header">
-              <img src={`/api/placeholder/80/80`} alt={`${selectedContact.first_name} ${selectedContact.last_name}`} className="contact-header-avatar" />
+            <div className={`contact-header ${isEditing ? 'editable' : ''}`}>
+              <div className="profile-picture-container" onClick={handleProfilePictureClick}>
+                <img 
+                  src={profilePicture || selectedContact.profile_picture_url || `/api/placeholder/80/80`} 
+                  alt={`${selectedContact.first_name} ${selectedContact.last_name}`} 
+                  className="contact-header-avatar" 
+                />
+                {isEditing && (
+                  <div className="profile-picture-overlay">
+                    <Camera size={24} />
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileChange} 
+                  style={{ display: 'none' }} 
+                  accept="image/*"
+                />
+              </div>
               <div className="contact-header-info">
                 <h2>{`${selectedContact.first_name} ${selectedContact.last_name}`}</h2>
-                <p>Phone: {selectedContact.phone_number || 'N/A'}</p>
-                <p>Secondary: {selectedContact.secondary_phone_number || 'N/A'}</p>
-                <p>Email: {selectedContact.email}</p>
-                <p>Fax: {selectedContact.fax || '124421412'}</p>
-                <p>Landline: {selectedContact.landline || '532 523 325'}</p>
+                {isEditing ? (
+                  <>
+                    <p><span>Phone:</span><input name="phone_number" value={editedContact.phone_number || ''} onChange={handleInputChange} /></p>
+                    <p><span>Secondary:</span><input name="secondary_phone_number" value={editedContact.secondary_phone_number || ''} onChange={handleInputChange} /></p>
+                    <p><span>Email:</span><input name="email" value={editedContact.email || ''} onChange={handleInputChange} /></p>
+                    <p><span>Address:</span><input name="address" value={editedContact.address || ''} onChange={handleInputChange} /></p>
+                    <p><span>Notes:</span><textarea name="notes" value={editedContact.notes || ''} onChange={handleInputChange} /></p>
+                  </>
+                ) : (
+                  <>
+                    <p><span>Phone:</span>{selectedContact.phone_number || 'N/A'}</p>
+                    <p><span>Secondary:</span>{selectedContact.secondary_phone_number || 'N/A'}</p>
+                    <p><span>Email:</span>{selectedContact.email}</p>
+                    <p><span>Address:</span>{selectedContact.address || 'N/A'}</p>
+                    <p><span>Notes:</span>{selectedContact.notes || 'N/A'}</p>
+                  </>
+                )}
               </div>
-              <button className="action-button">
-                <Edit2 size={18} />
-                Edit
-              </button>
+              {isEditing ? (
+                <>
+                  <button className="action-button cancel-button" onClick={handleCancel}>
+                    <X size={18} />
+                    Cancel
+                  </button>
+                  <button className="action-button save-button" onClick={handleSave}>
+                    <Save size={18} />
+                    Save
+                  </button>
+                </>
+              ) : (
+                <button className="action-button edit-button" onClick={handleEdit}>
+                  <Edit2 size={18} />
+                  Edit
+                </button>
+              )}
             </div>
 
             <div className="contact-actions">
@@ -140,7 +307,7 @@ const Contacts = ({ globalSearchTerm }) => {
             <div className="pets-section">
               <h3>PETS</h3>
               <div className="pets-grid">
-                {patients.map(patient => (
+                {sortedPatients.map(patient => (
                   <div key={patient.id} className="pet-card">
                     <img src={`/api/placeholder/60/60`} alt={patient.name} />
                     <h4>{patient.name} <Edit2 size={14} /></h4>
@@ -190,10 +357,6 @@ const Contacts = ({ globalSearchTerm }) => {
               </table>
             </div>
           </>
-        ) : (
-          <div className="no-contact-selected">
-            <p>Select a contact to view details</p>
-          </div>
         )}
       </div>
     </div>
