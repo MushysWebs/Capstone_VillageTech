@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../../components/routes/supabaseClient';
 import { Link } from "react-router-dom";
 import './Financial.css';
+import AddEstimateModal from '../../../components/addEstimateModal/AddEstimateModal';
 
 const Financial = () => {
     const [financialData, setFinancialData] = useState([]);
+    const [isModalOpen, setIsModalOpen, onAddEstimate] = useState(false);
+    
+    
 
     // Fetch financial data from Supabase
     useEffect(() => {
@@ -24,6 +28,14 @@ const Financial = () => {
         fetchFinancialData();
     }, []);
 
+    const openModal = () => {
+        setIsModalOpen(true);
+      };
+    
+      const closeModal = () => {
+        setIsModalOpen(false);
+      };
+
     return (
         <div className="patient-main">
             <header className="patient-header">
@@ -42,8 +54,12 @@ const Financial = () => {
             </div>
 
             <main>
-                <div>
-                    <h2>Estimates</h2>
+                <div className='invoices-section'>
+                    <div className='invoice-header-container'>
+                        <button onClick={openModal}>+</button>
+                        <h2>Estimates</h2>
+                    </div>
+
                     <div>
                         <table className="invoices-table">
                             <thead>
@@ -80,7 +96,7 @@ const Financial = () => {
                 <div>
                     <h2>Pending Invoices</h2>
                     <div>
-                        {/* Render pending invoices here */}
+                        Pending Invoices
                     </div>
                 </div>
                 <div>
@@ -104,6 +120,18 @@ const Financial = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Render the modal outside the main content */}
+            <AddEstimateModal
+  isOpen={isModalOpen}
+  onClose={closeModal}
+  onAddEstimate={(estimate) => {
+    // Handle the new estimate here
+    // For example, update state or refresh data
+    setFinancialData(prevData => [...prevData, estimate]);
+  }}
+/>
+
         </div>
     );
 };

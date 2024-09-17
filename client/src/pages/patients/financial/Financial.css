@@ -29,4 +29,39 @@
   .tab-button:hover {
     background-color: #bfbfbf;
   }
+
+  .invoices-section {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    margin: 50px;
+  }
+
+  .invoice-header-container {
+    display: flex;          /* Enables flexbox layout */
+    align-items: center;    /* Vertically centers items */
+}
+
+.invoice-header-container button {
+    margin-right: 10px;     /* Adds space between button and h2 */
+    padding: 0.1rem 0.5rem;
+    background-color: #09ACE0;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.invoice-header-container button:hover {
+  background-color: #2980b9;
+
+}
+
+
+
+  
   
