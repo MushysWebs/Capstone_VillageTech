@@ -1,0 +1,32 @@
+.patient-main {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .patient-header {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+    margin-left: 10px;
+  }
+  
+  .patient-tabs {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .tab-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e6e6e6;
+    color: black;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+  
+  .tab-button:hover {
+    background-color: #bfbfbf;
+  }
+  

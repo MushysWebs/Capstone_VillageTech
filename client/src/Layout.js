@@ -10,6 +10,7 @@ import MessagingPage from './pages/message/MessagingPage';
 import SignoutButton from './components/auth/SignOut';
 import NewPatient from './pages/patients/newPatient/NewPatient';
 import PatientMain from './pages/patients/patientMain/PatientMain';
+import Financial from './pages/patients/financial/Financial'
 
 
 const Layout = () => {
@@ -140,10 +141,12 @@ const Layout = () => {
       return <NewPatient />;
     } else if (location.pathname === '/patient') {
       return <PatientMain />;
+    } else if (location.pathname === '/Financial') {
+      return <Financial />;
     }
     return null;
   };
-  
+
   const renderSidebarLink = (to, icon, text) => {
     const isActive = location.pathname === to;
     return (
