@@ -55,13 +55,13 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Make inputs and textareas take up the full width */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="file"],
-textarea,
-select {
+/* Scope form input styles to new-patient-form */
+.new-patient-form input[type="text"],
+.new-patient-form input[type="number"],
+.new-patient-form input[type="date"],
+.new-patient-form input[type="file"],
+.new-patient-form textarea,
+.new-patient-form select {
   width: 100%;
   padding: 10px;
   margin: 10px 0;

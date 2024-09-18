@@ -168,7 +168,7 @@ const NewPatient = () => {
                 <h1>New Patient</h1>
             </div>
 
-            <form className="new-patient-grid" onSubmit={handleSubmit}>
+            <form className="new-patient-grid new-patient-form" onSubmit={handleSubmit}>
                 <div className="details-section">
                     <h2>Pet Details</h2>
 
