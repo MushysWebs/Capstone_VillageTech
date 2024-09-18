@@ -3,6 +3,7 @@ import { supabase } from '../../components/routes/supabaseClient';
 import './Admin.css';
 import AddStaffModal from '../../components/addStaffModal/AddStaffModal';
 import AuthGuard from '../../components/auth/AuthGuard';
+import { Edit2, X, Save, Trash2, Phone, Mail, MapPin, Calendar, User, AlertCircle } from 'lucide-react';
 
 const Admin = ({ globalSearchTerm }) => {
   const [staffList, setStaffList] = useState([]);
@@ -10,6 +11,8 @@ const Admin = ({ globalSearchTerm }) => {
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedStaff, setEditedStaff] = useState(null);
 
   const fetchStaff = async () => {
     try {
@@ -50,6 +53,54 @@ const Admin = ({ globalSearchTerm }) => {
     fetchStaff();
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedStaff({ ...selectedStaff });
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedStaff(null);
+  };
+
+  const handleSave = async () => {
+    try {
+      const { full_name, ...staffDataToUpdate } = editedStaff;
+
+      const { data, error } = await supabase
+        .from('staff')
+        .update(staffDataToUpdate)
+        .eq('id', editedStaff.id)
+        .select();
+
+      if (error) throw error;
+
+      const updatedStaff = {
+        ...data[0],
+        full_name: `${data[0].first_name} ${data[0].last_name}`
+      };
+
+      setStaffList(staffList.map(staff => staff.id === updatedStaff.id ? updatedStaff : staff));
+      setSelectedStaff(updatedStaff);
+      setIsEditing(false);
+      setEditedStaff(null);
+    } catch (error) {
+      console.error('Error updating staff member:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedStaff(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCloseInfoBox = () => {
+    setSelectedStaff(null);
+    setIsEditing(false);
+    setEditedStaff(null);
+    setDeleteError(null);
+  };
+
   const handleDeleteStaff = async () => {
     if (!selectedStaff) return;
 
@@ -71,22 +122,22 @@ const Admin = ({ globalSearchTerm }) => {
 
   return (
     <AuthGuard>
-      <div className="admin-content">
-        <div className="staff-list-card">
-          <div className="card-header">
+      <div className="a-admin-content">
+        <div className="a-staff-list-card">
+          <div className="a-card-header">
             <div>
-              <h2 className="card-title">Staff List</h2>
-              <button className="add-staff-button" onClick={openModal}>Add Staff</button>
+              <h2 className="a-card-title">Staff List</h2>
+              <button className="a-add-staff-button" onClick={openModal}>Add Staff</button>
             </div>
-            <div className="results-count">
+            <div className="a-results-count">
               Showing {filteredStaff.length} of {staffList.length} results
             </div>
           </div>
-          <div className="card-content">
-            <div className="search-filter-container">
-              <div className="view-filter-buttons">
+          <div className="a-card-content">
+            <div className="a-search-filter-container">
+              <div className="a-view-filter-buttons">
                 <select
-                  className="view-filter-button"
+                  className="a-view-filter-button"
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >
@@ -98,7 +149,7 @@ const Admin = ({ globalSearchTerm }) => {
                 </select>
               </div>
             </div>
-            <table className="staff-table">
+            <table className="a-staff-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -113,18 +164,18 @@ const Admin = ({ globalSearchTerm }) => {
                 {filteredStaff.map((staff) => (
                   <tr key={staff.id}>
                     <td>
-                      <div className="staff-name">
-                        <img src={staff.photo_url || "/floweronly.svg"} alt={staff.full_name} className="staff-avatar" />
+                      <div className="a-staff-name">
+                        <img src={staff.photo_url || "/floweronly.svg"} alt={staff.full_name} className="a-staff-avatar" />
                         {staff.full_name}
                       </div>
                     </td>
                     <td>{staff.email}</td>
                     <td>{staff.phone}</td>
-                    <td><span className="role-badge">{staff.role}</span></td>
-                    <td><span className={`status-badge ${staff.status.toLowerCase()}`}>{staff.status}</span></td>
+                    <td><span className="a-role-badge">{staff.role}</span></td>
+                    <td><span className={`a-status-badge ${staff.status.toLowerCase()}`}>{staff.status}</span></td>
                     <td>
-                      <button className="view-filter-button" onClick={() => setSelectedStaff(staff)}>
-                        <i className="fas fa-window-restore"></i>
+                      <button className="a-view-filter-button" onClick={() => setSelectedStaff(staff)}>
+                        View
                       </button>
                     </td>
                   </tr>
@@ -133,35 +184,195 @@ const Admin = ({ globalSearchTerm }) => {
             </table>
           </div>
         </div>
-        <button className="manage-schedule-button">Manage Schedule</button>
+        <button className="a-manage-schedule-button">Manage Schedule</button>
 
         {selectedStaff && (
-          <div className="staff-details-overlay">
-            <div className="staff-details-content">
-              <button className="close-button" onClick={() => setSelectedStaff(null)}>X</button>
-              <h2>{selectedStaff.full_name}</h2>
-              <p>First Name: {selectedStaff.first_name}</p>
-              <p>Last Name: {selectedStaff.last_name}</p>
-              <p>Email: {selectedStaff.email}</p>
-              <p>Phone: {selectedStaff.phone}</p>
-              <p>Secondary Phone: {selectedStaff.secondary_phone || 'N/A'}</p>
-              <p>Fax: {selectedStaff.fax || 'N/A'}</p>
-              <p>Landline: {selectedStaff.landline || 'N/A'}</p>
-              <p>Role: {selectedStaff.role}</p>
-              <p>Hire Date: {selectedStaff.hire_date || 'N/A'}</p>
-              <p>Status: {selectedStaff.status}</p>
-              <p>Address: {selectedStaff.address || 'N/A'}</p>
-              <p>Emergency Contact: {selectedStaff.emergency_contact || 'N/A'}</p>
-              <p>Notes: {selectedStaff.notes || 'N/A'}</p>
-
-              <button
-                className="delete-staff-button"
-                onClick={handleDeleteStaff}
-              >
-                Delete Staff Member
+          <div className="a-staff-details-overlay">
+            <div className="a-staff-details-content">
+            <button className="a-close-button" onClick={handleCloseInfoBox}>
+                <X size={24} />
               </button>
-
-              {deleteError && <p className="error-message">{deleteError}</p>}
+              <div className="a-staff-details-header">
+                <div className="a-staff-avatar-container">
+                  <img src={selectedStaff.photo_url || "/floweronly.svg"} alt={selectedStaff.full_name} className="a-staff-large-avatar" />
+                </div>
+                <div className="a-staff-header-info">
+                  {isEditing ? (
+                    <div>
+                      <input
+                        name="first_name"
+                        value={editedStaff.first_name || ''}
+                        onChange={handleInputChange}
+                        placeholder="First Name"
+                      />
+                      <input
+                        name="last_name"
+                        value={editedStaff.last_name || ''}
+                        onChange={handleInputChange}
+                        placeholder="Last Name"
+                      />
+                    </div>
+                  ) : (
+                    <h2>{selectedStaff.full_name}</h2>
+                  )}
+                  <span className="a-role-badge">{selectedStaff.role}</span>
+                  <span className={`a-status-badge ${selectedStaff.status.toLowerCase()}`}>{selectedStaff.status}</span>
+                </div>
+                {isEditing ? (
+                  <button className="a-save-button" onClick={handleSave}>
+                    <Save size={18} />
+                    Save
+                  </button>
+                ) : (
+                  <button className="a-edit-button" onClick={handleEdit}>
+                    <Edit2 size={18} />
+                    Edit
+                  </button>
+                )}
+              </div>
+              <div className="a-staff-details-body">
+                <div className="a-staff-info-item">
+                  <Phone size={18} />
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={editedStaff.phone || ''}
+                      onChange={handleInputChange}
+                      placeholder="Phone"
+                    />
+                  ) : (
+                    <p>{selectedStaff.phone || 'N/A'}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <Phone size={18} />
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      name="secondary_phone"
+                      value={editedStaff.secondary_phone || ''}
+                      onChange={handleInputChange}
+                      placeholder="Secondary Phone"
+                    />
+                  ) : (
+                    <p>Secondary: {selectedStaff.secondary_phone || 'N/A'}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <Mail size={18} />
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      name="email"
+                      value={editedStaff.email || ''}
+                      onChange={handleInputChange}
+                      placeholder="Email"
+                    />
+                  ) : (
+                    <p>{selectedStaff.email}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <User size={18} />
+                  {isEditing ? (
+                    <select
+                      name="role"
+                      value={editedStaff.role || ''}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Role</option>
+                      <option value="Veterinarian">Veterinarian</option>
+                      <option value="Vet Tech">Vet Tech</option>
+                      <option value="Receptionist">Receptionist</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  ) : (
+                    <p>Role: {selectedStaff.role || 'N/A'}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <Calendar size={18} />
+                  {isEditing ? (
+                    <input
+                      type="date"
+                      name="hire_date"
+                      value={editedStaff.hire_date || ''}
+                      onChange={handleInputChange}
+                    />
+                  ) : (
+                    <p>Hire Date: {selectedStaff.hire_date || 'N/A'}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <User size={18} />
+                  {isEditing ? (
+                    <select
+                      name="status"
+                      value={editedStaff.status || ''}
+                      onChange={handleInputChange}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  ) : (
+                    <p>Status: {selectedStaff.status}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <MapPin size={18} />
+                  {isEditing ? (
+                    <textarea
+                      name="address"
+                      value={editedStaff.address || ''}
+                      onChange={handleInputChange}
+                      placeholder="Address"
+                    />
+                  ) : (
+                    <p>{selectedStaff.address || 'N/A'}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <AlertCircle size={18} />
+                  {isEditing ? (
+                    <textarea
+                      name="emergency_contact"
+                      value={editedStaff.emergency_contact || ''}
+                      onChange={handleInputChange}
+                      placeholder="Emergency Contact"
+                    />
+                  ) : (
+                    <p>Emergency Contact: {selectedStaff.emergency_contact || 'N/A'}</p>
+                  )}
+                </div>
+                <div className="a-staff-info-item">
+                  <User size={18} />
+                  {isEditing ? (
+                    <textarea
+                      name="notes"
+                      value={editedStaff.notes || ''}
+                      onChange={handleInputChange}
+                      placeholder="Notes"
+                    />
+                  ) : (
+                    <p>Notes: {selectedStaff.notes || 'No notes available.'}</p>
+                  )}
+                </div>
+              </div>
+              <div className="a-staff-details-footer">
+                {isEditing ? (
+                  <button className="a-cancel-button" onClick={handleCancel}>
+                    <X size={18} />
+                    Cancel
+                  </button>
+                ) : (
+                  <button className="a-delete-button" onClick={handleDeleteStaff}>
+                    <Trash2 size={18} />
+                    Delete Staff Member
+                  </button>
+                )}
+              </div>
+              {deleteError && <p className="a-error-message">{deleteError}</p>}
             </div>
           </div>
         )}
