@@ -11,7 +11,6 @@ const NewPatient = () => {
         microchipNumber: '',
         weight: '',
         rabiesNumber: '',
-        age: '',
         dateOfBirth: '',
         gender: '',
         species: '',
@@ -39,11 +38,26 @@ const NewPatient = () => {
     const [animalNotes, setAnimalNotes] = useState('');
     const [imagePreview, setImagePreview] = useState(null);
     const [errors, setErrors] = useState({});
+    const [age, setAge] = useState(null); // New state for age
+
+    // Function to calculate age from the date of birth
+    const calculateAge = (dob) => {
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+        }
+
+        return calculatedAge;
+    };
 
     const validateInput = (name, value) => {
         let error = '';
 
-        if (name === 'weight' || name === 'age') {
+        if (name === 'weight') {
             if (value !== '' && isNaN(value)) {
                 error = 'Must be a number';
             }
@@ -62,6 +76,12 @@ const NewPatient = () => {
         setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
 
         setPatientDetails((prevDetails) => ({ ...prevDetails, [name]: newValue }));
+
+        // If the date of birth is changed, calculate and set the age
+        if (name === 'dateOfBirth') {
+            const calculatedAge = calculateAge(newValue);
+            setAge(calculatedAge);
+        }
     };
 
     const handleOtherDetailsChange = (e) => {
@@ -83,80 +103,51 @@ const NewPatient = () => {
         }
     };
 
-
     const handleTagsChange = (e) => {
         const { name, value } = e.target;
         setTags((prevTags) => ({ ...prevTags, [name]: value }));
     };
 
-    const handleImageUpload = async (file) => {
-        const fileName = `${Date.now()}_${file.name}`;
-        const { data, error } = await supabase
-            .storage
-            .from('patient/patient_pictures')  
-            .upload(fileName, file);
-
-        if (error) {
-            console.error('Error uploading image:', error.message);
-            return null;
-        }
-
-
-        const { publicURL, error: urlError } = supabase
-            .storage
-            .from('patient/patient_pictures')  
-            .getPublicUrl(fileName);
-
-        if (urlError) {
-            console.error('Error getting public URL:', urlError.message);
-            return null;
-        }
-
-        return publicURL;
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         const hasErrors = Object.values(errors).some((error) => error);
         if (hasErrors) {
             alert('Please correct the errors before submitting');
             return;
         }
-    
+
         try {
             let imageUrl = null;
-    
 
             if (otherDetails.image) {
                 const file = otherDetails.image;
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Math.random()}.${fileExt}`;
                 const filePath = `patient_pictures/${fileName}`;
-    
+
                 const { error: uploadError } = await supabase.storage
                     .from('patient')
                     .upload(filePath, file);
-    
+
                 if (uploadError) {
                     console.error('Error uploading image to Supabase:', uploadError.message);
                     alert('Error uploading image.');
                     return;
                 }
-    
+
                 const { data: publicUrlData, error: urlError } = supabase.storage
                     .from('patient')
                     .getPublicUrl(filePath);
-    
+
                 if (urlError) {
                     console.error('Error getting public URL for the image:', urlError.message);
                     alert('Error getting image URL.');
                     return;
                 }
-    
+
                 imageUrl = publicUrlData.publicUrl;
             }
-    
 
             const { data: ownerData, error: ownerError } = await supabase
                 .from('owners')
@@ -167,15 +158,14 @@ const NewPatient = () => {
                     phone_number: '1234567890',
                 }])
                 .select();
-    
+
             if (ownerError) {
                 console.error('Error inserting owner:', ownerError);
                 alert(`Error adding owner: ${ownerError.message}`);
                 return;
             }
-    
+
             const ownerId = ownerData[0].id;
-    
 
             const patientDataToInsert = {
                 owner_id: ownerId,
@@ -183,7 +173,6 @@ const NewPatient = () => {
                 microchip_number: patientDetails.microchipNumber || null,
                 weight: patientDetails.weight !== '' ? parseFloat(patientDetails.weight) : null,
                 rabies_number: patientDetails.rabiesNumber || null,
-                age: patientDetails.age !== '' ? parseInt(patientDetails.age) : null,
                 date_of_birth: patientDetails.dateOfBirth || null,
                 gender: patientDetails.gender,
                 species: patientDetails.species,
@@ -198,12 +187,12 @@ const NewPatient = () => {
                 reminder_tag: tags.reminder,
                 image_url: imageUrl,
             };
-    
+
             const { data: patientData, error: patientError } = await supabase
                 .from('patients')
                 .insert([patientDataToInsert])
                 .select();
-    
+
             if (patientError) {
                 console.error('Error inserting patient:', patientError.details || patientError.message || patientError);
                 alert(`Error adding new patient: ${patientError.details || patientError.message}`);
@@ -217,7 +206,6 @@ const NewPatient = () => {
                 microchipNumber: '',
                 weight: '',
                 rabiesNumber: '',
-                age: '',
                 dateOfBirth: '',
                 gender: '',
                 species: '',
@@ -240,15 +228,14 @@ const NewPatient = () => {
                 reminder: '',
             });
             setAnimalNotes('');
-            setImagePreview(null); 
-    
+            setImagePreview(null);
+
             alert('New patient created successfully!');
         } catch (error) {
             console.error('Error creating new patient:', error.message || error);
             alert(`Failed to create new patient: ${error.message}`);
         }
     };
-    
 
     return (
         <div className="new-patient-page">
@@ -276,11 +263,10 @@ const NewPatient = () => {
                         { label: 'Microchip Number', name: 'microchipNumber', type: 'text' },
                         { label: 'Weight in lb', name: 'weight', type: 'text' },
                         { label: 'Rabies Number', name: 'rabiesNumber', type: 'text' },
-                        { label: 'Age', name: 'age', type: 'text' },
-                        { label: 'Date of Birth', name: 'dateOfBirth', type: 'date' },
                         { label: 'Species', name: 'species', type: 'text' },
                         { label: 'Breed', name: 'breed', type: 'text' },
                         { label: 'Color', name: 'color', type: 'text' },
+                        { label: 'Date of Birth', name: 'dateOfBirth', type: 'date' },
                     ].map(({ label, name, type }) => (
                         <div key={name} className="input-wrapper">
                             <label>{label} {errors[name] && <span className="error-message-inline">{errors[name]}</span>}</label>
@@ -293,6 +279,10 @@ const NewPatient = () => {
                             />
                         </div>
                     ))}
+                    <div className="age-display">
+                        <label>Age</label>
+                        <input type="text" value={age !== null ? `${age} years` : ''} disabled />
+                    </div>
                     <label>Gender</label>
                     <select
                         name="gender"
