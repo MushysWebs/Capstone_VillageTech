@@ -11,6 +11,7 @@ import SignoutButton from './components/auth/SignOut';
 import NewPatient from './pages/patients/newPatient/NewPatient';
 import PatientMain from './pages/patients/patientMain/PatientMain';
 import Financial from './pages/patients/financial/Financial'
+import HealthStatus from './pages/patients/healthStatus/HealthStatus';
 
 
 const Layout = () => {
@@ -143,6 +144,8 @@ const Layout = () => {
       return <PatientMain />;
     } else if (location.pathname === '/Financial') {
       return <Financial />;
+    }else if (location.pathname === '/healthStatus') {
+      return <HealthStatus />;
     }
     return null;
   };
