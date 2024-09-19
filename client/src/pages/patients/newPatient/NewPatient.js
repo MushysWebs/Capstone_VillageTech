@@ -38,9 +38,9 @@ const NewPatient = () => {
     const [animalNotes, setAnimalNotes] = useState('');
     const [imagePreview, setImagePreview] = useState(null);
     const [errors, setErrors] = useState({});
-    const [age, setAge] = useState(null); // New state for age
+    const [age, setAge] = useState(null);
 
-    // Function to calculate age from the date of birth
+
     const calculateAge = (dob) => {
         const today = new Date();
         const birthDate = new Date(dob);
