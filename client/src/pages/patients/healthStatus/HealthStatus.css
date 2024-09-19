@@ -1,0 +1,113 @@
+/* Main container for the health status page */
+.health-status-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: #f5f7fa; 
+    width: 95%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Section container with shadow and border around the entire section */
+.section-box {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+    padding: 20px;
+    margin-bottom: 10px; 
+    border: 1px solid #e6e6e6;
+}
+
+/* Section headers */
+.section-header {
+    font-size: 1.8rem;  
+    margin-bottom: 10px;
+    text-align: center;
+    color: black;
+}
+
+/* Grid layout for Canine Information */
+.canine-info .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 10px;
+    width: 100%;  
+    margin-bottom: 20px;
+}
+
+.info-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    text-align: left;
+    color: black;
+    font-size: 1rem;
+}
+
+/* Health Notes and Alerts grid */
+.health-notes .health-notes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.health-textarea {
+    width: 100%;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: black;
+}
+
+
+.vaccination-info .vaccination-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 10px;
+    width: 100%;  
+    margin-top: 20px;
+}
+
+.vaccination-column {
+    font-weight: bold;
+    text-align: center;
+    color: black;
+    font-size: 1.2rem;
+}
+
+.vaccination-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    text-align: center;
+    color: black;
+    font-size: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design adjustments */
+@media (max-width: 1200px) {
+    .canine-info .info-grid,
+    .health-notes .health-notes-grid,
+    .vaccination-info .vaccination-grid {
+        grid-template-columns: 1fr 1fr; 
+    }
+}
+
+@media (max-width: 768px) {
+    .canine-info .info-grid,
+    .health-notes .health-notes-grid,
+    .vaccination-info .vaccination-grid {
+        grid-template-columns: 1fr; 
+    }
+}
