@@ -3,6 +3,18 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { Edit2, X, Save, Clock, Calendar, Send, Camera} from 'lucide-react';
 import './Contacts.css';
 
+
+//https://sendgrid.com/en-us/pricing
+
+//set up free SMTP plan to use as our email sender
+
+//
+
+//
+
+//
+
+
 const Contacts = ({ globalSearchTerm }) => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [filteredContacts, setFilteredContacts] = useState([]);
