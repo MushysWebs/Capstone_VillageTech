@@ -1,3 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
+
+.financial-h1{
+  display: flex;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+
+}
+
+.financial-h2 {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+}
+
+
 .patient-main {
   display: flex;
   flex-direction: column;
@@ -66,51 +82,50 @@
 }
 
 .financial-edit-button {
-  margin-right: 10px;     /* Adds space between button and h2 */
-  padding: 0.1rem 0.5rem;
-  border: 1px solid;
-  border-radius: 6px;
-  color: black;
-  border-color: #7f8c8d;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .financial-edit-button:hover {
-  background-color: whitesmoke;
+  background-color: #09ACE0;
+  color: white;
 }
 
 .financial-complete {
-  margin-right: 10px;     /* Adds space between button and h2 */
-  padding: 0.1rem 0.5rem;
-  border: 1px solid;
-  border-radius: 6px;
-  color: black;
-  border-color: #7f8c8d;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .financial-complete:hover {
-  background-color: whitesmoke;
+  background-color: #09ACE0;
+  color: white;
 }
 
 .status-estimate {
-  border: 1px solid chocolate;
+  border: 1px solid #d852d8;
+  padding: 5px;
   border-radius: 6px;
   color: white;
-  background-color: chocolate;
+  background-color: #d852d8;
 }
 
 .status-pending {
-  border: 1px solid #f7cb73;
+  border: 1px solid #e6b249;
+  padding: 5px;
   border-radius: 6px;
   color: white;
-  background-color: #f7cb73;
+  background-color: #e6b249;
 }
 
 .status-completed {
   border: 2px solid #09CB8B;
+  padding: 5px;
   border-radius: 6px;
   color: white;
   background-color: #09CB8B;
@@ -118,6 +133,7 @@
 
 .status-cancelled{
   border: 2px solid #E74C3C;
+  padding: 5px;
   border-radius: 6px;
   color: white;
   background-color: #E74C3C;
