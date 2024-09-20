@@ -10,7 +10,8 @@ import MessagingPage from './pages/message/MessagingPage';
 import SignoutButton from './components/auth/SignOut';
 import NewPatient from './pages/patients/newPatient/NewPatient';
 import PatientMain from './pages/patients/patientMain/PatientMain';
-import Financial from './pages/patients/financial/Financial'
+import Financial from './pages/patients/financial/Financial';
+import SOC from './pages/patients/soc/SOC'
 
 
 const Layout = () => {
@@ -143,6 +144,8 @@ const Layout = () => {
       return <PatientMain />;
     } else if (location.pathname === '/Financial') {
       return <Financial />;
+    } else if (location.pathname === '/SOC') {
+      return <SOC />;
     }
     return null;
   };
