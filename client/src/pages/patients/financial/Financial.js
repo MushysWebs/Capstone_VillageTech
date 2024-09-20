@@ -91,9 +91,6 @@ const Financial = () => {
         }
     };
 
-
-
-
     return (
         <div className="patient-main">
             <header className="patient-header">
@@ -102,7 +99,7 @@ const Financial = () => {
                     <Link to="/patient/soc" className="tab-button">S.O.C.</Link>
                     <Link to="/Financial" className="tab-button">Financial</Link>
                     <Link to="/patient/summaries" className="tab-button">Summaries</Link>
-                    <Link to="/patient/healthStatus" className="tab-button">Health Status</Link>
+                    <Link to="/healthStatus" className="tab-button">Health Status</Link>
                     <Link to="/patient/medication" className="tab-button">Medication</Link>
                     <Link to="/newPatient" className="tab-button">New Patient</Link>
                 </div>
