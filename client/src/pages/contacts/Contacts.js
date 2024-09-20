@@ -3,6 +3,18 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { Edit2, X, Save, Clock, Calendar, Send, Camera} from 'lucide-react';
 import './Contacts.css';
 
+
+//https://sendgrid.com/en-us/pricing
+
+//set up free SMTP plan to use as our email sender
+
+//
+
+//
+
+//
+
+
 const Contacts = ({ globalSearchTerm }) => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [filteredContacts, setFilteredContacts] = useState([]);
@@ -309,7 +321,14 @@ const Contacts = ({ globalSearchTerm }) => {
               <div className="pets-grid">
                 {sortedPatients.map(patient => (
                   <div key={patient.id} className="pet-card">
-                    <img src={`/api/placeholder/60/60`} alt={patient.name} />
+                    <img 
+                      src={patient.image_url || `/api/placeholder/60/60`} 
+                      alt={patient.name} 
+                      onError={(e) => {
+                        e.target.onerror = null; 
+                        e.target.src = `/api/placeholder/60/60`;
+                      }}
+                    />
                     <h4>{patient.name} <Edit2 size={14} /></h4>
                     <p>Patient ID: {patient.id}</p>
                     <p>Date of Birth: {patient.date_of_birth}</p>

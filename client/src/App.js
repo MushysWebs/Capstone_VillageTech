@@ -12,6 +12,7 @@ import PrivateRoute from './components/PrivateRoute';
 import NewPatient from './pages/patients/newPatient/NewPatient';
 import PatientMain from './pages/patients/patientMain/PatientMain';
 import Financial from './pages/patients/financial/Financial'
+import HealthStatus from './pages/patients/healthStatus/HealthStatus';
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
               <Route path="/patient" element={<PatientMain />} />
               <Route path="/newPatient" element={<NewPatient />} />
               <Route path="/financial" element={<Financial />} />
+              <Route path="/healthStatus" element={<HealthStatus />} />
             </Route>
 
           </Route>
