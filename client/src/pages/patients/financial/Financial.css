@@ -1,67 +1,152 @@
 .patient-main {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-  }
-  
-  .patient-header {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 20px;
-    margin-left: 10px;
-  }
-  
-  .patient-tabs {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .tab-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #e6e6e6;
-    color: black;
-    text-decoration: none;
-    transition: background-color 0.3s;
-  }
-  
-  .tab-button:hover {
-    background-color: #bfbfbf;
-  }
-
-  .invoices-section {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    margin: 50px;
-  }
-
-  .invoice-header-container {
-    display: flex;          /* Enables flexbox layout */
-    align-items: center;    /* Vertically centers items */
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto; /* Ensure the container allows vertical scrolling */
+  height: 100vh; /* Ensure it takes up the full viewport height */
 }
 
-.invoice-header-container button {
-    margin-right: 10px;     /* Adds space between button and h2 */
-    padding: 0.1rem 0.5rem;
-    background-color: #09ACE0;
-    border: none;
-    border-radius: 6px;
-    font-size: 1.5rem;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.patient-header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  margin-left: 10px;
 }
 
-.invoice-header-container button:hover {
+.patient-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e6e6e6;
+  color: black;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.tab-button:hover {
+  background-color: #bfbfbf;
+}
+
+.estimate-section {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  /* Use padding to create space instead of margin */
+  margin: 50px;
+  max-height: 400px; /* Set a maximum height */
+  overflow-y: auto;  /* Enable vertical scrolling */
+}
+
+.estimate-header-container {
+  display: flex;          /* Enables flexbox layout */
+  align-items: center;    /* Vertically centers items */
+}
+
+.estimate-header-container button {
+  margin-right: 10px;     /* Adds space between button and h2 */
+  padding: 0.1rem 0.5rem;
+  background-color: #09ACE0;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.estimate-header-container button:hover {
   background-color: #2980b9;
-
 }
 
+.financial-edit-button {
+  margin-right: 10px;     /* Adds space between button and h2 */
+  padding: 0.1rem 0.5rem;
+  border: 1px solid;
+  border-radius: 6px;
+  color: black;
+  border-color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
+.financial-edit-button:hover {
+  background-color: whitesmoke;
+}
 
-  
-  
+.financial-complete {
+  margin-right: 10px;     /* Adds space between button and h2 */
+  padding: 0.1rem 0.5rem;
+  border: 1px solid;
+  border-radius: 6px;
+  color: black;
+  border-color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.financial-complete:hover {
+  background-color: whitesmoke;
+}
+
+.status-estimate {
+  border: 1px solid chocolate;
+  border-radius: 6px;
+  color: white;
+  background-color: chocolate;
+}
+
+.status-pending {
+  border: 1px solid #f7cb73;
+  border-radius: 6px;
+  color: white;
+  background-color: #f7cb73;
+}
+
+.status-completed {
+  border: 2px solid #09CB8B;
+  border-radius: 6px;
+  color: white;
+  background-color: #09CB8B;
+}
+
+.status-cancelled{
+  border: 2px solid #E74C3C;
+  border-radius: 6px;
+  color: white;
+  background-color: #E74C3C;
+}
+
+.estimate-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.estimate-table th,
+.estimate-table td {
+  padding: 1rem;
+  text-align: left;
+}
+
+.estimate-table th {
+  font-weight: 500;
+  color: #7f8c8d;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.estimate-table tr {
+  background-color: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.estimate-table tr:hover {
+  background-color: #eef2f7;
+}

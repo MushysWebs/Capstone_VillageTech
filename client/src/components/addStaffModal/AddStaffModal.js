@@ -9,8 +9,6 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
     email: '',
     phone: '',
     secondary_phone: '',
-    fax: '',
-    landline: '',
     role: 'Veterinarian',
     hire_date: '',
     status: 'Active',
@@ -57,8 +55,6 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           email: formData.email,
           phone: formData.phone,
           secondary_phone: formData.secondary_phone,
-          fax: formData.fax,
-          landline: formData.landline,
           role: formData.role,
           hire_date: formData.hire_date,
           status: formData.status,
@@ -124,14 +120,6 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           <div className="form-group">
             <label>Secondary Phone</label>
             <input type="tel" name="secondary_phone" value={formData.secondary_phone} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>Fax</label>
-            <input type="tel" name="fax" value={formData.fax} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>Landline</label>
-            <input type="tel" name="landline" value={formData.landline} onChange={handleChange} />
           </div>
           <div className="form-group">
             <label>Role</label>

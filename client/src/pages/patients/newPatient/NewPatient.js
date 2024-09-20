@@ -127,7 +127,6 @@ const NewPatient = () => {
         microchipNumber: '',
         weight: '',
         rabiesNumber: '',
-        age: '',
         dateOfBirth: '',
         gender: '',
         species: '',
@@ -162,11 +161,26 @@ const NewPatient = () => {
     const [animalNotes, setAnimalNotes] = useState('');
     const [imagePreview, setImagePreview] = useState(null);
     const [errors, setErrors] = useState({});
+    const [age, setAge] = useState(null);
+
+
+    const calculateAge = (dob) => {
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+        }
+
+        return calculatedAge;
+    };
 
     const validateInput = (name, value) => {
         let error = '';
 
-        if (name === 'weight' || name === 'age') {
+        if (name === 'weight') {
             if (value !== '' && isNaN(value)) {
                 error = 'Must be a number';
             }
@@ -185,6 +199,12 @@ const NewPatient = () => {
         setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
 
         setPatientDetails((prevDetails) => ({ ...prevDetails, [name]: newValue }));
+
+        // If the date of birth is changed, calculate and set the age
+        if (name === 'dateOfBirth') {
+            const calculatedAge = calculateAge(newValue);
+            setAge(calculatedAge);
+        }
     };
 
     const handleOtherDetailsChange = (e) => {
@@ -205,7 +225,6 @@ const NewPatient = () => {
             setOtherDetails((prevDetails) => ({ ...prevDetails, image: file }));
         }
     };
-
 
     const handleTagsChange = (e) => {
         const { name, value } = e.target;
@@ -253,7 +272,7 @@ const NewPatient = () => {
     
       const handleSubmit = async (e) => {
         e.preventDefault();
-      
+
         const hasErrors = Object.values(errors).some((error) => error);
         if (hasErrors) {
           alert('Please correct the errors before submitting');
