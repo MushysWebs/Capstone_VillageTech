@@ -108,14 +108,14 @@ const Financial = () => {
                 </div>
             </header>
             <div>
-                <h1>Financial</h1>
+                <h1 className='financial-h1'>Financial</h1>
             </div>
 
             <main>
                 <div className='estimate-section'>
                     <div className='estimate-header-container'>
                         <button onClick={openModal}>+</button>
-                        <h2>Estimates</h2>
+                        <h2 className='financial-h2'>Estimates</h2>
                     </div>
 
                     <div className='table-container'>
@@ -163,7 +163,7 @@ const Financial = () => {
                 </div>
 
                 <div className='estimate-section'>
-                    <h2>Pending Invoices</h2>
+                    <h2 className='financial-h2'>Pending Invoices</h2>
                     <div className='table-container'>
                         <table className="invoices-table">
                             <thead>
@@ -206,7 +206,7 @@ const Financial = () => {
                 </div>
 
                 <div className='estimate-section'>
-                    <h2>Completed</h2>
+                    <h2 className='financial-h2'>Completed</h2>
                     <div className='table-container'>
                         <table className="invoices-table">
                             <thead>
@@ -241,7 +241,7 @@ const Financial = () => {
                 </div>
 
                 <div className='estimate-section'>
-                    <h2>Cancelled</h2>
+                    <h2 className='financial-h2'>Cancelled</h2>
                     <div className='table-container'>
                         <table className="invoices-table">
                             <thead>
