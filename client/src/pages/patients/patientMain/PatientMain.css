@@ -29,7 +29,7 @@
   background-color: rgba(255, 255, 255, 0.9);
   border-right: 1px solid #e0e6ed;
   overflow-y: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Full shadow around */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
   border-radius: 12px;
   padding: 10px;
   flex-shrink: 0;
@@ -58,12 +58,12 @@
   flex-direction: column;
 }
 
-/* Update to align the image with the text details */
+
 .patientMain-details-header {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 20px; /* Space between image and details */
+  gap: 20px; 
 }
 
 .patientMain-avatar-large {
@@ -143,7 +143,6 @@
   min-height: 150px;
 }
 
-/* Additional Information Layout */
 .patientMain-additional-info,
 .patientMain-clinical-info,
 .patientMain-tags,
@@ -161,14 +160,13 @@
   margin-bottom: 0.5rem;
 }
 
-/* Side by side layout for sections */
+
 .patientMain-info-section {
   display: flex;
   gap: 4rem;
   margin-top: 2rem;
 }
 
-/* Edit Buttons */
 .action-button.edit-button {
   position: absolute;
   top: 10px;

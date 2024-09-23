@@ -90,7 +90,6 @@ const PatientMain = ({ globalSearchTerm }) => {
 
   return (
     <div className="patientMain-page">
-      {/* Patient Tabs Navigation */}
       <header className="patientMain-tabs-header">
         <div className="patientMain-tabs">
           <Link to="/patient/clinical" className="tab-button">Clinical</Link>
@@ -104,7 +103,6 @@ const PatientMain = ({ globalSearchTerm }) => {
       </header>
 
       <div className="patientMain-section">
-        {/* Patients List */}
         <div className="patientMain-list">
           {filteredPatients.map(patient => (
             <div
@@ -122,7 +120,6 @@ const PatientMain = ({ globalSearchTerm }) => {
           ))}
         </div>
 
-        {/* Patient Details */}
         <div className="patientMain-main">
           {error && <div className="error-message">{error}</div>}
           {selectedPatient && (
@@ -203,7 +200,6 @@ const PatientMain = ({ globalSearchTerm }) => {
               </div>
 
               <div className="patientMain-info-section">
-                {/* Additional Information */}
                 <div className="patientMain-additional-info">
                   <h3>Additional Information</h3>
                   {isEditing ? (
@@ -245,7 +241,6 @@ const PatientMain = ({ globalSearchTerm }) => {
                   )}
                 </div>
 
-                {/* Clinical Details */}
                 <div className="patientMain-clinical-info">
                   <h3>Clinical Details</h3>
                   {isEditing ? (
@@ -297,9 +292,6 @@ const PatientMain = ({ globalSearchTerm }) => {
                   )}
                 </div>
 
-
-
-                {/* Tags */}
                 <div className="patientMain-tags">
                   <h3>Tags</h3>
                   {isEditing ? (
@@ -330,7 +322,7 @@ const PatientMain = ({ globalSearchTerm }) => {
                     </>
                   )}
                 </div>
-                {/* Animal Notes */}
+
                 <div className="patientMain-notes">
                   <h3>Animal Notes</h3>
                   {isEditing ? (
