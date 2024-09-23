@@ -1,31 +1,223 @@
-.patient-main {
+.patientMain-page {
   display: flex;
   flex-direction: column;
+  height: calc(100vh - 60px);
   padding: 20px;
 }
 
-.patient-header {
+.patientMain-header {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 20px;
-  margin-left: 10px;
 }
 
-.patient-tabs {
+.patientMain-tabs {
   display: flex;
   gap: 10px;
+  padding: 0 10px 10px 10px;
 }
 
-.tab-button {
-  padding: 10px 20px;
+.patientMain-section {
+  display: flex;
+  flex: 1;
+  margin-left: 10px;
+  margin-bottom: 60px;
+}
+
+.patientMain-list {
+  width: 300px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-right: 1px solid #e0e6ed;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Full shadow around */
+  border-radius: 12px;
+  padding: 10px;
+  flex-shrink: 0;
+  margin-bottom: 5px;
+}
+
+.patientMain-main {
+  flex: 1;
+  padding-left: 20px;
+  padding-bottom: 5px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.patientMain-details {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  max-width: 1500px;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Update to align the image with the text details */
+.patientMain-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px; /* Space between image and details */
+}
+
+.patientMain-avatar-large {
+  width: auto;
+  height: 300px;
+  border-radius: 10%;
+}
+
+.patientMain-header-info {
+  display: flex;
+  flex-direction: column;
+  padding-left: 20px;
+
+}
+
+.patientMain-header-info h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding-bottom: 20px;
+  
+}
+
+.patientMain-header-info p {
+  color: #7f8c8d;
+  margin-bottom: 0.5rem;
+}
+
+.patientMain-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.patientMain-item:hover {
+  background-color: #eef2f7;
+}
+
+.patientMain-item.active {
+  background-color: #09ace0;
+  color: white;
+}
+
+.patientMain-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 1rem;
+  object-fit: cover;
+}
+
+.patientMain-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.patientMain-notes {
+  margin-top: 2rem;
+}
+
+.patientMain-notes h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  min-height: 150px;
+}
+
+/* Additional Information Layout */
+.patientMain-additional-info,
+.patientMain-clinical-info,
+.patientMain-tags,
+.patientMain-notes {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+}
+
+.patientMain-additional-info h3,
+.patientMain-clinical-info h3,
+.patientMain-tags h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* Side by side layout for sections */
+.patientMain-info-section {
+  display: flex;
+  gap: 4rem;
+  margin-top: 2rem;
+}
+
+/* Edit Buttons */
+.action-button.edit-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #09ace0;
+  color: white;
   border: none;
   border-radius: 5px;
-  background-color: #e6e6e6;
-  color: black;
-  text-decoration: none;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
   transition: background-color 0.3s;
 }
 
-.tab-button:hover {
-  background-color: #bfbfbf;
+.action-button.edit-button:hover {
+  background-color: #007bbf;
+}
+
+.action-button.save-button {
+  background-color: #09cb8b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.action-button.save-button:hover {
+  background-color: #07a470;
+}
+
+.action-button.cancel-button {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.action-button.cancel-button:hover {
+  background-color: #e55a5a;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 1rem;
 }
