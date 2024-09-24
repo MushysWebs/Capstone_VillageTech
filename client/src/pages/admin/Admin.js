@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '../../components/routes/supabaseClient';
 import './Admin.css';
 import AddStaffModal from '../../components/addStaffModal/AddStaffModal';
 import AuthGuard from '../../components/auth/AuthGuard';
-import { Edit2, X, Save, Trash2, Phone, Mail, MapPin, Calendar, User, AlertCircle } from 'lucide-react';
+import { Edit2, X, Save, Trash2, Phone, Mail, MapPin, Calendar, User, AlertCircle, Camera } from 'lucide-react';
 
 const Admin = ({ globalSearchTerm }) => {
   const [staffList, setStaffList] = useState([]);
@@ -13,6 +13,8 @@ const Admin = ({ globalSearchTerm }) => {
   const [deleteError, setDeleteError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedStaff, setEditedStaff] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const fileInputRef = useRef(null);
 
   const fetchStaff = async () => {
     try {
@@ -69,7 +71,10 @@ const Admin = ({ globalSearchTerm }) => {
 
       const { data, error } = await supabase
         .from('staff')
-        .update(staffDataToUpdate)
+        .update({
+          ...staffDataToUpdate,
+          photo_url: profilePicture || editedStaff.photo_url
+        })
         .eq('id', editedStaff.id)
         .select();
 
@@ -84,10 +89,12 @@ const Admin = ({ globalSearchTerm }) => {
       setSelectedStaff(updatedStaff);
       setIsEditing(false);
       setEditedStaff(null);
+      setProfilePicture(null);
     } catch (error) {
       console.error('Error updating staff member:', error);
     }
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -99,6 +106,46 @@ const Admin = ({ globalSearchTerm }) => {
     setIsEditing(false);
     setEditedStaff(null);
     setDeleteError(null);
+  };
+
+  const handleProfilePictureClick = () => {
+    if (isEditing) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `staff_photos/${fileName}`;
+  
+        let { error: uploadError } = await supabase.storage
+          .from('staff')
+          .upload(filePath, file);
+  
+        if (uploadError) {
+          throw uploadError;
+        }
+  
+        const { data: { publicUrl }, error: urlError } = supabase.storage
+          .from('staff')
+          .getPublicUrl(filePath);
+  
+        if (urlError) {
+          throw urlError;
+        }
+  
+        setProfilePicture(publicUrl);
+        setEditedStaff(prev => ({ ...prev, photo_url: publicUrl }));
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setDeleteError('Failed to upload profile picture. Please try again. Error: ' + error.message);
+        // You might want to show this error to the user in the UI
+      }
+    }
   };
 
   const handleDeleteStaff = async () => {
@@ -189,29 +236,49 @@ const Admin = ({ globalSearchTerm }) => {
         {selectedStaff && (
           <div className="a-staff-details-overlay">
             <div className="a-staff-details-content">
-            <button className="a-close-button" onClick={handleCloseInfoBox}>
+              <button className="a-close-button" onClick={handleCloseInfoBox}>
                 <X size={24} />
               </button>
               <div className="a-staff-details-header">
-                <div className="a-staff-avatar-container">
-                  <img src={selectedStaff.photo_url || "/floweronly.svg"} alt={selectedStaff.full_name} className="a-staff-large-avatar" />
+                <div className="a-staff-avatar-container" onClick={handleProfilePictureClick}>
+                  <img 
+                    src={profilePicture || selectedStaff.photo_url || "/floweronly.svg"} 
+                    alt={selectedStaff.full_name} 
+                    className="a-staff-large-avatar" 
+                  />
+                  {isEditing && (
+                    <div className="a-profile-picture-overlay">
+                      <Camera size={24} />
+                    </div>
+                  )}
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    style={{ display: 'none' }} 
+                    accept="image/*"
+                  />
                 </div>
                 <div className="a-staff-header-info">
                   {isEditing ? (
-                    <div>
-                      <input
-                        name="first_name"
-                        value={editedStaff.first_name || ''}
-                        onChange={handleInputChange}
-                        placeholder="First Name"
-                      />
-                      <input
-                        name="last_name"
-                        value={editedStaff.last_name || ''}
-                        onChange={handleInputChange}
-                        placeholder="Last Name"
-                      />
-                    </div>
+                    <>
+                      <div className="a-name-input-container">
+                        <input
+                          name="first_name"
+                          value={editedStaff.first_name || ''}
+                          onChange={handleInputChange}
+                          placeholder="First Name"
+                          className="a-edit-input a-name-input"
+                        />
+                        <input
+                          name="last_name"
+                          value={editedStaff.last_name || ''}
+                          onChange={handleInputChange}
+                          placeholder="Last Name"
+                          className="a-edit-input a-name-input"
+                        />
+                      </div>
+                    </>
                   ) : (
                     <h2>{selectedStaff.full_name}</h2>
                   )}
@@ -240,6 +307,7 @@ const Admin = ({ globalSearchTerm }) => {
                       value={editedStaff.phone || ''}
                       onChange={handleInputChange}
                       placeholder="Phone"
+                      className="a-edit-input"
                     />
                   ) : (
                     <p>{selectedStaff.phone || 'N/A'}</p>
@@ -254,6 +322,7 @@ const Admin = ({ globalSearchTerm }) => {
                       value={editedStaff.secondary_phone || ''}
                       onChange={handleInputChange}
                       placeholder="Secondary Phone"
+                      className="a-edit-input"
                     />
                   ) : (
                     <p>Secondary: {selectedStaff.secondary_phone || 'N/A'}</p>
@@ -268,6 +337,7 @@ const Admin = ({ globalSearchTerm }) => {
                       value={editedStaff.email || ''}
                       onChange={handleInputChange}
                       placeholder="Email"
+                      className="a-edit-input"
                     />
                   ) : (
                     <p>{selectedStaff.email}</p>
@@ -280,6 +350,7 @@ const Admin = ({ globalSearchTerm }) => {
                       name="role"
                       value={editedStaff.role || ''}
                       onChange={handleInputChange}
+                      className="a-edit-input"
                     >
                       <option value="">Select Role</option>
                       <option value="Veterinarian">Veterinarian</option>
@@ -299,6 +370,7 @@ const Admin = ({ globalSearchTerm }) => {
                       name="hire_date"
                       value={editedStaff.hire_date || ''}
                       onChange={handleInputChange}
+                      className="a-edit-input"
                     />
                   ) : (
                     <p>Hire Date: {selectedStaff.hire_date || 'N/A'}</p>
@@ -311,6 +383,7 @@ const Admin = ({ globalSearchTerm }) => {
                       name="status"
                       value={editedStaff.status || ''}
                       onChange={handleInputChange}
+                      className="a-edit-input"
                     >
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
@@ -327,6 +400,7 @@ const Admin = ({ globalSearchTerm }) => {
                       value={editedStaff.address || ''}
                       onChange={handleInputChange}
                       placeholder="Address"
+                      className="a-edit-input"
                     />
                   ) : (
                     <p>{selectedStaff.address || 'N/A'}</p>
@@ -340,6 +414,7 @@ const Admin = ({ globalSearchTerm }) => {
                       value={editedStaff.emergency_contact || ''}
                       onChange={handleInputChange}
                       placeholder="Emergency Contact"
+                      className="a-edit-input"
                     />
                   ) : (
                     <p>Emergency Contact: {selectedStaff.emergency_contact || 'N/A'}</p>
@@ -353,6 +428,7 @@ const Admin = ({ globalSearchTerm }) => {
                       value={editedStaff.notes || ''}
                       onChange={handleInputChange}
                       placeholder="Notes"
+                      className="a-edit-input"
                     />
                   ) : (
                     <p>Notes: {selectedStaff.notes || 'No notes available.'}</p>
