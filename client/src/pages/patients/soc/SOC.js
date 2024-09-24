@@ -1,9 +1,9 @@
-import patientSidebar from '../../components/patientSidebar'
+// import patientSidebar from '../../components/patientSidebar'
 
-const SOC = () => {
+// const SOC = () => {
 
-};
+// };
 
-return (
+// return (
 
-);
+// );
