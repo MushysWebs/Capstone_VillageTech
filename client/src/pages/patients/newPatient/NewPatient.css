@@ -1,4 +1,11 @@
-/* General styles for the New Patient page */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f5f7fa;
+  color: #34495e;
+}
+
 .new-patient-page {
   display: flex;
   flex-direction: column;
@@ -9,14 +16,11 @@
 
 .new-patient-header {
   text-align: center;
-  margin-bottom: 20px;
 }
 
-/* Consistent button alignment */
 .patient-header {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 20px;
 }
 
 .patient-tabs {
@@ -38,39 +42,54 @@
   background-color: #bfbfbf;
 }
 
-/* Grid layout for the sections */
 .new-patient-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
 }
 
-/* Section styles */
-.details-section,
-.other-details-section,
-.additional-info-section {
+.details-section {
   background-color: white;
-  padding: 20px;
+  padding: 0 20px 20px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-left: 20px;
+}
+
+.clinical-details-section {
+  background-color: white;
+  padding: 0 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: white;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Make inputs and textareas take up the full width */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="file"],
-textarea,
-select {
+.additional-info-section {
+  background-color: white;
+  padding: 0 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.new-patient-form input[type="text"],
+.new-patient-form input[type="number"],
+.new-patient-form input[type="date"],
+.new-patient-form input[type="file"],
+.new-patient-form textarea,
+.new-patient-form select {
   width: 100%;
   padding: 10px;
-  margin: 10px 0;
+  margin: 10px 10;
   border-radius: 5px;
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
 
-/* Image preview styling */
 .image-preview-container {
   margin-top: 10px;
   display: flex;
@@ -80,15 +99,9 @@ select {
 
 .image-preview {
   width: 100%;
-  max-width: 300px;
+  max-width: 290px;
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Subsection styles for Additional Information */
-.additional-info-section .notes-subsection,
-.additional-info-section .tags-subsection {
-  margin-bottom: 20px;
 }
 
 .input-wrapper {
@@ -125,18 +138,127 @@ select {
 .create-patient-button {
   background-color: #09ace0;
   color: white;
-  padding: 10px 25px;
+  padding: 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
+  margin-top: auto;
+  margin-bottom: 12px;
 }
 
 .create-patient-button:hover {
   background-color: #0a9ecf;
 }
 
-/* Responsive behavior for smaller screens */
+.selected-owner-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.selected-owner-header h1 {
+  margin: 0 0 1rem 0;
+}
+
+.selected-owner-header button {
+  background-color: #09ACE0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.selected-owner-header button:hover {
+  background-color: #2980b9;
+}
+
+.owner-selection-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+.owner-selection {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  height: 100%;
+  overflow: hidden;
+}
+
+
+.owner-selection h2 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.owner-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.owner-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.owner-item:hover {
+  background-color: #eef2f7;
+}
+
+.owner-item.active {
+  background-color: #09ACE0;
+  color: white;
+}
+
+.owner-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 1rem;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.owner-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.create-new-owner-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #09ACE0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: auto;
+}
+
+.create-new-owner-button:hover {
+  background-color: #2980b9;
+}
 @media (max-width: 1200px) {
   .new-patient-grid {
     grid-template-columns: 1fr 1fr;
@@ -149,6 +271,6 @@ select {
   }
 
   .new-patient-page {
-    margin-left: 0;
+    margin-left: 10;
   }
 }
