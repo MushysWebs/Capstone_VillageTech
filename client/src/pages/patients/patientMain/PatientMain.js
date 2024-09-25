@@ -197,7 +197,27 @@ const PatientMain = ({ globalSearchTerm }) => {
                     </>
                   )}
                 </div>
+                {/* Edit Button */}
+                {!isEditing && (
+                  <button className="action-button edit-button" onClick={handleEdit}>
+                    <Edit2 size={18} />
+                    Edit
+                  </button>
+                )}
               </div>
+
+              {isEditing && (
+                <>
+                  <button className="action-button cancel-button" onClick={handleCancel}>
+                    <X size={18} />
+                    Cancel
+                  </button>
+                  <button className="action-button save-button" onClick={handleSave}>
+                    <Save size={18} />
+                    Save
+                  </button>
+                </>
+              )}
 
               <div className="patientMain-info-section">
                 <div className="patientMain-additional-info">
