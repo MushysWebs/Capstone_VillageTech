@@ -16,6 +16,8 @@ const Summaries = () => {
                     <Link to="/newPatient" className="tab-button">New Patient</Link>
                 </div>
             </header>
+
+            <h1>Summaries</h1>
         </div>
 
         
