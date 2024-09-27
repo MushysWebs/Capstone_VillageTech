@@ -58,25 +58,26 @@
   flex-direction: column;
 }
 
-
 .patientMain-details-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
-  gap: 20px; 
+  gap: 20px;
+  position: relative;
 }
 
 .patientMain-avatar-large {
   width: auto;
   height: 300px;
   border-radius: 10%;
+  object-fit: cover;
 }
 
 .patientMain-header-info {
   display: flex;
   flex-direction: column;
   padding-left: 20px;
-
+  margin-top: 1rem;
 }
 
 .patientMain-header-info h2 {
@@ -84,7 +85,6 @@
   font-weight: 600;
   margin-bottom: 0.5rem;
   padding-bottom: 20px;
-  
 }
 
 .patientMain-header-info p {
@@ -123,14 +123,114 @@
   font-size: 0.9rem;
 }
 
-.patientMain-notes {
+.patientMain-action-buttons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.action-button.add-appointment-button,
+.action-button.edit-button {
+  color: white;
+}
+
+.action-button.add-appointment-button {
+  background-color: #09cb8b;
+}
+
+.action-button.add-appointment-button:hover {
+  background-color: #07a470;
+}
+
+.action-button.edit-button {
+  background-color: #09ace0;
+}
+
+.action-button.edit-button:hover {
+  background-color: #007bbf;
+}
+
+.patientMain-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.action-button.save-button,
+.action-button.cancel-button {
+  color: white;
+  margin-top: 10px;
+}
+
+.action-button.save-button {
+  background-color: #09cb8b;
+}
+
+.action-button.save-button:hover {
+  background-color: #07a470;
+}
+
+.action-button.cancel-button {
+  background-color: #ff6b6b;
+  margin-right: 10px;
+}
+
+.action-button.cancel-button:hover {
+  background-color: #e55a5a;
+}
+
+.patientMain-info-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
   margin-top: 2rem;
 }
 
+.patientMain-additional-info,
+.patientMain-clinical-info,
+.patientMain-tags,
+.patientMain-notes {
+  flex: 1;
+  min-width: 250px;
+}
+
+.patientMain-additional-info h3,
+.patientMain-clinical-info h3,
+.patientMain-tags h3,
 .patientMain-notes h3 {
   font-size: 1.2rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.patientMain-additional-info p,
+.patientMain-clinical-info p,
+.patientMain-tags p {
+  margin-bottom: 0.5rem;
+}
+
+.patientMain-additional-info strong,
+.patientMain-clinical-info strong,
+.patientMain-tags strong {
+  font-weight: 600;
+  color: #34495e;
 }
 
 .notes-textarea {
@@ -143,79 +243,39 @@
   min-height: 150px;
 }
 
-.patientMain-additional-info,
-.patientMain-clinical-info,
-.patientMain-tags,
-.patientMain-notes {
-  display: flex;
-  flex-direction: column;
-  margin-top: 1.5rem;
-}
-
-.patientMain-additional-info h3,
-.patientMain-clinical-info h3,
-.patientMain-tags h3 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-
-.patientMain-info-section {
-  display: flex;
-  gap: 4rem;
-  margin-top: 2rem;
-}
-
-.action-button.edit-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #09ace0;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.3s;
-}
-
-.action-button.edit-button:hover {
-  background-color: #007bbf;
-}
-
-.action-button.save-button {
-  background-color: #09cb8b;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.3s;
-  margin-top: 10px;
-}
-
-.action-button.save-button:hover {
-  background-color: #07a470;
-}
-
-.action-button.cancel-button {
-  background-color: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.3s;
-  margin-top: 10px;
-  margin-left: 10px;
-}
-
-.action-button.cancel-button:hover {
-  background-color: #e55a5a;
-}
-
 .error-message {
-  color: red;
+  color: #e74c3c;
   margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .patientMain-info-section {
+    flex-direction: column;
+  }
+
+  .patientMain-additional-info,
+  .patientMain-clinical-info,
+  .patientMain-tags,
+  .patientMain-notes {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .patientMain-details-header {
+    flex-direction: column;
+    padding-right: 0;
+  }
+
+  .patientMain-action-buttons {
+    position: static;
+    flex-direction: row;
+    margin-top: 10px;
+  }
+
+  .action-button {
+    width: auto;
+  }
 }

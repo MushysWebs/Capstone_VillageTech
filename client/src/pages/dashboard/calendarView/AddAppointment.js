@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
-const AddAppointment = ({ onClose, onAppointmentAdded }) => {
+const AddAppointment = ({ onClose, onAppointmentAdded, patientId, patientName, ownerId }) => {
   const [owners, setOwners] = useState([]);
   const [filteredOwners, setFilteredOwners] = useState([]);
   const [selectedOwner, setSelectedOwner] = useState(null);
@@ -9,7 +9,7 @@ const AddAppointment = ({ onClose, onAppointmentAdded }) => {
   const [pets, setPets] = useState([]);
   const [staff, setStaff] = useState([]);
   const [appointmentData, setAppointmentData] = useState({
-    patient_id: '',
+    patient_id: patientId || '',
     staff_id: '',
     title: '',
     start_time: '',
@@ -21,9 +21,30 @@ const AddAppointment = ({ onClose, onAppointmentAdded }) => {
   const supabase = useSupabaseClient();
 
   useEffect(() => {
-    fetchOwners();
     fetchStaff();
-  }, []);
+    if (ownerId) {
+      fetchOwnerDetails(ownerId);
+    } else {
+      fetchOwners();
+    }
+  }, [ownerId]);
+
+  const fetchOwnerDetails = async (id) => {
+    try {
+      const { data, error } = await supabase
+        .from('owners')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      setSelectedOwner(data);
+      setOwnerSearch(`${data.first_name} ${data.last_name} - ${data.phone_number}`);
+      fetchPets(id);
+    } catch (error) {
+      console.error('Error fetching owner details:', error);
+    }
+  };
 
   useEffect(() => {
     if (owners.length > 0) {
@@ -60,6 +81,22 @@ const AddAppointment = ({ onClose, onAppointmentAdded }) => {
     }
   };
 
+  useEffect(() => {
+    if (patientId && patientName) {
+      setSelectedPet({ id: patientId, name: patientName });
+    }
+  }, [patientId, patientName]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAppointmentData(prev => ({ ...prev, [name]: value }));
+    if (name === 'patient_id' && !patientId) {
+      const pet = pets.find(p => p.id === parseInt(value));
+      setSelectedPet(pet);
+    }
+  };
+
+
 
   //TODO: UPDATE THIS TO VETS ONLY, BUT WE'RE USING ALL STAFF FOR NOW FOR CONVENIENCE
   const fetchStaff = async () => {
@@ -91,15 +128,6 @@ const AddAppointment = ({ onClose, onAppointmentAdded }) => {
     if (search === '') {
       setSelectedOwner(null);
       setPets([]);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAppointmentData(prev => ({ ...prev, [name]: value }));
-    if (name === 'patient_id') {
-      const pet = pets.find(p => p.id === parseInt(value));
-      setSelectedPet(pet);
     }
   };
 
@@ -150,8 +178,9 @@ const AddAppointment = ({ onClose, onAppointmentAdded }) => {
               value={ownerSearch}
               onChange={handleOwnerSearch}
               className="calendarView__input"
+              disabled={!!ownerId}
             />
-            {filteredOwners.length > 0 && !selectedOwner && (
+            {filteredOwners.length > 0 && !selectedOwner && !ownerId && (
               <ul className="calendarView__ownerList">
                 {filteredOwners.map(owner => (
                   <li key={owner.id} onClick={() => handleOwnerSelect(owner)}>
@@ -168,13 +197,14 @@ const AddAppointment = ({ onClose, onAppointmentAdded }) => {
             onChange={handleInputChange}
             required
             className="calendarView__select"
-            disabled={!selectedOwner}
+            disabled={!!patientId || !selectedOwner}
           >
             <option value="">Select Pet</option>
             {pets.map(pet => (
               <option key={pet.id} value={pet.id}>{pet.name}</option>
             ))}
           </select>
+
 
           <select
             name="staff_id"

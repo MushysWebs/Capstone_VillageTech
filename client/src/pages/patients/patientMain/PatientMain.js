@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Edit2, X, Save } from 'lucide-react';
+import { Edit2, X, Save, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './PatientMain.css';
+//TO DO: MOVE ADDAPPOINTMENT FILE TO COMPONENTS INSTEAD OF NESTED IN DASHBOARD PROBABLY.
+import AddAppointment from '../../dashboard/calendarView/AddAppointment';
 
 const PatientMain = ({ globalSearchTerm }) => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isAddAppointmentModalOpen, setIsAddAppointmentModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedPatient, setEditedPatient] = useState(null);
   const [error, setError] = useState(null);
@@ -25,6 +28,16 @@ const PatientMain = ({ globalSearchTerm }) => {
     setFilteredPatients(filtered);
   }, [globalSearchTerm, patients]);
 
+  //Add appointments
+  const handleAddAppointment = () => {
+    setIsAddAppointmentModalOpen(true);
+  };
+
+  const handleCloseAppointmentModal = () => {
+    setIsAddAppointmentModalOpen(false);
+  };
+
+  //Fetch
   const fetchPatients = async () => {
     try {
       const { data, error } = await supabase.from('patients').select('*').order('id');
@@ -101,7 +114,7 @@ const PatientMain = ({ globalSearchTerm }) => {
           <Link to="/newPatient" className="tab-button">New Patient</Link>
         </div>
       </header>
-
+  
       <div className="patientMain-section">
         <div className="patientMain-list">
           {filteredPatients.map(patient => (
@@ -119,7 +132,7 @@ const PatientMain = ({ globalSearchTerm }) => {
             </div>
           ))}
         </div>
-
+  
         <div className="patientMain-main">
           {error && <div className="error-message">{error}</div>}
           {selectedPatient && (
@@ -179,35 +192,30 @@ const PatientMain = ({ globalSearchTerm }) => {
                   ) : (
                     <>
                       <h2>{selectedPatient.name}</h2>
-                      <p>
-                        <strong>Species:</strong> {selectedPatient.species}
-                      </p>
-                      <p>
-                        <strong>Breed:</strong> {selectedPatient.breed}
-                      </p>
-                      <p>
-                        <strong>Age:</strong> {selectedPatient.age} years
-                      </p>
-                      <p>
-                        <strong>Weight:</strong> {selectedPatient.weight} lbs
-                      </p>
-                      <p>
-                        <strong>Date of Birth:</strong> {formatDate(selectedPatient.date_of_birth)}
-                      </p>
+                      <p><strong>Species:</strong> {selectedPatient.species}</p>
+                      <p><strong>Breed:</strong> {selectedPatient.breed}</p>
+                      <p><strong>Age:</strong> {selectedPatient.age} years</p>
+                      <p><strong>Weight:</strong> {selectedPatient.weight} lbs</p>
+                      <p><strong>Date of Birth:</strong> {formatDate(selectedPatient.date_of_birth)}</p>
                     </>
                   )}
                 </div>
-                {/* Edit Button */}
-                {!isEditing && (
-                  <button className="action-button edit-button" onClick={handleEdit}>
-                    <Edit2 size={18} />
-                    Edit
+                <div className="patientMain-action-buttons">
+                  <button className="action-button add-appointment-button" onClick={handleAddAppointment}>
+                    <Calendar size={18} />
+                    Add Appointment
                   </button>
-                )}
+                  {!isEditing && (
+                    <button className="action-button edit-button" onClick={handleEdit}>
+                      <Edit2 size={18} />
+                      Edit
+                    </button>
+                  )}
+                </div>
               </div>
-
+  
               {isEditing && (
-                <>
+                <div className="patientMain-edit-actions">
                   <button className="action-button cancel-button" onClick={handleCancel}>
                     <X size={18} />
                     Cancel
@@ -216,9 +224,9 @@ const PatientMain = ({ globalSearchTerm }) => {
                     <Save size={18} />
                     Save
                   </button>
-                </>
+                </div>
               )}
-
+  
               <div className="patientMain-info-section">
                 <div className="patientMain-additional-info">
                   <h3>Additional Information</h3>
@@ -260,7 +268,7 @@ const PatientMain = ({ globalSearchTerm }) => {
                     </>
                   )}
                 </div>
-
+  
                 <div className="patientMain-clinical-info">
                   <h3>Clinical Details</h3>
                   {isEditing ? (
@@ -311,7 +319,7 @@ const PatientMain = ({ globalSearchTerm }) => {
                     </>
                   )}
                 </div>
-
+  
                 <div className="patientMain-tags">
                   <h3>Tags</h3>
                   {isEditing ? (
@@ -342,7 +350,7 @@ const PatientMain = ({ globalSearchTerm }) => {
                     </>
                   )}
                 </div>
-
+  
                 <div className="patientMain-notes">
                   <h3>Animal Notes</h3>
                   {isEditing ? (
@@ -361,6 +369,17 @@ const PatientMain = ({ globalSearchTerm }) => {
           )}
         </div>
       </div>
+      {isAddAppointmentModalOpen && (
+      <AddAppointment
+        onClose={handleCloseAppointmentModal}
+        patientId={selectedPatient.id}
+        patientName={selectedPatient.name}
+        ownerId={selectedPatient.owner_id}
+        onAppointmentAdded={(newAppointment) => {
+          setIsAddAppointmentModalOpen(false);
+        }}
+      />
+    )}
     </div>
   );
 };
