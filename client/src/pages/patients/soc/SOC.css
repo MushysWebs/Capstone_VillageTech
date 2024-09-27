@@ -1,0 +1,30 @@
+.SOC_container {
+    display: flex;
+    padding: 20px;
+    height: 100vh;
+    /* Ensure the content doesn't overflow horizontally */
+    width: 63%; /* Add this line to ensure the flex container does not expand unnecessarily */
+    box-sizing: border-box; /* Ensures padding doesn't affect width calculations */
+}
+
+.main-content {
+    width: 75%; /* Content takes up the remaining 75% */
+    padding: 2rem;
+    box-sizing: border-box; /* Add this to ensure padding is part of the width calculation */
+    overflow: auto; /* Ensures content that exceeds height will scroll, not overflow */
+}
+
+.standard-of-care {
+    margin-top: 1rem;
+}
+
+.standard-of-care table {
+    width: 100%; /* Ensures table doesn't extend beyond the content area */
+    border-collapse: collapse;
+    align-items: start;
+}
+
+.standard-of-care th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}

@@ -9,25 +9,24 @@ const PatientSidebar = () => {
     return (
         <div className="PatientSidebar">
             <div className="patientPhoto">
-                    <img></img>
-            </div>
-            
-            <div className="patientInfo">
-                <div>
-                    <img></img>
-                </div>
+             {/* <img src="https://fuitfkjuphldahkcsogq.supabase.co/storage/v1/object/public/contacts/profile_pictures/0.38716950783300974.jpg" alt="Taylor Swift" class="contact-header-avatar"> */}
+             {/* This is Rickys code for his contacts page anime taylor swift something, ill dissect later */}
+            </div> 
+            <div className="patientName">
                 
                 <h2 className="patientName">Ponzu</h2>
-                {/* <dl>
-                <p>Patient ID: {patient.id}</p>
-                    <p>Date of Birth: {patient.date_of_birth}</p>
-                    <p>{patient.species} - {patient.breed}</p>
-                    <p>Weight: {patient.weight} kg</p>
-                </dl> */}
-            </div>
+                <dl>
+                <p>Patient ID: </p>
+                    <p>Date of Birth: </p>
+                    <p></p>
+                    <p>Weight:  kg</p>
+                </dl>
+                {/* <Link> </Link> */}
+                </div>
          
             <div className="demeanor">
-                
+
+                <h3>demeanor</h3>
                 <p><span>Evil</span></p><img></img>
 
             </div>
