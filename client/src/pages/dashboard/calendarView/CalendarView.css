@@ -1,34 +1,31 @@
-.calendar-view {
+.calendarView {
   display: flex;
   flex-direction: column;
   height: 100vh;
   font-family: 'Nunito', sans-serif;
   padding: 20px;
   box-sizing: border-box;
+  background-color: #f5f7fa;
 }
 
-.calendar-header {
+.calendarView__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.calendar-header h1 {
-  display: flex;
-  align-items: center;
+.calendarView__header h1 {
   font-size: 24px;
-  margin: 0;
+  color: #333;
 }
 
-
-.calendar-controls {
+.calendarView__headerButtons {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 10px;
 }
 
-.action-button, .control-button {
+.calendarView__actionButton {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -36,122 +33,288 @@
   color: white;
   cursor: pointer;
   font-size: 14px;
-  margin-right: 10px;
+  transition: background-color 0.3s;
 }
 
-.control-button {
-  background-color: #f0f0f0;
+.calendarView__actionButton:hover {
+  background-color: #0789b4;
+}
+
+.calendarView__controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.calendarView__leftControls,
+.calendarView__rightControls {
+  display: flex;
+  gap: 10px;
+}
+
+.calendarView__controlButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #fff;
   color: #333;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
 }
 
-.today-button {
+.calendarView__controlButton:hover {
+  background-color: #e6e6e6;
+}
+
+.calendarView__todayButton {
   background-color: #09ACE0;
   color: white;
 }
 
-.view-select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
+.calendarView__todayButton:hover {
+  background-color: #0789b4;
 }
 
-.calendar-grid {
+.calendarView__dateDisplay {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.calendarView__weekContainer {
   display: flex;
   flex-grow: 1;
-  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.time-column {
+.calendarView__timeColumn {
   width: 60px;
-  flex-shrink: 0;
+  border-right: 1px solid #e0e0e0;
 }
 
-.time-marker {
-  height: 100px;
+.calendarView__timeSlot {
+  height: 50px;
   display: flex;
-  align-items: start;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
   font-size: 12px;
-  color: #666;
-  padding-right: 10px;
+  color: #888;
 }
 
-.events-column {
-  flex-grow: 1;
+.calendarView__dayColumn {
+  flex: 1;
+  border-right: 1px solid #e0e0e0;
   position: relative;
-  border-left: 1px solid #e0e0e0;
-  height: 2400px;
+  height: 1200px; /* 24 hours * 50px per hour */
   overflow-y: auto;
 }
 
-.appointment {
+.calendarView__dayColumn:last-child {
+  border-right: none;
+}
+
+.calendarView__dayHeader {
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+  background-color: #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.calendarView__appointment {
   position: absolute;
-  width: 190px;
-  padding: 5px 5px 0px 5px;
+  left: 5px;
+  right: 5px;
+  background-color: #e6f7ff;
+  border-left: 4px solid #09ACE0;
+  padding: 5px;
   border-radius: 4px;
   font-size: 12px;
   overflow: hidden;
 }
 
-.appointment.even {
-  background-color: #E6F7FF;
-  border-left: 4px solid #09ACE0;
+.calendarView__appointmentTime {
+  font-weight: bold;
 }
 
-.appointment.odd {
-  background-color: #F0FAFF;
-  border-left: 4px solid #0B8EC2;
+.calendarView__appointmentTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.appointment h3 {
-  margin: 0 0 3px 0;
-  font-size: 14px;
+.calendarView__appointmentPatient {
+  font-style: italic;
 }
 
-.appointment p {
-  margin: 2px 0;
-}
-
-.appointment.highlighted {
-  background-color: #fffeac;
-  border-left: 4px solid #ffd13c;
-}
-
-.current-time-line {
+.calendarView__currentTimeBar {
   position: absolute;
   left: 0;
   right: 0;
   height: 2px;
+  background-color: #ff0000;
+  z-index: 2;
+}
+
+/* Modal styles */
+.calendarView__modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calendarView__modalContent {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 500px;
+}
+
+.calendarView__modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendarView__modalHeader h2 {
+  font-size: 20px;
+  color: #333;
+}
+
+.calendarView__petImage {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.calendarView__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarView__ownerSelect {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.calendarView__ownerList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.calendarView__ownerList li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.calendarView__ownerList li:hover {
+  background-color: #f0f0f0;
+}
+
+.calendarView__input,
+.calendarView__select,
+.calendarView__textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.calendarView__input:focus,
+.calendarView__select:focus,
+.calendarView__textarea:focus {
+  outline: none;
+  border-color: #09ACE0;
+  box-shadow: 0 0 0 2px rgba(9, 172, 224, 0.2);
+}
+
+.calendarView__select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.calendarView__textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.calendarView__submitButton,
+.calendarView__cancelButton {
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 14px;
+}
+
+.calendarView__submitButton {
   background-color: #09ACE0;
-  z-index: 10;
-}
-
-.dark .calendar-view {
-  background-color: #363D3F;
   color: white;
 }
 
-.dark .appointment.even {
-  background-color: #2A3132;
-  border-left-color: #09ACE0;
+.calendarView__submitButton:hover {
+  background-color: #0789b4;
 }
 
-.dark .appointment.odd {
-  background-color: #323A3B;
-  border-left-color: #0B8EC2;
+.calendarView__cancelButton {
+  background-color: #f0f0f0;
+  color: #333;
 }
 
-.dark .time-marker {
-  color: #ccc;
+.calendarView__cancelButton:hover {
+  background-color: #e0e0e0;
 }
 
-.dark .control-button {
-  background-color: #4a5256;
-  color: white;
-}
+/* Responsive styles */
+@media (max-width: 768px) {
+  .calendarView__weekContainer {
+    flex-direction: column;
+  }
 
-.dark .view-select {
-  background-color: #4a5256;
-  color: white;
-  border-color: #666;
+  .calendarView__dayColumn {
+    height: auto;
+    min-height: 200px;
+  }
+
+  .calendarView__timeColumn {
+    display: none;
+  }
+
+  .calendarView__modalContent {
+    width: 95%;
+  }
 }
