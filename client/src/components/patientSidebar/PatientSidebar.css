@@ -1,8 +1,9 @@
 .PatientSidebar {
   display: flex;
   flex-direction: column;
-  justify-items: center;
+  justify-content: space-between; /* Ensures proper vertical spacing */
   height: 81vh; 
+  min-width: 190px;
   margin: 0;
   background-color: #f9f9f9;
   border-radius: 10px;
@@ -10,7 +11,15 @@
   flex-grow: 1;
 }
 
-/* .patientImg, .patientInfo */
+.patientImg {
+  flex: 1; /* Ensures it expands to fill available space */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 20vh;
+  background-color: grey;
+  border-radius: 10px 10px 0 0;
+}
 
 .patientImg img {
   margin: 0;
@@ -21,22 +30,12 @@
   justify-self: center;
 }
 
-.patientImg {
-  flex: auto;
-  display: flex;
-  margin: 0px;
-  align-items: center;
-  justify-content: center;
-  max-height: 20vh;
-  background-color: grey;
-  border-radius: 10px 10px 0 0;
-}
-
 .patientName, .patient-body {
   margin: 0 8px;
 }
 
 .patient-body {
+  flex: 1; /* Allows it to take up remaining space */
   margin-bottom: 5px;
 }
 
@@ -46,6 +45,7 @@
 }
 
 .patientDemeanor {
+  flex: 0.5; /* Expands to fill empty space */
   max-height: 10vh;
 }
 
@@ -54,7 +54,8 @@
   padding: 0;
   align-items: center;
 }
-.demeanor-container{
+
+.demeanor-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -71,10 +72,9 @@
 
 .patientDemeanor p {
   margin: 10px 8px;
-
 }
 
-.patient-owner p{
+.patient-owner p {
   margin: 2px 8px;
   font-size: small;
 }
@@ -87,25 +87,30 @@
   margin: 2px 8px;
   font-size: small;
   font-weight: bold;
-  
 }
 
 .patientSOC {
+  flex: 1; /* Ensures it grows to fill space */
+  display: flex;
+  flex-direction: column;
   max-height: 10vh;
-  margin: 0;
 }
 
 .event-section {
   display: flex;
-  flex: 1;
+  flex: 1; /* Takes up remaining space */
   justify-content: space-between;
   background-color: grey;
-  max-height: 10vh;
 }
 
-.soc-event{
+.soc-event {
   flex: 1;
   margin: 0;
+}
+.SOC-body {
+  flex: 1;
+  background-color: #ddd;
+  border-radius: 0 0 10px 10px;
 }
 
 .next-due {
@@ -113,15 +118,8 @@
   margin: 0;
 }
 
-
-.title {
-  flex-grow: 1;
-
-}
-
 h3 {
   background-color: grey;
-  /* border-radius: 10px; */
   text-align: center;
   color: #fff;
 }
@@ -130,11 +128,5 @@ h3 {
   background-color: aliceblue;
   padding: 1px;
   border-radius: 12px;
-
-
+  flex: 1; /* Fills empty space */
 }
-
-
-/* h3, p {
-  margin-left: 4px;
-} */
