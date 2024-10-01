@@ -1,190 +1,251 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { 
+  format, 
+  startOfWeek, 
+  addDays, 
+  isSameDay, 
+  differenceInMinutes, 
+  startOfDay, 
+  endOfWeek, 
+  addWeeks, 
+  subWeeks, 
+  subDays,
+  areIntervalsOverlapping
+} from 'date-fns';
 import './CalendarView.css';
+import AddAppointment from './AddAppointment';
 
 const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [appointments, setAppointments] = useState([
-    { id: 1, title: 'Eye Replacement', start: new Date(2024, 6, 23, 9, 0), end: new Date(2024, 6, 23, 11, 0), patient: 'Ponzu', doctor: 'Dr. M' },
-    { id: 2, title: 'Medical Haircut', start: new Date(2024, 6, 23, 11, 0), end: new Date(2024, 6, 23, 13, 0), patient: 'Simby', doctor: 'Dr. Oopie' },
-    { id: 3, title: 'Eye Exam', start: new Date(2024, 6, 23, 12, 30), end: new Date(2024, 6, 23, 13, 30), patient: 'Ponzu', doctor: 'Dr. M' },
-    { id: 4, title: 'X-Ray', start: new Date(2024, 6, 23, 16, 0), end: new Date(2024, 6, 23, 17, 15), patient: 'Dashawn', doctor: 'Dr. Oopie, Dr.M' },
-  ]);
+  const [appointments, setAppointments] = useState([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('week'); // 'week' or 'day'
+  const supabase = useSupabaseClient();
+  const scrollContainerRef = useRef(null);
 
   useEffect(() => {
-    if (searchTerm) {
-      const filteredAppointments = appointments.filter(
-        app => app.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               app.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               app.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      if (filteredAppointments.length > 0) {
-        const nextAppointment = filteredAppointments.find(app => app.start > new Date());
-        if (nextAppointment) {
-          const appointmentTop = (nextAppointment.start.getHours() * 60 + nextAppointment.start.getMinutes()) / 60 * 100;
-        }
-      }
-    }
-  }, [searchTerm, appointments]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentDate(new Date()), 60000);
+    fetchAppointments();
+    const timer = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 60000); // Update every minute
     return () => clearInterval(timer);
-  }, []);
+  }, [currentDate, viewMode]);
 
-  useEffect(() => {
-    if (searchTerm) {
-      const filteredAppointments = appointments.filter(
-        app => app.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               app.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               app.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const fetchAppointments = async () => {
+    try {
+      const start = viewMode === 'week' ? startOfWeek(currentDate) : startOfDay(currentDate);
+      const end = viewMode === 'week' ? endOfWeek(currentDate) : addDays(startOfDay(currentDate), 1);
 
-      console.log('Filtered appointments:', filteredAppointments);
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          id,
+          title,
+          start_time,
+          end_time,
+          description,
+          status,
+          patients:patient_id (
+            id,
+            name
+          ),
+          staff:staff_id (
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .gte('start_time', start.toISOString())
+        .lt('start_time', end.toISOString())
+        .order('start_time', { ascending: true });
 
-      if (filteredAppointments.length > 0) {
-        const nextAppointment = filteredAppointments.find(app => app.start > new Date());
-        if (nextAppointment) {
-          const appointmentTop = (nextAppointment.start.getHours() * 60 + nextAppointment.start.getMinutes()) / 60 * 100;
-          console.log('Scrolling to appointment at position:', appointmentTop);
-        } else {
-          console.log('No future appointments found for the search term');
-        }
-      } else {
-        console.log('No appointments found for the search term');
-      }
+      if (error) throw error;
+
+      const formattedAppointments = data.map(app => ({
+        id: app.id,
+        title: app.title,
+        start: new Date(app.start_time),
+        end: new Date(app.end_time),
+        patient: app.patients?.name || 'Unknown',
+        doctor: app.staff ? `${app.staff.first_name} ${app.staff.last_name}` : 'Unknown',
+        description: app.description,
+        status: app.status
+      }));
+
+      setAppointments(formattedAppointments);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
     }
-  }, [searchTerm, appointments]);
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const getAppointmentStyle = (start, end, column = 0) => {
-    const startMinutes = start.getHours() * 60 + start.getMinutes();
-    const endMinutes = end.getHours() * 60 + end.getMinutes();
-    const duration = endMinutes - startMinutes;
-    
-    return {
-      top: `${startMinutes / 60 * 100}px`,
-      height: `${duration / 60 * 100}px`,
-      left: `${column * 200}px`,
+  const handleAddAppointment = (newAppointment) => {
+    const formattedAppointment = {
+      id: newAppointment.id,
+      title: newAppointment.title,
+      start: new Date(newAppointment.start_time),
+      end: new Date(newAppointment.end_time),
+      patient: newAppointment.patient_name,
+      doctor: newAppointment.staff_name,
+      description: newAppointment.description,
+      status: newAppointment.status
     };
+    setAppointments(prevAppointments => [...prevAppointments, formattedAppointment]);
+    setIsAddModalOpen(false);
+    fetchAppointments();
   };
 
-  const renderAppointments = () => {
-    const appointmentColumns = [];
-    const renderedAppointments = [];
-
-    appointments.forEach((app, index) => {
-      let column = 0;
-      while (appointmentColumns[column]?.some(existingApp => 
-        (app.start < existingApp.end && app.end > existingApp.start)
-      )) {
-        column++;
-      }
-
-      if (!appointmentColumns[column]) {
-        appointmentColumns[column] = [];
-      }
-      appointmentColumns[column].push(app);
-
-      const isHighlighted = searchTerm && 
-        (app.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         app.title.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        renderedAppointments.push(
-        <div
-          key={app.id}
-          className={`appointment ${index % 2 === 0 ? 'even' : 'odd'} ${isHighlighted ? 'highlighted' : ''}`}
-          style={getAppointmentStyle(app.start, app.end, column)}
-        >
-          <h3>{app.title}</h3>
-          <p>{formatTime(app.start)} → {formatTime(app.end)}</p>
-          <p>Patient: {app.patient}</p>
-          <p>Doctor: {app.doctor}</p>
-        </div>
-      );
-    });
-    return renderedAppointments;
-  };
-
-  const renderTimeMarkers = () => {
+  const renderTimeColumn = () => {
     return Array.from({ length: 24 }, (_, i) => (
-      <div key={i} className="time-marker">
-        {i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}
+      <div key={i} className="calendarView__timeSlot">
+        {format(new Date().setHours(i, 0, 0, 0), 'HH:mm')}
       </div>
     ));
   };
 
-  const getCurrentTimeLine = () => {
-    const now = new Date();
-    const minutes = now.getHours() * 60 + now.getMinutes();
-    return {
-      top: `${minutes / 60 * 100}px`,
-    };
+  const renderAppointments = (day) => {
+    const dayAppointments = appointments.filter(app => isSameDay(app.start, day));
+    
+    // Sort appointments by start time
+    dayAppointments.sort((a, b) => a.start.getTime() - b.start.getTime());
+  
+    // Function to check if two appointments overlap
+    const doAppointmentsOverlap = (app1, app2) => 
+      areIntervalsOverlapping(
+        { start: app1.start, end: app1.end },
+        { start: app2.start, end: app2.end }
+      );
+  
+    // Group overlapping appointments
+    const overlappingGroups = [];
+    dayAppointments.forEach(app => {
+      const overlappingGroup = overlappingGroups.find(group => 
+        group.some(groupApp => doAppointmentsOverlap(groupApp, app))
+      );
+      
+      if (overlappingGroup) {
+        overlappingGroup.push(app);
+      } else {
+        overlappingGroups.push([app]);
+      }
+    });
+  
+    return overlappingGroups.flatMap(group => {
+      const isOverlapping = group.length > 1;
+      return group.map((app, index) => {
+        const top = (differenceInMinutes(app.start, startOfDay(day)) / 60) * 50;
+        const height = (differenceInMinutes(app.end, app.start) / 60) * 50;
+        
+        let left = '0%';
+        let width = '100%';
+        
+        if (isOverlapping) {
+          const columnWidth = 100 / group.length;
+          left = `${index * columnWidth}%`;
+          width = `${columnWidth}%`;
+        }
+  
+        return (
+          <div
+            key={app.id}
+            className="calendarView__appointment"
+            style={{ top: `${top}px`, height: `${height}px`, left, width }}
+          >
+            <div className="calendarView__appointmentTime">
+              {format(app.start, 'HH:mm')} - {format(app.end, 'HH:mm')}
+            </div>
+            <div className="calendarView__appointmentTitle">{app.title}</div>
+            <div className="calendarView__appointmentPatient">{app.patient}</div>
+          </div>
+        );
+      });
+    });
   };
 
-  // masking delayed name retrieval
-  const TypingAnimation = ({ text, speed = 150 }) => {
-    const [displayedText, setDisplayedText] = useState('');
-  
-    useEffect(() => {
-      let i = 0;
-      const timer = setInterval(() => {
-        if (i < text.length) {
-          setDisplayedText(text.slice(0, i + 1));
-          i++;
-        } else {
-          clearInterval(timer);
-        }
-      }, speed);
-  
-      return () => clearInterval(timer);
-    }, [text, speed]);
-  
-    return (
-      <span className="typing-animation" style={{ minWidth: `${text.length}ch` }}>
-        {displayedText}
-      </span>
-    );
+  const renderDayColumn = (day) => (
+    <div className="calendarView__dayColumn">
+      <div className="calendarView__dayHeader">
+        {format(day, 'EEE dd')}
+      </div>
+      <div className="calendarView__dayContent">
+        {renderAppointments(day)}
+        {isSameDay(day, new Date()) && renderCurrentTimeBar(day)}
+      </div>
+    </div>
+  );
+
+  const renderWeekView = () => {
+    const weekStart = startOfWeek(currentDate);
+    return Array.from({ length: 7 }, (_, i) => renderDayColumn(addDays(weekStart, i)));
   };
+
+  const renderDayView = () => {
+    return renderDayColumn(currentDate);
+  };
+
+  const renderCurrentTimeBar = (day) => {
+    const now = new Date();
+    if (isSameDay(now, day)) {
+      const minutesSinceMidnight = differenceInMinutes(now, startOfDay(day));
+      const top = (minutesSinceMidnight / 60) * 50;
+      return <div className="calendarView__currentTimeBar" style={{ top: `${top}px` }} />;
+    }
+    return null;
+  };
+
+  const navigateDate = (direction) => {
+    if (viewMode === 'week') {
+      setCurrentDate(prevDate => direction === 'next' ? addWeeks(prevDate, 1) : subWeeks(prevDate, 1));
+    } else {
+      setCurrentDate(prevDate => direction === 'next' ? addDays(prevDate, 1) : subDays(prevDate, 1));
+    }
+  };
+
   return (
-    <div className="calendar-view">
-      <div className="calendar-header">
-      <h1>
-      Hello,&nbsp;<TypingAnimation text={`${firstName}!`} speed={150} />
-        </h1>
-        <div className="header-buttons">
-          <button className="action-button">Clock In</button>
-          <button className="action-button">View Hours</button>
+    <div className="calendarView">
+      <div className="calendarView__header">
+        <h1>Hello, {firstName}!</h1>
+        <div className="calendarView__headerButtons">
+          <button className="calendarView__actionButton">Clock In</button>
+          <button className="calendarView__actionButton">View Hours</button>
         </div>
       </div>
-      <div className="calendar-controls">
-        <div className="left-controls">
-          <button className="action-button">+ Create Appointment</button>
-          <button className="action-button">View Appointments</button>
+      <div className="calendarView__controls">
+        <div className="calendarView__leftControls">
+          <button className="calendarView__actionButton" onClick={() => setIsAddModalOpen(true)}>+ Create Appointment</button>
+          <button className="calendarView__actionButton">View Appointments</button>
+          <button className="calendarView__actionButton" onClick={() => setViewMode(viewMode === 'week' ? 'day' : 'week')}>
+            {viewMode === 'week' ? 'Day View' : 'Week View'}
+          </button>
         </div>
-        <div className="right-controls">
-          <button className="control-button today-button">Today</button>
-          <span className="date-display">{currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
-          <button className="control-button nav-button">&#9664;</button>
-          <button className="control-button nav-button">&#9654;</button>
-          <select className="view-select">
-            <option value="day">Day View</option>
-            <option value="week">Week View</option>
-          </select>
+        <div className="calendarView__rightControls">
+          <button className="calendarView__controlButton calendarView__todayButton" onClick={() => setCurrentDate(new Date())}>Today</button>
+          <span className="calendarView__dateDisplay">
+            {viewMode === 'week'
+              ? `${format(startOfWeek(currentDate), 'MMM d')} - ${format(endOfWeek(currentDate), 'MMM d, yyyy')}`
+              : format(currentDate, 'MMMM d, yyyy')}
+          </span>
+          <button className="calendarView__controlButton calendarView__navButton" onClick={() => navigateDate('prev')}>&#9664;</button>
+          <button className="calendarView__controlButton calendarView__navButton" onClick={() => navigateDate('next')}>&#9654;</button>
         </div>
       </div>
-      <div className="main-content">
-        <div className="calendar-grid">
-          <div className="time-column">{renderTimeMarkers()}</div>
-          <div className="events-column">
-            {renderAppointments()}
-            <div className="current-time-line" style={getCurrentTimeLine()}></div>
+      <div className="calendarView__weekContainer">
+        <div className="calendarView__scrollContainer" ref={scrollContainerRef}>
+          <div className="calendarView__timeColumn">
+            {renderTimeColumn()}
+          </div>
+          <div className="calendarView__daysContainer">
+            {viewMode === 'week' ? renderWeekView() : renderDayView()}
           </div>
         </div>
       </div>
+      
+      {isAddModalOpen && (
+        <AddAppointment
+          onClose={() => setIsAddModalOpen(false)}
+          onAppointmentAdded={handleAddAppointment}
+        />
+      )}
     </div>
   );
 };
