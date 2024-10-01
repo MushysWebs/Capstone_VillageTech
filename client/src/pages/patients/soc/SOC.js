@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from "react";
 import './SOC.css';
 import PatientSidebar from "../../../components/patientSideBar/PatientSidebar";
@@ -50,3 +51,14 @@ const SOC = () => {
 };
 
 export default SOC;
+=======
+// import patientSidebar from '../../components/patientSidebar'
+
+// const SOC = () => {
+
+// };
+
+// return (
+
+// );
+>>>>>>> 2b4b44cfb8f703771f76461227d2c8fe85fe4f28
