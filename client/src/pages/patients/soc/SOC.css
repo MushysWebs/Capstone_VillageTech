@@ -1,11 +1,18 @@
 .SOC_container {
     display: flex;
     padding: 20px;
-    height: 100vh;
-    /* Ensure the content doesn't overflow horizontally */
-    width: 63%; /* Add this line to ensure the flex container does not expand unnecessarily */
+    height: 1500px;
     box-sizing: border-box; /* Ensures padding doesn't affect width calculations */
+    overflow-y: auto;
+    width: 100%;
 }
+/* .patientSidebar {
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
+    flex-basis: 25%;
+    max-width: 25%;
+} */
 
 .main-content {
     width: 75%; /* Content takes up the remaining 75% */
@@ -15,7 +22,9 @@
 }
 
 .standard-of-care {
+    flex-grow: 9;
     margin-top: 1rem;
+    margin: auto;
 }
 
 .standard-of-care table {
