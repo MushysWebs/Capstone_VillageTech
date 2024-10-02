@@ -108,7 +108,7 @@ const Financial = () => {
           <Link to="/healthStatus" className="tab-button">
             Health Status
           </Link>
-          <Link to="/patient/medication" className="tab-button">
+          <Link to="/medication" className="tab-button">
             Medication
           </Link>
           <Link to="/newPatient" className="tab-button">
