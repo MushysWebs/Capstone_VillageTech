@@ -51,7 +51,7 @@ const Summaries = () => {
           <Link to="/healthStatus" className="tab-button">
             Health Status
           </Link>
-          <Link to="/Medication" className="tab-button">
+          <Link to="/medication" className="tab-button">
             Medication
           </Link>
           <Link to="/newPatient" className="tab-button">

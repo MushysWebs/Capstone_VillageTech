@@ -14,6 +14,7 @@ import PatientMain from './pages/patients/patientMain/PatientMain';
 import Financial from './pages/patients/financial/Financial'
 import HealthStatus from './pages/patients/healthStatus/HealthStatus';
 import Summaries from './pages/patients/summaries/Summaries';
+import Medication from './pages/patients/medication/Medication';
 
 
 
@@ -35,6 +36,7 @@ function App() {
               <Route path="/financial" element={<Financial />} />
               <Route path="/healthStatus" element={<HealthStatus />} />
               <Route path="/summaries" element={<Summaries />} />
+              <Route path="/medication" element={<Medication/>} />
             </Route>
 
           </Route>
