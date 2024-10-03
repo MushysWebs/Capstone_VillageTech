@@ -13,6 +13,9 @@ import PatientMain from './pages/patients/patientMain/PatientMain';
 import Financial from './pages/patients/financial/Financial'
 import HealthStatus from './pages/patients/healthStatus/HealthStatus';
 import SOC from './pages/patients/soc/SOC';
+import Summaries from './pages/patients/summaries/Summaries';
+import Medication from './pages/patients/medication/Medication';
+
 
 
 
@@ -150,6 +153,10 @@ const Layout = () => {
       return <HealthStatus />;
     } else if (location.pathname === '/SOC') {
       return <SOC />;
+    } else if (location.pathname === '/summaries') {
+      return <Summaries />;
+    } else if (location.pathname === '/medication') {
+      return <Medication />
     }
     return null;
   };
