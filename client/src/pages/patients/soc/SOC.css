@@ -33,7 +33,8 @@
     align-items: start;
 }
 
-.standard-of-care th, td {
+.standard-of-care, .comments-section {
     border: 1px solid #ddd;
     padding: 8px;
+    flex-direction: row;
 }
