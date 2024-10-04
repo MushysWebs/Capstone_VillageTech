@@ -1,6 +1,6 @@
 import React from "react";
 import './SOC.css';
-import PatientSidebar from "../../../components/patientSideBar/PatientSidebar";
+import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 
 const SOC = () => {
     return (
