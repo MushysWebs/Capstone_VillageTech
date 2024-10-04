@@ -14,12 +14,7 @@
     max-width: 25%;
 } */
 
-.main-content {
-    width: 100%; /* Content takes up the remaining 75% */
-    padding: 2rem;
-    box-sizing: border-box; /* Add this to ensure padding is part of the width calculation */
-    overflow: auto; /* Ensures content that exceeds height will scroll, not overflow */
-}
+
 
 .standard-of-care {
     flex-grow: 9;
