@@ -52,35 +52,45 @@ const PatientSidebar = ({ patientId }) => {
     }, [patientId]);
 
     // Placeholder patient data
+    const displayedPatientId = selectedPatient ? selectedPatient.patientId : "123456";
     const ownerName = selectedPatient ? selectedPatient.owner_name : "Owner Name";
     const patientName = selectedPatient ? selectedPatient.name : "Ponzu";
     const dob = selectedPatient ? selectedPatient.dob : "2020-01-01";
-    const breed = selectedPatient ? selectedPatient.breed : "Canine (Dog) - Ridgeback X"
+    const breed = selectedPatient ? selectedPatient.breed : "Ridgeback X"
     const weight = selectedPatient ? selectedPatient.weight : "5.5";
     const demeanor = selectedPatient ? selectedPatient.demeanor : "Playful";
     const phoneNumber = selectedPatient ? selectedPatient.owner_phone : "403123456789";
 
     return (
-        <div className="PatientSidebar">
-            {/* Patient Image */}
-            <div className="patientImg">
-                <img 
-                    src="https://fuitfkjuphldahkcsogq.supabase.co/storage/v1/object/public/contacts/profile_pictures/0.38716950783300974.jpg" 
-                    alt={patientName} 
-                    className="contact-header-avatar" 
-                />
-            </div>
+<div className="PatientSidebar">
+    <div className="patientHeader">
+        <div className="patientImg">
+            <img 
+                src="https://fuitfkjuphldahkcsogq.supabase.co/storage/v1/object/public/contacts/profile_pictures/0.38716950783300974.jpg" 
+                alt={patientName} 
+                className="contact-header-avatar" 
+            />
+        </div>
+        <h2 className="patientName">{patientName}</h2>
+    </div>
 
-            {/* Patient Info */}
-            <div className="patientInfo">
-                <h2 className="patientName">{patientName}</h2>
-                <dl className="patient-body">
-                    <p>Patient ID: {patientId}</p>
-                    <p>Date of Birth: {dob}</p>
-                    <p>{breed}</p>
-                    <p>Weight: {weight} kg</p>
-                </dl>
-            </div>
+    <div className="patientInfo">
+        <dl className="patient-body">
+            <dt><strong>Patient ID:</strong></dt>
+            <dd>{displayedPatientId}</dd>
+            
+            <dt><strong>Date of Birth:</strong></dt>
+            <dd>{dob}</dd>
+            
+            <dt><strong>Breed (dog):</strong></dt>
+            <dd>{breed}</dd>
+            
+            <dt><strong>Weight:</strong></dt>
+            <dd>{weight} kg</dd>
+        </dl>
+    </div>
+
+
 
             {/* Patient Demeanor */}
             <div className="patientDemeanor">
