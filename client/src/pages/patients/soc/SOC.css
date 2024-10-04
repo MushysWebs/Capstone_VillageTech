@@ -15,7 +15,7 @@
 } */
 
 .main-content {
-    width: 75%; /* Content takes up the remaining 75% */
+    width: 100%; /* Content takes up the remaining 75% */
     padding: 2rem;
     box-sizing: border-box; /* Add this to ensure padding is part of the width calculation */
     overflow: auto; /* Ensures content that exceeds height will scroll, not overflow */
