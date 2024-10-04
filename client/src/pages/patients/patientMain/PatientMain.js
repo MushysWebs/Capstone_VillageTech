@@ -106,7 +106,7 @@ const PatientMain = ({ globalSearchTerm }) => {
       <header className="patientMain-tabs-header">
         <div className="patientMain-tabs">
           <Link to="/patient/clinical" className="tab-button">Clinical</Link>
-          <Link to="/patient/soc" className="tab-button">S.O.C.</Link>
+          <Link to="/SOC" className="tab-button">S.O.C.</Link>
           <Link to="/Financial" className="tab-button">Financial</Link>
           <Link to="/summaries" className="tab-button">Summaries</Link>
           <Link to="/healthStatus" className="tab-button">Health Status</Link>
