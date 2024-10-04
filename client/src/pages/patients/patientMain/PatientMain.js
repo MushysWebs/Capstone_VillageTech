@@ -195,7 +195,7 @@ const PatientMain = ({ globalSearchTerm }) => {
                       <p><strong>Species:</strong> {selectedPatient.species}</p>
                       <p><strong>Breed:</strong> {selectedPatient.breed}</p>
                       <p><strong>Age:</strong> {selectedPatient.age} years</p>
-                      <p><strong>Weight:</strong> {selectedPatient.weight} lbs</p>
+                      <p><strong>Weight:</strong> {selectedPatient.weight} Kg</p>
                       <p><strong>Date of Birth:</strong> {formatDate(selectedPatient.date_of_birth)}</p>
                     </>
                   )}
