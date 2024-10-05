@@ -4,7 +4,7 @@
   align-items: center;
   width: 100%;
   max-width: 300px;
-  height: 100%; /* Full viewport height */
+  height: 100%;
   padding: 20px;
   background-color: #ffffff;
   border-radius: 15px;
@@ -14,6 +14,7 @@
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
+  margin-left: 5px;
 }
 
 .patientHeader {
@@ -21,12 +22,11 @@
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
-  margin-bottom: 15px;
 }
 
 .patientImg img {
-  width: 100px;
-  height: 100px;
+  width: 125px;
+  height: 125px;
   object-fit: cover;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   margin-right: 15px;
@@ -45,73 +45,118 @@
 .patientInfo {
   text-align: left;
   width: 100%;
+  margin-bottom: 10px;
 }
 
 .patient-body {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 5px 15px;
+  gap: 3px 10px;
 }
 
 .patient-body dt {
   font-weight: bold;
   color: #333;
+  margin: 0;
 }
 
 .patient-body dd {
-  margin-left: 0;
+  margin: 0;
   font-size: 14px;
   color: #666;
 }
 
-.patientDemeanor {
+.patient-owner,
+.patientApp,
+.patientSOC,
+.patientDemeanor,
+.patientPreferredDoctor {
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   padding: 10px;
-  background-color: #f9f9f9;
+  background-color: #f2f0f0;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.demeanor-header {
+.patientDemeanor h3,
+.patient-owner h3,
+.patientApp h3,
+.patientSOC h3,
+.patientPreferredDoctor h3 {
   font-size: 16px;
   color: #333;
-  margin-bottom: 8px;
+  margin: 0 0 5px 0;
 }
 
-.demeanor-container {
-  display: flex;
-  justify-content: space-between; /* Keeps the edit icon on the right */
-  align-items: center;
-}
-
-.fa-pen-to-square {
-  color: #09ace0;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.fa-pen-to-square:hover {
-  color: #007bbf;
-}
-
-.patient-owner, .patientApp, .patientSOC {
-  width: 100%;
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+.patientDemeanor p,
+.patient-owner p,
+.patientApp p,
+.patientSOC p,
+.patient-body p,
+.patientPreferredDoctor p {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #666;
 }
 
 .event-section {
-  display: flex;
-  justify-content: space-between; /* Aligns SOC Event and Next Due in one row */
-  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: space-between;
+  margin-bottom: 5px;
 }
 
-.soc-event, .next-due {
-  font-size: 16px;
-  color: #333;
+.soc-event-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.soc-event-name {
+  font-size: 14px;
+  color: #666;
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.soc-event-next-due {
+  font-size: 14px;
+  color: #666;
+  grid-column: 2;
+  margin-top: 0;
+  text-align: right;
+}
+
+.next-due {
+  text-align: right;
+  margin-right: 10px;
+}
+
+.soc-event {
+  text-align: left;
+}
+
+.owner-name {
+  margin: 0 0 5px 0;
   font-weight: bold;
+}
+
+.demeanor-container p {
+  margin: 0;
+}
+
+.PatientSidebar h3,
+.PatientSidebar p {
+  margin: 0 0 5px 0;
+}
+
+.patientApp > div {
+  margin-bottom: 5px;
+}
+
+.patientApp p {
+  margin: 0 0 3px 0;
 }

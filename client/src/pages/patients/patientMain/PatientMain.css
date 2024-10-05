@@ -33,7 +33,6 @@
 .patientMain-main {
   flex: 1;
   padding-left: 20px;
-  overflow-y: auto;
   display: flex;
   justify-content: center;
 }
@@ -71,7 +70,6 @@
 .patientMain-header-info h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 20px;
 }
 
 .patientMain-item {
@@ -190,7 +188,6 @@
   font-weight: 500;
 }
 
-/* Responsive design */
 @media (max-width: 1200px) {
   .patientMain-info-section {
     flex-direction: column;
