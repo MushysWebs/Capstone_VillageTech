@@ -1,28 +1,52 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { Link } from "react-router-dom";
+import { usePatient } from "../../../context/PatientContext";
 import "./Financial.css";
 import AddEstimateModal from "../../../components/addEstimateModal/AddEstimateModal";
 
 const Financial = () => {
-  const [financialData, setFinancialData] = useState([]);
+  const { selectedPatient } = usePatient();
+  const [estimateData, setEstimateData] = useState([]);
+  const [invoiceData, setInvoiceData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [estimateToEdit, setEstimateToEdit] = useState(null);
 
-  const fetchFinancialData = async () => {
-    const { data, error } = await supabase.from("financial").select("*");
+  const fetchEstimateData = async () => {
+    if (selectedPatient) {
+      const { data, error } = await supabase
+        .from("estimates")
+        .select("*")
+        .eq("patient_id", selectedPatient.id)
+        .eq("is_active", true);
 
-    if (error) {
-      console.error("Error fetching financial data:", error.message);
-    } else {
-      console.log("Fetched data:", data);
-      setFinancialData(data);
+      if (error) {
+        console.error("Error fetching estimate data:", error.message);
+      } else {
+        setEstimateData(data);
+      }
+    }
+  };
+
+  const fetchInvoiceData = async () => {
+    if (selectedPatient) {
+      const { data, error } = await supabase
+        .from("invoices")
+        .select("*")
+        .eq("patient_id", selectedPatient.id);
+
+      if (error) {
+        console.error("Error fetching invoice data:", error.message);
+      } else {
+        setInvoiceData(data);
+      }
     }
   };
 
   useEffect(() => {
-    fetchFinancialData();
-  }, []);
+    fetchEstimateData();
+    fetchInvoiceData();
+  }, [selectedPatient]);
 
   const openModal = () => {
     setEstimateToEdit(null);
@@ -38,34 +62,77 @@ const Financial = () => {
     setIsModalOpen(false);
   };
 
-  const handleSaveEstimate = async (newOrUpdatedEstimate) => {
-    const { data, error } = await supabase
-      .from("financial")
-      .upsert(newOrUpdatedEstimate);
+  const convertEstimateToInvoice = async (estimate) => {
+    const { error: insertError } = await supabase.from("invoices").insert({
+      invoice_name: estimate.estimate_name,
+      patient_id: selectedPatient.id,
+      invoice_total: estimate.estimate_hightotal,
+      invoice_paid: 0,
+      invoice_date: new Date().toISOString(),
+      invoice_status: "Pending",
+      pet_id: estimate.pet_id,
+    });
 
-    if (error) {
-      console.error("Error saving estimate:", error.message);
-    } else {
-      console.log("Estimate saved:", data);
-      await fetchFinancialData();
+    if (insertError) {
+      console.error(
+        "Error converting estimate to invoice:",
+        insertError.message
+      );
+      return;
     }
-    closeModal();
+
+    const { error: updateError } = await supabase
+      .from("estimates")
+      .update({ is_active: false })
+      .eq("estimate_id", estimate.estimate_id);
+
+    if (updateError) {
+      console.error("Error marking estimate as inactive:", updateError.message);
+    } else {
+      fetchEstimateData();
+      fetchInvoiceData();
+    }
   };
 
-  const updateStatus = async (item, newStatus) => {
-    const { data, error } = await supabase
-      .from("financial")
-      .update({ financial_status: newStatus })
-      .eq("financial_number", item.financial_number);
+  const cancelEstimate = async (estimate) => {
+    const { error } = await supabase
+      .from("estimates")
+      .update({ is_active: false })
+      .eq("estimate_id", estimate.estimate_id);
 
     if (error) {
-      console.error("Error updating status:", error.message);
+      console.error("Error canceling estimate:", error.message);
     } else {
-      await fetchFinancialData();
+      fetchEstimateData();
     }
   };
 
-  // Format number as currency
+  const updateInvoiceStatus = async (invoice, newStatus) => {
+    const { error } = await supabase
+      .from("invoices")
+      .update({ invoice_status: newStatus })
+      .eq("invoice_id", invoice.invoice_id);
+
+    if (error) {
+      console.error("Error updating invoice status:", error.message);
+    } else {
+      fetchInvoiceData();
+    }
+  };
+
+  const cancelInvoice = async (invoice) => {
+    const { error } = await supabase
+      .from("invoices")
+      .update({ invoice_status: "Cancelled" })
+      .eq("invoice_id", invoice.invoice_id);
+
+    if (error) {
+      console.error("Error canceling invoice:", error.message);
+    } else {
+      fetchInvoiceData();
+    }
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -83,9 +150,9 @@ const Financial = () => {
       case "Cancelled":
         return "status-cancelled";
       case "Estimate":
-        return "status-estimate"; // Ensure this class is defined in your CSS
+        return "status-estimate";
       default:
-        return ""; // Return an empty string if no match is found
+        return "";
     }
   };
 
@@ -139,44 +206,54 @@ const Financial = () => {
                   <th>Deposit</th>
                   <th>Date</th>
                   <th>Status</th>
+                  <th>Convert to Invoice</th>
+                  <th>Cancel</th>
                   <th>Last Update</th>
                   <th>Edit</th>
                 </tr>
               </thead>
               <tbody>
-                {financialData
-                  .filter((item) => item.financial_status === "Estimate")
-                  .map((item) => (
-                    <tr key={item.financial_number}>
-                      <td>{item.financial_number}</td>
-                      <td>{item.financial_name}</td>
-                      <td>{item.financial_patient}</td>
-                      <td>{formatCurrency(item.financial_lowtotal)}</td>
-                      <td>{formatCurrency(item.financial_hightotal)}</td>
-                      <td>{formatCurrency(item.financial_deposit)}</td>
-                      <td>
-                        {new Date(item.financial_date).toLocaleDateString()}
-                      </td>
-                      <td>
-                        <button
-                          className={getStatusClass(item.financial_status)}
-                        >
-                          {item.financial_status}
-                        </button>
-                      </td>
-                      <td>
-                        {new Date(item.financial_lastupdate).toLocaleString()}
-                      </td>
-                      <td>
-                        <button
-                          className="financial-edit-button"
-                          onClick={() => handleEditClick(item)}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                {estimateData.map((item) => (
+                  <tr key={item.estimate_id}>
+                    <td>{item.estimate_id}</td>
+                    <td>{item.estimate_name}</td>
+                    <td>{selectedPatient.name}</td>
+                    <td>{formatCurrency(item.estimate_lowtotal)}</td>
+                    <td>{formatCurrency(item.estimate_hightotal)}</td>
+                    <td>{formatCurrency(item.estimate_deposit)}</td>
+                    <td>{new Date(item.estimate_date).toLocaleDateString()}</td>
+                    <td>
+                      <button className={getStatusClass(item.estimate_status)}>
+                        {item.estimate_status}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="convert-button"
+                        onClick={() => convertEstimateToInvoice(item)}
+                      >
+                        Convert to Invoice
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="cancel-button"
+                        onClick={() => cancelEstimate(item)}
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                    <td>{new Date(item.last_update).toLocaleString()}</td>
+                    <td>
+                      <button
+                        className="financial-edit-button"
+                        onClick={() => handleEditClick(item)}
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -196,26 +273,25 @@ const Financial = () => {
                   <th>Date</th>
                   <th>Edit</th>
                   <th>Update Status</th>
+                  <th>Cancel</th>
                 </tr>
               </thead>
               <tbody>
-                {financialData
-                  .filter((invoice) => invoice.financial_status === "Pending")
+                {invoiceData
+                  .filter((invoice) => invoice.invoice_status === "Pending")
                   .map((item) => (
-                    <tr key={item.financial_number}>
-                      <td>{item.financial_number}</td>
-                      <td>{item.financial_name}</td>
-                      <td>{item.financial_patient}</td>
-                      <td>{formatCurrency(item.financial_hightotal)}</td>
+                    <tr key={item.invoice_id}>
+                      <td>{item.invoice_id}</td>
+                      <td>{item.invoice_name}</td>
+                      <td>{selectedPatient.name}</td>
+                      <td>{formatCurrency(item.invoice_total)}</td>
                       <td>
-                        <button
-                          className={getStatusClass(item.financial_status)}
-                        >
-                          {item.financial_status}
+                        <button className={getStatusClass(item.invoice_status)}>
+                          {item.invoice_status}
                         </button>
                       </td>
                       <td>
-                        {new Date(item.financial_date).toLocaleDateString()}
+                        {new Date(item.invoice_date).toLocaleDateString()}
                       </td>
                       <td>
                         <button
@@ -225,12 +301,21 @@ const Financial = () => {
                           Edit
                         </button>
                       </td>
+
                       <td>
                         <button
                           className="financial-complete"
-                          onClick={() => updateStatus(item, "Completed")}
+                          onClick={() => updateInvoiceStatus(item, "Completed")}
                         >
                           Complete
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="cancel-button"
+                          onClick={() => cancelInvoice(item)}
+                        >
+                          Cancel
                         </button>
                       </td>
                     </tr>
@@ -255,23 +340,21 @@ const Financial = () => {
                 </tr>
               </thead>
               <tbody>
-                {financialData
-                  .filter((invoice) => invoice.financial_status === "Completed")
+                {invoiceData
+                  .filter((invoice) => invoice.invoice_status === "Completed")
                   .map((item) => (
-                    <tr key={item.financial_number}>
-                      <td>{item.financial_number}</td>
-                      <td>{item.financial_name}</td>
-                      <td>{item.financial_patient}</td>
-                      <td>{formatCurrency(item.financial_hightotal)}</td>
+                    <tr key={item.invoice_id}>
+                      <td>{item.invoice_id}</td>
+                      <td>{item.invoice_name}</td>
+                      <td>{selectedPatient.name}</td>
+                      <td>{formatCurrency(item.invoice_total)}</td>
                       <td>
-                        <button
-                          className={getStatusClass(item.financial_status)}
-                        >
-                          {item.financial_status}
+                        <button className={getStatusClass(item.invoice_status)}>
+                          {item.invoice_status}
                         </button>
                       </td>
                       <td>
-                        {new Date(item.financial_date).toLocaleDateString()}
+                        {new Date(item.invoice_date).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}
@@ -295,23 +378,21 @@ const Financial = () => {
                 </tr>
               </thead>
               <tbody>
-                {financialData
-                  .filter((invoice) => invoice.financial_status === "Cancelled")
+                {invoiceData
+                  .filter((invoice) => invoice.invoice_status === "Cancelled")
                   .map((item) => (
-                    <tr key={item.financial_number}>
-                      <td>{item.financial_number}</td>
-                      <td>{item.financial_name}</td>
-                      <td>{item.financial_patient}</td>
-                      <td>{formatCurrency(item.financial_hightotal)}</td>
+                    <tr key={item.invoice_id}>
+                      <td>{item.invoice_id}</td>
+                      <td>{item.invoice_name}</td>
+                      <td>{selectedPatient.name}</td>
+                      <td>{formatCurrency(item.invoice_total)}</td>
                       <td>
-                        <button
-                          className={getStatusClass(item.financial_status)}
-                        >
-                          {item.financial_status}
+                        <button className={getStatusClass(item.invoice_status)}>
+                          {item.invoice_status}
                         </button>
                       </td>
                       <td>
-                        {new Date(item.financial_date).toLocaleDateString()}
+                        {new Date(item.invoice_date).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}
@@ -324,7 +405,6 @@ const Financial = () => {
       <AddEstimateModal
         isOpen={isModalOpen}
         onClose={closeModal}
-        onAddEstimate={handleSaveEstimate}
         estimateToEdit={estimateToEdit}
       />
     </div>
