@@ -1,28 +1,72 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { Link } from "react-router-dom";
+import { usePatient } from "../../../context/PatientContext";
 import "./Summaries.css";
 
 const Summaries = () => {
+  const { selectedPatient } = usePatient();
+  const [ownerDetails, setOwnerDetails] = useState({});
+  const [patientDetails, setPatientDetails] = useState({});
   const [pendingInvoices, setPendingInvoices] = useState([]);
 
-  const fetchPendingInvoices = async () => {
-    const { data, error } = await supabase
-      .from("financial")
-      .select("*")
-      .eq("financial_status", "Pending"); // Fetch only pending invoices
+  const fetchOwnerDetails = async () => {
+    if (selectedPatient) {
+      const { data, error } = await supabase
+        .from("owners")
+        .select("*")
+        .eq("id", selectedPatient.owner_id);
 
-    if (error) {
-      console.error("Error fetching pending invoices:", error.message);
-    } else {
-      console.log("Fetched pending invoices:", data);
-      setPendingInvoices(data);
+      if (error) {
+        console.error("Error fetching owner details:", error.message);
+      } else {
+        if (data.length > 0) {
+          setOwnerDetails(data[0]);
+        }
+      }
+    }
+  };
+
+  const fetchPatientDetails = async () => {
+    if (selectedPatient) {
+      const { data, error } = await supabase
+        .from("patients")
+        .select("*")
+        .eq("id", selectedPatient.id);
+
+      if (error) {
+        console.error("Error fetching patient details:", error.message);
+      } else {
+        if (data.length > 0) {
+          setPatientDetails(data[0]);
+        }
+      }
+    }
+  };
+
+  const fetchPendingInvoices = async () => {
+    if (selectedPatient) {
+      const { data, error } = await supabase
+        .from("invoices")
+        .select("*")
+        .eq("patient_id", selectedPatient.id)
+        .eq("invoice_status", "Pending");
+
+      if (error) {
+        console.error("Error fetching pending invoices:", error.message);
+      } else {
+        setPendingInvoices(data);
+      }
     }
   };
 
   useEffect(() => {
-    fetchPendingInvoices();
-  }, []);
+    if (selectedPatient) {
+      fetchOwnerDetails();
+      fetchPatientDetails();
+      fetchPendingInvoices();
+    }
+  }, [selectedPatient]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-US", {
@@ -72,12 +116,12 @@ const Summaries = () => {
 
           <div className="table-container">
             <div className="owner-header">
-              <p>First Name:</p>
-              <p>Last Name:</p>
-              <p>Email:</p>
-              <p>Phone:</p>
-              <p>Address:</p>
-              <p>Notes:</p>
+              <p>First Name: {ownerDetails.first_name || "N/A"}</p>
+              <p>Last Name: {ownerDetails.last_name || "N/A"}</p>
+              <p>Email: {ownerDetails.email || "N/A"}</p>
+              <p>Phone: {ownerDetails.phone || "N/A"}</p>
+              <p>Address: {ownerDetails.address || "N/A"}</p>
+              <p>Notes: {ownerDetails.notes || "N/A"}</p>
             </div>
           </div>
         </div>
@@ -87,16 +131,22 @@ const Summaries = () => {
 
           <div className="table-container">
             <div className="owner-header">
-              <p>Species:</p>
-              <p>Breed:</p>
-              <p>Age:</p>
-              <p>Date of Birth:</p>
-              <p>Gender:</p>
-              <p>Microchip Number:</p>
-              <p>Weight:</p>
-              <p>Rabies Number:</p>
-              <p>Color:</p>
-              <p>Notes:</p>
+              <p>Species: {patientDetails.species || "N/A"}</p>
+              <p>Breed: {patientDetails.breed || "N/A"}</p>
+              <p>Age: {patientDetails.age || "N/A"}</p>
+              <p>
+                Date of Birth:{" "}
+                {new Date(patientDetails.date_of_birth).toLocaleDateString() ||
+                  "N/A"}
+              </p>
+              <p>Gender: {patientDetails.gender || "N/A"}</p>
+              <p>
+                Microchip Number: {patientDetails.microchip_number || "N/A"}
+              </p>
+              <p>Weight: {patientDetails.weight || "N/A"} KG</p>
+              <p>Rabies Number: {patientDetails.rabies_number || "N/A"}</p>
+              <p>Color: {patientDetails.color || "N/A"}</p>
+              <p>Notes: {patientDetails.notes || "N/A"}</p>
             </div>
           </div>
         </div>
@@ -109,7 +159,6 @@ const Summaries = () => {
                 <tr>
                   <th>Number</th>
                   <th>Name</th>
-                  <th>Patient</th>
                   <th>Amount</th>
                   <th>Status</th>
                   <th>Date</th>
@@ -117,20 +166,19 @@ const Summaries = () => {
               </thead>
               <tbody>
                 {pendingInvoices.map((invoice) => (
-                  <tr key={invoice.financial_number}>
-                    <td>{invoice.financial_number}</td>
-                    <td>{invoice.financial_name}</td>
-                    <td>{invoice.financial_patient}</td>
-                    <td>{formatCurrency(invoice.financial_hightotal)}</td>
+                  <tr key={invoice.invoice_id}>
+                    <td>{invoice.invoice_id}</td>
+                    <td>{invoice.invoice_name}</td>
+                    <td>{formatCurrency(invoice.invoice_total)}</td>
                     <td>
                       <button
-                        className={`status-${invoice.financial_status.toLowerCase()}`}
+                        className={`status-${invoice.invoice_status.toLowerCase()}`}
                       >
-                        {invoice.financial_status}
+                        {invoice.invoice_status}
                       </button>
                     </td>
                     <td>
-                      {new Date(invoice.financial_date).toLocaleDateString()}
+                      {new Date(invoice.invoice_date).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
@@ -138,8 +186,6 @@ const Summaries = () => {
             </table>
           </div>
         </div>
-
-        {/* Add your other sections here... */}
 
         <div className="estimate-section">
           <h2 className="financial-h2">Summary Notes</h2>
@@ -152,7 +198,7 @@ const Summaries = () => {
                   <th>Date</th>
                 </tr>
               </thead>
-              <tbody>{/* display information from database here */}</tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>

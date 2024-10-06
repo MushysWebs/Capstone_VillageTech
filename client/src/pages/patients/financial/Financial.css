@@ -1,18 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap");
 
-.financial-h1{
+.financial-h1 {
   display: flex;
   justify-content: center;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-weight: 400;
-
 }
 
 .financial-h2 {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-weight: 400;
 }
-
 
 .patient-main {
   display: flex;
@@ -54,21 +52,20 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
   margin-bottom: 2rem;
-  /* Use padding to create space instead of margin */
   margin: 50px;
-  max-height: 400px; /* Set a maximum height */
-  overflow-y: auto;  /* Enable vertical scrolling */
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .estimate-header-container {
-  display: flex;          /* Enables flexbox layout */
-  align-items: center;    /* Vertically centers items */
+  display: flex;
+  align-items: center;
 }
 
 .estimate-header-container button {
-  margin-right: 10px;     /* Adds space between button and h2 */
+  margin-right: 10px;
   padding: 0.1rem 0.5rem;
-  background-color: #09ACE0;
+  background-color: #09ace0;
   border: none;
   border-radius: 6px;
   font-size: 1.5rem;
@@ -90,7 +87,7 @@
 }
 
 .financial-edit-button:hover {
-  background-color: #09ACE0;
+  background-color: #09ace0;
   color: white;
 }
 
@@ -103,7 +100,7 @@
 }
 
 .financial-complete:hover {
-  background-color: #09ACE0;
+  background-color: #09ace0;
   color: white;
 }
 
@@ -124,19 +121,19 @@
 }
 
 .status-completed {
-  border: 2px solid #09CB8B;
+  border: 2px solid #09cb8b;
   padding: 5px;
   border-radius: 6px;
   color: white;
-  background-color: #09CB8B;
+  background-color: #09cb8b;
 }
 
-.status-cancelled{
-  border: 2px solid #E74C3C;
+.status-cancelled {
+  border: 2px solid #e74c3c;
   padding: 5px;
   border-radius: 6px;
   color: white;
-  background-color: #E74C3C;
+  background-color: #e74c3c;
 }
 
 .estimate-table {
@@ -165,4 +162,19 @@
 
 .estimate-table tr:hover {
   background-color: #eef2f7;
+}
+
+.cancel-button {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.cancel-button:hover {
+  background-color: #e74c3c;
+  color: white;
 }
