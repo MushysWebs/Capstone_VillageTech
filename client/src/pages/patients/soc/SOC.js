@@ -35,20 +35,36 @@ const SOC = () => {
                 <div className="standard-of-care">
                     <h2>+ Standard Of Care</h2>
 
-                    {socData ? (
+                    {/* {socData ? (
                         <div className="soc-table">
-                            {/* {socData.map((socEvent, index) => (
+                            {socData.map((socEvent, index) => (
                                 <div className="soc-row" key={index}>
                                     <div className="soc-item">{socEvent.name}</div>
                                     <div className={`soc-importance ${socEvent.importance}`}>{socEvent.importance}</div>
                                     <div className="soc-fulfilled">{socEvent.fulfilled}</div>
                                     <div className="soc-next-due">{socEvent.nextDue}</div>
                                 </div>
-                            ))} */}
+                            ))}
                         </div>
                     ) : (
                         <p>No SOC events available</p>
-                    )}
+                    )} */}
+                    <div className="soc-header">
+                        <div className=""></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <div className="soc-table">
+                        <div className="soc-row">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Comments Section */}
@@ -69,5 +85,6 @@ const SOC = () => {
         </div>
     );
 };
+
 
 export default SOC;
