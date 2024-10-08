@@ -1,87 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import PatientSidebar from "../../../components/patientSideBar/PatientSidebar"; // Import PatientSidebar component
+import SOCModal from "./SOCModal";  // Import SOCModal component (Assuming it's in the same folder as SOC.js)
+import CommentsModal from "./CommentsModal";  // Import CommentsModal component (Assuming it's in the same folder as SOC.js)
 import './SOC.css';
-import PatientSidebar from "../../../components/patientSideBar/PatientSidebar";
-
-// Modal Component for Standard of Care
-const SOCModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Add Standard of Care Data</h2>
-        {/* Add your form inputs for SOC data */}
-        <form>
-          <label>
-            Treatment:
-            <input type="text" name="treatment" />
-          </label>
-          <label>
-            Importance:
-            <input type="text" name="importance" />
-          </label>
-          <label>
-            Fulfilled At:
-            <input type="text" name="fulfilledAt" />
-          </label>
-          <label>
-            Next Due:
-            <input type="date" name="nextDue" />
-          </label>
-          <div className="modal-actions">
-            <button type="submit">Add SOC Data</button>
-            <button onClick={onClose}>Close</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-// Modal Component for Comments
-const CommentsModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Add Comment</h2>
-        {/* Add your form inputs for Comments */}
-        <form>
-          <label>
-            Comment:
-            <textarea name="comment" />
-          </label>
-          <label>
-            Public:
-            <input type="checkbox" name="public" />
-          </label>
-          <label>
-            Date Created:
-            <input type="date" name="dateCreated" />
-          </label>
-          <div className="modal-actions">
-            <button type="submit">Add Comment</button>
-            <button onClick={onClose}>Close</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
 
 const SOC = () => {
-  // Modal visibility states
+  const [socData, setSocData] = useState([
+    { treatment: "Annual Health Check", importance: "Required", fulfilledAt: "25-07-2024", nextDue: "25-07-2025" },
+    { treatment: "DA2PP", importance: "Core", fulfilledAt: "15-04-2024", nextDue: "15-04-2025" }
+    // You can replace this with fetched data later on
+  ]);
+
+  // Functions to open modals
   const [isSOCModalOpen, setIsSOCModalOpen] = useState(false);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
 
-  // Functions to open modals
   const openSOCModal = () => setIsSOCModalOpen(true);
   const openCommentsModal = () => setIsCommentsModalOpen(true);
-
-  // Functions to close modals
   const closeSOCModal = () => setIsSOCModalOpen(false);
   const closeCommentsModal = () => setIsCommentsModalOpen(false);
+
+  // Simulate fetch for SOC data (you can replace with actual API call)
+  useEffect(() => {
+    // Here you can add a fetch call to your database if needed
+    // For example:
+    // fetch('/api/soc')
+    //   .then(response => response.json())
+    //   .then(data => setSocData(data));
+  }, []);
 
   return (
     <div className="SOC-main">
@@ -103,13 +49,14 @@ const SOC = () => {
           </div>
 
           <div className="soc-table">
-            <div className="soc-column">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
+            {socData.map((item, index) => (
+              <div className="soc-column" key={index}>
+                <div>{item.treatment}</div>
+                <div>{item.importance}</div>
+                <div>{item.fulfilledAt}</div>
+                <div>{item.nextDue}</div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -128,13 +75,7 @@ const SOC = () => {
           </div>
 
           <div className="comments-table">
-            <div className="comments-column">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
+            {/* This will be similar to the SOC table, with a mapped list */}
           </div>
         </div>
       </div>

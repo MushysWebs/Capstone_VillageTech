@@ -10,6 +10,7 @@
 /* SOC and Comments, no Sideabar */
 .SOC-page {
     width: 100%;
+    min-width: 780px;
     height: 100%;
     min-height: 600px;
     max-height: 100%;
@@ -23,12 +24,14 @@
 
 /* SOC Portion */
 .standard-of-care {
+    min-height: 60vh;  /* Ensuring 60vh minimum height */
     background-color: #f2f0f0;
     border-radius: 18px;
     margin-bottom: 10px; /* Separate from the comments section */
     flex-grow: 1; /* Allow it to grow as needed */
-    max-height: 60vh; /* Set a maximum height so it doesn't grow endlessly */
-    overflow-y: auto; /* Allow internal scrolling if it exceeds its max height */
+    overflow-x: auto; /* Add horizontal scrollbar if content overflows */
+    overflow-y: auto; /* Allow internal vertical scrolling if content exceeds */
+    white-space: nowrap; /* Prevent text from wrapping and shrinking horizontally */
 }
 
 .soc-header {
@@ -47,15 +50,16 @@
 
 /* Comments Portion */
 .comments-section {
+    min-height: 60vh;  /* Ensuring 60vh minimum height */
     background-color: #f2f0f0;
     border-radius: 14px;
     margin-bottom: 10px;
     flex-grow: 1; /* Allow it to grow as needed */
-    max-height: 40vh; /* Set a maximum height */
-    overflow-y: auto; /* Enable scrolling inside the comments section if needed */
+    overflow-x: auto; /* Add horizontal scrollbar if content overflows */
+    overflow-y: auto; /* Enable vertical scrolling inside comments */
+    white-space: nowrap; /* Prevent shrinking horizontally */
 }
 
-/* Comments Header - Match Figma's Layout */
 .comments-header {
     display: grid;
     grid-template-columns: 3fr 1fr 1fr 1fr;  /* Adjust column proportions based on Figma */
