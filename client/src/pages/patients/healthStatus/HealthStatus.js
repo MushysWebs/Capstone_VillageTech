@@ -1,49 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Link } from 'react-router-dom';
-import './HealthStatus.css';
+import React, { useState, useEffect } from "react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Link } from "react-router-dom";
+import { usePatient } from "../../../context/PatientContext";
+import "./HealthStatus.css";
 
 const HealthStatus = () => {
-  const patientId = 10; // Hardcoded patient ID for now
-  const [patient, setPatient] = useState(null);
+  const { selectedPatient } = usePatient();
   const [error, setError] = useState(null);
+  const [vaccinations, setVaccinations] = useState([]);
   const supabase = useSupabaseClient();
 
   useEffect(() => {
-    const fetchPatient = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('patients')
-          .select('*')
-          .eq('id', patientId)
-          .single();
+    const fetchPatientData = async () => {
+      if (selectedPatient) {
+        try {
+          const { data: vaccinations, error: vaccinationError } = await supabase
+            .from("medications")
+            .select("*")
+            .eq("patient_id", selectedPatient.id)
+            .eq("type", "Vaccine");
 
-        if (error) {
-          console.error('Supabase fetch error:', error);
-          setError('Failed to fetch patient information.');
-        } else {
-          setPatient(data);
+          if (vaccinationError) {
+            console.error("Error fetching vaccinations:", vaccinationError);
+            setError("Failed to fetch vaccination information.");
+          } else {
+            setVaccinations(vaccinations);
+          }
+        } catch (error) {
+          console.error("Error fetching vaccination information:", error);
+          setError(
+            "An unexpected error occurred while fetching vaccination information."
+          );
         }
-      } catch (error) {
-        console.error('Error fetching patient information:', error);
-        setError('An unexpected error occurred while fetching patient information.');
       }
     };
 
-    fetchPatient();
-  }, [patientId, supabase]);
+    fetchPatientData();
+  }, [selectedPatient, supabase]);
 
   return (
-    <div className='patient-main'>
+    <div className="patient-main">
       <header className="patient-header">
         <div className="patient-tabs">
-          <Link to="/patient/clinical" className="tab-button">Clinical</Link>
-          <Link to="/patient/soc" className="tab-button">S.O.C.</Link>
-          <Link to="/Financial" className="tab-button">Financial</Link>
-          <Link to="/summaries" className="tab-button">Summaries</Link>
-          <Link to="/healthStatus" className="tab-button">Health Status</Link>
-          <Link to="/medication" className="tab-button">Medication</Link>
-          <Link to="/newPatient" className="tab-button">New Patient</Link>
+          <Link to="/patient/clinical" className="tab-button">
+            Clinical
+          </Link>
+          <Link to="/patient/soc" className="tab-button">
+            S.O.C.
+          </Link>
+          <Link to="/Financial" className="tab-button">
+            Financial
+          </Link>
+          <Link to="/summaries" className="tab-button">
+            Summaries
+          </Link>
+          <Link to="/healthStatus" className="tab-button">
+            Health Status
+          </Link>
+          <Link to="/medication" className="tab-button">
+            Medication
+          </Link>
+          <Link to="/newPatient" className="tab-button">
+            New Patient
+          </Link>
         </div>
       </header>
 
@@ -54,14 +73,24 @@ const HealthStatus = () => {
             <div className="info-grid">
               {error ? (
                 <div className="info-item">{error}</div>
-              ) : patient ? (
+              ) : selectedPatient ? (
                 <>
-                  <div className="info-item">Name: {patient.name}</div>
-                  <div className="info-item">Breed: {patient.breed}</div>
-                  <div className="info-item">Patient ID: {patient.id}</div>
-                  <div className="info-item">Gender: {patient.gender}</div>
-                  <div className="info-item">Colour: {patient.color}</div>
-                  <div className="info-item">Birth weight: {patient.weight} lbs</div>
+                  <div className="info-item">Name: {selectedPatient.name}</div>
+                  <div className="info-item">
+                    Breed: {selectedPatient.breed}
+                  </div>
+                  <div className="info-item">
+                    Patient ID: {selectedPatient.id}
+                  </div>
+                  <div className="info-item">
+                    Gender: {selectedPatient.gender}
+                  </div>
+                  <div className="info-item">
+                    Colour: {selectedPatient.color}
+                  </div>
+                  <div className="info-item">
+                    Weight: {selectedPatient.weight} kgs
+                  </div>
                 </>
               ) : (
                 <div className="info-item">Loading...</div>
@@ -74,20 +103,23 @@ const HealthStatus = () => {
           <section className="health-notes">
             <header className="section-header">Health Notes and Alerts</header>
             <div className="health-notes-grid">
-              {/* Display patient notes here */}
               {error ? (
                 <div className="info-item">{error}</div>
-              ) : patient ? (
-                <textarea 
-                  className="health-textarea" 
+              ) : selectedPatient ? (
+                <textarea
+                  className="health-textarea"
                   placeholder="Health notes"
-                  defaultValue={patient.notes || 'No health notes available'} // Default value from patient notes
+                  defaultValue={
+                    selectedPatient.notes || "No health notes available"
+                  } 
                 />
               ) : (
                 <div className="info-item">Loading...</div>
               )}
-              {/* Alerts section */}
-              <textarea className="health-textarea" placeholder="Alerts"></textarea>
+              <textarea
+                className="health-textarea"
+                placeholder="Alerts"
+              ></textarea>
             </div>
           </section>
         </div>
@@ -100,19 +132,27 @@ const HealthStatus = () => {
               <div className="vaccination-column">Date</div>
               <div className="vaccination-column">Next Due</div>
 
-              {/* Example Vaccinations */}
-              <div className="vaccination-item">DA2PP</div>
-              <div className="vaccination-item">TBD</div>
-              <div className="vaccination-item">TBD</div>
-              <div className="vaccination-item">Rabies</div>
-              <div className="vaccination-item">TBD</div>
-              <div className="vaccination-item">TBD</div>
-              <div className="vaccination-item">Leptospirosis</div>
-              <div className="vaccination-item">TBD</div>
-              <div className="vaccination-item">TBD</div>
-              <div className="vaccination-item">Lyme</div>
-              <div className="vaccination-item">TBD</div>
-              <div className="vaccination-item">TBD</div>
+              {vaccinations.length > 0 ? (
+                vaccinations.map((vaccination) => (
+                  <React.Fragment key={vaccination.id}>
+                    <div className="vaccination-item">{vaccination.name}</div>
+                    <div className="vaccination-item">
+                      {vaccination.date_prescribed || "N/A"}
+                    </div>
+                    <div className="vaccination-item">
+                      {vaccination.next_due || "N/A"}
+                    </div>
+                  </React.Fragment>
+                ))
+              ) : (
+                <>
+                  <div className="vaccination-item">
+                    No vaccinations available
+                  </div>
+                  <div className="vaccination-item"></div>
+                  <div className="vaccination-item"></div>
+                </>
+              )}
             </div>
           </section>
         </div>

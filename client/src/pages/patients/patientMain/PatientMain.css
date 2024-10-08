@@ -5,16 +5,10 @@
   padding: 20px;
 }
 
-.patientMain-header {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 20px;
-}
-
 .patientMain-tabs {
   display: flex;
   gap: 10px;
-  padding: 0 10px 10px 10px;
+  padding-bottom: 10px;
 }
 
 .patientMain-section {
@@ -29,7 +23,7 @@
   background-color: rgba(255, 255, 255, 0.9);
   border-right: 1px solid #e0e6ed;
   overflow-y: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   padding: 10px;
   flex-shrink: 0;
@@ -39,9 +33,6 @@
 .patientMain-main {
   flex: 1;
   padding-left: 20px;
-  padding-bottom: 5px;
-  overflow-y: auto;
-  overflow-x: hidden;
   display: flex;
   justify-content: center;
 }
@@ -53,7 +44,6 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   max-width: 1500px;
   width: 100%;
-  position: relative;
   display: flex;
   flex-direction: column;
 }
@@ -61,13 +51,11 @@
 .patientMain-details-header {
   display: flex;
   align-items: flex-start;
-  justify-content: flex-start;
   gap: 20px;
   position: relative;
 }
 
 .patientMain-avatar-large {
-  width: auto;
   height: 300px;
   border-radius: 10%;
   object-fit: cover;
@@ -77,19 +65,12 @@
   display: flex;
   flex-direction: column;
   padding-left: 20px;
-  margin-top: 1rem;
 }
 
 .patientMain-header-info h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  padding-bottom: 20px;
-}
-
-.patientMain-header-info p {
-  color: #7f8c8d;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1px;
 }
 
 .patientMain-item {
@@ -98,7 +79,7 @@
   padding: 0.75rem;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s;
 }
 
 .patientMain-item:hover {
@@ -122,32 +103,10 @@
   font-weight: 500;
   font-size: 0.9rem;
 }
-
 .patientMain-action-buttons {
-  position: absolute;
-  top: 10px;
-  right: 10px;
   display: flex;
-  gap: 10px;
-}
-
-.action-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.3s;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.action-button.add-appointment-button,
-.action-button.edit-button {
-  color: white;
+  margin-left: 150px;
+  margin-top: 20px;
 }
 
 .action-button.add-appointment-button {
@@ -169,12 +128,6 @@
 .patientMain-edit-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.action-button.save-button,
-.action-button.cancel-button {
-  color: white;
   margin-top: 10px;
 }
 
@@ -220,19 +173,6 @@
   color: #2c3e50;
 }
 
-.patientMain-additional-info p,
-.patientMain-clinical-info p,
-.patientMain-tags p {
-  margin-bottom: 0.5rem;
-}
-
-.patientMain-additional-info strong,
-.patientMain-clinical-info strong,
-.patientMain-tags strong {
-  font-weight: 600;
-  color: #34495e;
-}
-
 .notes-textarea {
   width: 100%;
   padding: 1rem;
@@ -249,33 +189,20 @@
   font-weight: 500;
 }
 
-/* Responsive design */
 @media (max-width: 1200px) {
   .patientMain-info-section {
     flex-direction: column;
-  }
-
-  .patientMain-additional-info,
-  .patientMain-clinical-info,
-  .patientMain-tags,
-  .patientMain-notes {
-    width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .patientMain-details-header {
     flex-direction: column;
-    padding-right: 0;
   }
 
   .patientMain-action-buttons {
     position: static;
     flex-direction: row;
     margin-top: 10px;
-  }
-
-  .action-button {
-    width: auto;
   }
 }
