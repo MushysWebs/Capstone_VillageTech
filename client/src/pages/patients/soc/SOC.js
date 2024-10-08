@@ -5,11 +5,11 @@ import CommentsModal from "./CommentsModal";  // Import CommentsModal component 
 import './SOC.css';
 
 const SOC = () => {
-  const [socData, setSocData] = useState([
-    { treatment: "Annual Health Check", importance: "Required", fulfilledAt: "25-07-2024", nextDue: "25-07-2025" },
-    { treatment: "DA2PP", importance: "Core", fulfilledAt: "15-04-2024", nextDue: "15-04-2025" }
-    // You can replace this with fetched data later on
-  ]);
+    const [socData, setSocData] = useState([
+      { treatment: "Annual Health Check", importance: "Required", fulfilledAt: "25-07-2024", nextDue: "25-07-2025" },
+      { treatment: "DA2PP", importance: "Core", fulfilledAt: "15-04-2024", nextDue: "15-04-2025" }
+    ]);
+  
 
   // Functions to open modals
   const [isSOCModalOpen, setIsSOCModalOpen] = useState(false);
@@ -20,13 +20,9 @@ const SOC = () => {
   const closeSOCModal = () => setIsSOCModalOpen(false);
   const closeCommentsModal = () => setIsCommentsModalOpen(false);
 
-  // Simulate fetch for SOC data (you can replace with actual API call)
+  // Simulate fetch for SOC data (replace with actual API call)
   useEffect(() => {
-    // Here you can add a fetch call to your database if needed
-    // For example:
-    // fetch('/api/soc')
-    //   .then(response => response.json())
-    //   .then(data => setSocData(data));
+    // Here you can add a fetch call to your database
   }, []);
 
   return (

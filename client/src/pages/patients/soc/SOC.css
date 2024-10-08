@@ -108,7 +108,7 @@
     overflow-y: auto;
 }
 
-.soc-row {
+.soc-column {
     display: grid;
     grid-template-columns: 3fr 1fr 1fr 1fr;  /* More space for the Treatment/Vaccine column */
     padding: 10px 0;
@@ -118,7 +118,7 @@
 }
 
 /* Comments Rows */
-.comments-row {
+.comments-column {
     display: grid;
     grid-template-columns: 4fr 1fr 1fr 1fr;  /* More space for the Comment column */
     padding: 10px 0;
