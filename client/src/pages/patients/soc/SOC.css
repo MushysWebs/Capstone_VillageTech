@@ -1,40 +1,52 @@
-.SOC_container {
+.SOC_page {
     display: flex;
     padding: 20px;
-    height: 1500px;
-    box-sizing: border-box; /* Ensures padding doesn't affect width calculations */
+    height: 100vh; /* Make sure the container always takes the full viewport height */
+    box-sizing: border-box;
     overflow-y: auto;
     width: 100%;
 }
-/* .patientSidebar {
-    width: 100%;
-    height: 100%;
-    flex-grow: 1;
-    flex-basis: 25%;
-    max-width: 25%;
-} */
 
-.main-content {
-    width: 75%; /* Content takes up the remaining 75% */
-    padding: 2rem;
-    box-sizing: border-box; /* Add this to ensure padding is part of the width calculation */
-    overflow: auto; /* Ensures content that exceeds height will scroll, not overflow */
-}
-
-.standard-of-care {
-    flex-grow: 9;
-    margin-top: 1rem;
-    margin: auto;
-}
-
-.standard-of-care table {
-    width: 100%; /* Ensures table doesn't extend beyond the content area */
-    border-collapse: collapse;
-    align-items: start;
+.SOC_container {
+    display: flex;
+    flex: row;
 }
 
 .standard-of-care, .comments-section {
     border: 1px solid #ddd;
-    padding: 8px;
-    flex-direction: row;
+    padding: 20px;
+    flex-direction: column;
+    margin: 10px; /* Add margin between elements */
+    box-sizing: border-box;
+}
+
+.standard-of-care {
+    flex-grow: 2; /* Adjust flex-grow to control size relative to comments */
+    margin-top: 1rem;
+    width: 60%; /* Control how much of the available space it should take */
+}
+
+.comments-section {
+    flex-grow: 1; /* Comments take less space */
+    margin-left: 1rem;
+    width: 30%; /* Width to control how much space comments take */
+}
+
+.standard-of-care table {
+    width: 100%;
+    border-collapse: collapse;
+    align-items: start;
+}
+
+.standard-of-care .soc-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.comments-section .comment {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+    overflow-y: auto; /* Handle long comments */
 }
