@@ -162,9 +162,15 @@ const Layout = () => {
   };
 
   const renderSidebarLink = (to, icon, text) => {
-    const isActive = location.pathname === to;
+    const isActive = () => {
+      if (to === '/patient') {
+        return ['/patient', '/SOC', '/Financial', '/summaries', '/healthStatus', '/medication', '/newPatient'].includes(location.pathname);
+      }
+      return location.pathname === to;
+    };
+
     return (
-      <li className={isActive ? 'active' : ''} draggable="false">
+      <li className={isActive() ? 'active' : ''} draggable="false">
         <Link to={to} draggable="false">
           <i className={`fas ${icon}`} draggable="false"></i>{' '}
           <span draggable="false">{text}</span>
