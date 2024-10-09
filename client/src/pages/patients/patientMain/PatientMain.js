@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { usePatient } from "../../../context/PatientContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Edit2, X, Save, Calendar } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./PatientMain.css";
 import AddAppointment from "../../dashboard/calendarView/AddAppointment";
 
 const PatientMain = ({ globalSearchTerm }) => {
+  const location = useLocation();
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const { selectedPatient, setSelectedPatient } = usePatient();
@@ -140,28 +141,49 @@ const PatientMain = ({ globalSearchTerm }) => {
   };
 
   return (
-    <div className="patientMain-page">
-      <header className="patientMain-tabs-header">
+    <div className="patient-main">
+      <header className="patient-header">
         <div className="patientMain-tabs">
-          <Link to="/patient/clinical" className="tab-button">
+          <Link
+            to="/patient/clinical"
+            className={`tab-button ${location.pathname === "/patient/clinical" ? "active" : ""}`}
+          >
             Clinical
           </Link>
-          <Link to="/SOC" className="tab-button">
+          <Link
+            to="/SOC"
+            className={`tab-button ${location.pathname === "/SOC" ? "active" : ""}`}
+          >
             S.O.C.
           </Link>
-          <Link to="/Financial" className="tab-button">
+          <Link
+            to="/Financial"
+            className={`tab-button ${location.pathname === "/Financial" ? "active" : ""}`}
+          >
             Financial
           </Link>
-          <Link to="/summaries" className="tab-button">
+          <Link
+            to="/summaries"
+            className={`tab-button ${location.pathname === "/summaries" ? "active" : ""}`}
+          >
             Summaries
           </Link>
-          <Link to="/healthStatus" className="tab-button">
+          <Link
+            to="/healthStatus"
+            className={`tab-button ${location.pathname === "/healthStatus" ? "active" : ""}`}
+          >
             Health Status
           </Link>
-          <Link to="/medication" className="tab-button">
+          <Link
+            to="/medication"
+            className={`tab-button ${location.pathname === "/medication" ? "active" : ""}`}
+          >
             Medication
           </Link>
-          <Link to="/newPatient" className="tab-button">
+          <Link
+            to="/newPatient"
+            className={`tab-button ${location.pathname === "/newPatient" ? "active" : ""}`}
+          >
             New Patient
           </Link>
         </div>

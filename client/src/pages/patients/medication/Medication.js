@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSupabaseClient } from "@supabase/auth-helpers-react"; // Supabase client to fetch data
 import { usePatient } from "../../../context/PatientContext"; // Import Patient Context
+import PatientTabs from '../../../components/patientSideBar/PatientTabs'
 import "./Medication.css";
 
 const MedicationHistory = () => {
@@ -73,30 +74,9 @@ const MedicationHistory = () => {
   return (
     <div className="patient-main">
       <header className="patient-header">
-        <div className="patient-tabs">
-          <Link to="/patient/clinical" className="tab-button">
-            Clinical
-          </Link>
-          <Link to="/patient/soc" className="tab-button">
-            S.O.C.
-          </Link>
-          <Link to="/Financial" className="tab-button">
-            Financial
-          </Link>
-          <Link to="/summaries" className="tab-button">
-            Summaries
-          </Link>
-          <Link to="/healthStatus" className="tab-button">
-            Health Status
-          </Link>
-          <Link to="/patient/medication" className="tab-button">
-            Medication
-          </Link>
-          <Link to="/newPatient" className="tab-button">
-            New Patient
-          </Link>
-        </div>
+        <PatientTabs />
       </header>
+
 
       <div className="medication-content">
         <div>

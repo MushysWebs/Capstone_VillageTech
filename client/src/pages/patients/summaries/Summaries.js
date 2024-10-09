@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { Link } from "react-router-dom";
 import { usePatient } from "../../../context/PatientContext";
+import PatientTabs from '../../../components/patientSideBar/PatientTabs'
 import "./Summaries.css";
 
 const Summaries = () => {
@@ -79,29 +80,7 @@ const Summaries = () => {
   return (
     <div className="patient-main">
       <header className="patient-header">
-        <div className="patient-tabs">
-          <Link to="/patient/clinical" className="tab-button">
-            Clinical
-          </Link>
-          <Link to="/patient/soc" className="tab-button">
-            S.O.C.
-          </Link>
-          <Link to="/Financial" className="tab-button">
-            Financial
-          </Link>
-          <Link to="/patient/summaries" className="tab-button">
-            Summaries
-          </Link>
-          <Link to="/healthStatus" className="tab-button">
-            Health Status
-          </Link>
-          <Link to="/medication" className="tab-button">
-            Medication
-          </Link>
-          <Link to="/newPatient" className="tab-button">
-            New Patient
-          </Link>
-        </div>
+      <PatientTabs />
       </header>
 
       <div>
