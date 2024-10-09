@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useSupabaseClient } from "@supabase/auth-helpers-react"; // Supabase client to fetch data
-import { usePatient } from "../../../context/PatientContext"; // Import Patient Context
-import PatientTabs from '../../../components/patientSideBar/PatientTabs'
+import React, { useState, useEffect } from "react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { usePatient } from "../../../context/PatientContext";
+import PatientTabs from '../../../components/patientSideBar/PatientTabs';
+import { Search, AlertCircle, Activity, FileText } from 'lucide-react';
 import "./Medication.css";
 
 const MedicationHistory = () => {
-  const { selectedPatient } = usePatient(); // Get the selected patient from context
+  const { selectedPatient } = usePatient();
   const supabase = useSupabaseClient();
 
   const [medications, setMedications] = useState([]);
@@ -17,58 +17,63 @@ const MedicationHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchPatientData = async () => {
-      if (selectedPatient) {
-        setLoading(true);
+    if (selectedPatient) {
+      fetchPatientData();
+    }
+  }, [selectedPatient]);
 
-        try {
-          const { data: medicationData, error: medicationError } =
-            await supabase
-              .from("medications")
-              .select("*")
-              .eq("patient_id", selectedPatient.id);
+  const fetchPatientData = async () => {
+    setLoading(true);
+    try {
+      const [medicationData, allergyData, vitalData, noteData] = await Promise.all([
+        supabase.from("medications").select("*").eq("patient_id", selectedPatient.id),
+        supabase.from("patient_allergies").select("*").eq("patient_id", selectedPatient.id),
+        supabase.from("patient_vitals").select("*").eq("patient_id", selectedPatient.id),
+        supabase.from("patient_notes").select("*").eq("patient_id", selectedPatient.id)
+      ]);
 
-          const { data: allergyData, error: allergyError } = await supabase
-            .from("patient_allergies")
-            .select("*")
-            .eq("patient_id", selectedPatient.id);
-
-          const { data: vitalData, error: vitalError } = await supabase
-            .from("patient_vitals")
-            .select("*")
-            .eq("patient_id", selectedPatient.id);
-
-          const { data: noteData, error: noteError } = await supabase
-            .from("patient_notes")
-            .select("*")
-            .eq("patient_id", selectedPatient.id);
-
-          if (medicationError || allergyError || vitalError || noteError) {
-            console.error("Error fetching patient data:", {
-              medicationError,
-              allergyError,
-              vitalError,
-              noteError,
-            });
-          } else {
-            setMedications(medicationData || []);
-            setAllergies(allergyData || []);
-            setVitals(vitalData || []);
-            setNotes(noteData || []);
-          }
-        } catch (error) {
-          console.error("Error fetching patient information:", error);
-        }
-
-        setLoading(false);
-      }
-    };
-
-    fetchPatientData();
-  }, [selectedPatient, supabase]);
+      setMedications(medicationData.data || []);
+      setAllergies(allergyData.data || []);
+      setVitals(vitalData.data || []);
+      setNotes(noteData.data || []);
+    } catch (error) {
+      console.error("Error fetching patient data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredMedications = medications.filter((med) =>
     med.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const renderTable = (data, columns) => (
+    <table className="medication-table">
+      <thead>
+        <tr>
+          {columns.map((col) => (
+            <th key={col.key}>{col.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.length > 0 ? (
+          data.map((item) => (
+            <tr key={item.id}>
+              {columns.map((col) => (
+                <td key={col.key}>{item[col.key]}</td>
+              ))}
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={columns.length} className="no-data-message">
+              No data available
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   );
 
   return (
@@ -77,14 +82,12 @@ const MedicationHistory = () => {
         <PatientTabs />
       </header>
 
-
       <div className="medication-content">
-        <div>
-          <h1>Medication</h1>
-        </div>
-
-        <div className="estimate-section">
-          <h2>Patient Medication History</h2>
+        <div className="section-box">
+          <h2 className="section-header">
+            <Search size={24} style={{ marginRight: '10px' }} />
+            Medication History
+          </h2>
           <input
             type="text"
             placeholder="Search medications..."
@@ -92,144 +95,70 @@ const MedicationHistory = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-medication"
           />
-
           {loading ? (
-            <p>Loading medications...</p>
+            <p className="loading-message">Loading medications...</p>
           ) : (
-            <table className="estimate-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Dosage</th>
-                  <th>Frequency</th>
-                  <th>Date Prescribed</th>
-                  <th>End Date</th>
-                  <th>Reason</th>
-                  <th>Prescribing Doctor</th>
-                  <th>Instructions</th>
-                  <th>Refills</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMedications.length > 0 ? (
-                  filteredMedications.map((medication) => (
-                    <tr key={medication.id}>
-                      <td>{medication.name}</td>
-                      <td>{medication.dosage}</td>
-                      <td>{medication.frequency}</td>
-                      <td>{medication.date_prescribed}</td>
-                      <td>{medication.end_date}</td>
-                      <td>{medication.reason}</td>
-                      <td>{medication.doctor}</td>
-                      <td>{medication.instructions}</td>
-                      <td>{medication.refills}</td>
-                      <td>{medication.status}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="10">No medications found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            renderTable(filteredMedications, [
+              { key: 'name', label: 'Name' },
+              { key: 'dosage', label: 'Dosage' },
+              { key: 'frequency', label: 'Frequency' },
+              { key: 'date_prescribed', label: 'Date Prescribed' },
+              { key: 'end_date', label: 'End Date' },
+              { key: 'reason', label: 'Reason' },
+              { key: 'doctor', label: 'Prescribing Doctor' },
+              { key: 'instructions', label: 'Instructions' },
+              { key: 'refills', label: 'Refills' },
+              { key: 'status', label: 'Status' }
+            ])
           )}
         </div>
 
-        <div className="estimate-section">
-          <h2>Allergies</h2>
+        <div className="section-box">
+          <h2 className="section-header">
+            <AlertCircle size={24} style={{ marginRight: '10px' }} />
+            Allergies
+          </h2>
           {loading ? (
-            <p>Loading allergies...</p>
+            <p className="loading-message">Loading allergies...</p>
           ) : (
-            <table className="estimate-table">
-              <thead>
-                <tr>
-                  <th>Allergy</th>
-                  <th>Reaction</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allergies.length > 0 ? (
-                  allergies.map((allergy) => (
-                    <tr key={allergy.id}>
-                      <td>{allergy.name}</td>
-                      <td>{allergy.reaction}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="2">No allergies found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            renderTable(allergies, [
+              { key: 'name', label: 'Allergy' },
+              { key: 'reaction', label: 'Reaction' }
+            ])
           )}
         </div>
 
-        <div className="estimate-section">
-          <h2>Vitals</h2>
+        <div className="section-box">
+          <h2 className="section-header">
+            <Activity size={24} style={{ marginRight: '10px' }} />
+            Vitals
+          </h2>
           {loading ? (
-            <p>Loading vitals...</p>
+            <p className="loading-message">Loading vitals...</p>
           ) : (
-            <table className="estimate-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Weight</th>
-                  <th>Temperature</th>
-                  <th>Heart Rate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vitals.length > 0 ? (
-                  vitals.map((vital) => (
-                    <tr key={vital.id}>
-                      <td>{vital.date}</td>
-                      <td>{vital.weight}</td>
-                      <td>{vital.temperature}</td>
-                      <td>{vital.heart_rate}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4">No vitals found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            renderTable(vitals, [
+              { key: 'date', label: 'Date' },
+              { key: 'weight', label: 'Weight' },
+              { key: 'temperature', label: 'Temperature' },
+              { key: 'heart_rate', label: 'Heart Rate' }
+            ])
           )}
         </div>
 
-        <section className="estimate-section">
-          <h2>Notes</h2>
+        <div className="section-box">
+          <h2 className="section-header">
+            <FileText size={24} style={{ marginRight: '10px' }} />
+            Notes
+          </h2>
           {loading ? (
-            <p>Loading notes...</p>
+            <p className="loading-message">Loading notes...</p>
           ) : (
-            <table className="estimate-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {notes.length > 0 ? (
-                  notes.map((note) => (
-                    <tr key={note.id}>
-                      <td>{note.date}</td>
-                      <td>{note.note}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="2">No notes found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            renderTable(notes, [
+              { key: 'date', label: 'Date' },
+              { key: 'note', label: 'Note' }
+            ])
           )}
-        </section>
+        </div>
       </div>
     </div>
   );

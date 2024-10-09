@@ -1,139 +1,156 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { Link } from "react-router-dom";
-import PatientTabs from '../../../components/patientSideBar/PatientTabs'
+import PatientTabs from '../../../components/patientSideBar/PatientTabs';
 import { usePatient } from "../../../context/PatientContext";
+import { Edit2, Save } from 'lucide-react';
 import "./HealthStatus.css";
 
 const HealthStatus = () => {
   const { selectedPatient } = usePatient();
   const [error, setError] = useState(null);
   const [vaccinations, setVaccinations] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [healthNotes, setHealthNotes] = useState("");
+  const [alerts, setAlerts] = useState("");
   const supabase = useSupabaseClient();
 
   useEffect(() => {
-    const fetchPatientData = async () => {
-      if (selectedPatient) {
-        try {
-          const { data: vaccinations, error: vaccinationError } = await supabase
-            .from("medications")
-            .select("*")
-            .eq("patient_id", selectedPatient.id)
-            .eq("type", "Vaccine");
+    if (selectedPatient) {
+      fetchPatientData();
+      setHealthNotes(selectedPatient.notes || "");
+    }
+  }, [selectedPatient]);
 
-          if (vaccinationError) {
-            console.error("Error fetching vaccinations:", vaccinationError);
-            setError("Failed to fetch vaccination information.");
-          } else {
-            setVaccinations(vaccinations);
-          }
-        } catch (error) {
-          console.error("Error fetching vaccination information:", error);
-          setError(
-            "An unexpected error occurred while fetching vaccination information."
-          );
-        }
-      }
-    };
+  const fetchPatientData = async () => {
+    try {
+      const { data: vaccinations, error: vaccinationError } = await supabase
+        .from("medications")
+        .select("*")
+        .eq("patient_id", selectedPatient.id)
+        .eq("type", "Vaccine");
 
-    fetchPatientData();
-  }, [selectedPatient, supabase]);
+      if (vaccinationError) throw vaccinationError;
+      setVaccinations(vaccinations);
+    } catch (error) {
+      console.error("Error fetching patient data:", error);
+      setError("An error occurred while fetching patient data.");
+    }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      const { error } = await supabase
+        .from("patients")
+        .update({ notes: healthNotes })
+        .eq("id", selectedPatient.id);
+
+      if (error) throw error;
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving health notes:", error);
+      setError("Failed to save health notes.");
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
     <div className="patient-main">
       <header className="patient-header">
-       <PatientTabs />
+        <PatientTabs />
       </header>
 
       <div className="health-status-container">
+        {error && <div className="error-message">{error}</div>}
+        
         <div className="section-box">
-          <section className="canine-info">
-            <header className="section-header">PATIENT INFORMATION</header>
-            <div className="info-grid">
-              {error ? (
-                <div className="info-item">{error}</div>
-              ) : selectedPatient ? (
-                <>
-                  <div className="info-item">Name: {selectedPatient.name}</div>
-                  <div className="info-item">
-                    Breed: {selectedPatient.breed}
-                  </div>
-                  <div className="info-item">
-                    Patient ID: {selectedPatient.id}
-                  </div>
-                  <div className="info-item">
-                    Gender: {selectedPatient.gender}
-                  </div>
-                  <div className="info-item">
-                    Colour: {selectedPatient.color}
-                  </div>
-                  <div className="info-item">
-                    Weight: {selectedPatient.weight} kgs
-                  </div>
-                </>
-              ) : (
-                <div className="info-item">Loading...</div>
-              )}
+          <h2 className="section-header">Patient Information</h2>
+          <div className="info-grid">
+            <div className="info-item">
+              <div className="info-label">Name</div>
+              <div className="info-value">{selectedPatient?.name}</div>
             </div>
-          </section>
+            <div className="info-item">
+              <div className="info-label">Breed</div>
+              <div className="info-value">{selectedPatient?.breed}</div>
+            </div>
+            <div className="info-item">
+              <div className="info-label">Patient ID</div>
+              <div className="info-value">{selectedPatient?.id}</div>
+            </div>
+            <div className="info-item">
+              <div className="info-label">Gender</div>
+              <div className="info-value">{selectedPatient?.gender}</div>
+            </div>
+            <div className="info-item">
+              <div className="info-label">Color</div>
+              <div className="info-value">{selectedPatient?.color}</div>
+            </div>
+            <div className="info-item">
+              <div className="info-label">Weight</div>
+              <div className="info-value">{selectedPatient?.weight} kg</div>
+            </div>
+          </div>
         </div>
 
         <div className="section-box">
-          <section className="health-notes">
-            <header className="section-header">Health Notes and Alerts</header>
-            <div className="health-notes-grid">
-              {error ? (
-                <div className="info-item">{error}</div>
-              ) : selectedPatient ? (
-                <textarea
-                  className="health-textarea"
-                  placeholder="Health notes"
-                  defaultValue={
-                    selectedPatient.notes || "No health notes available"
-                  } 
-                />
-              ) : (
-                <div className="info-item">Loading...</div>
-              )}
+          <h2 className="section-header">Health Notes and Alerts</h2>
+          <div className="health-notes-grid">
+            <div>
+              <h3>Health Notes</h3>
               <textarea
                 className="health-textarea"
-                placeholder="Alerts"
-              ></textarea>
+                value={healthNotes}
+                onChange={(e) => setHealthNotes(e.target.value)}
+                placeholder="Enter health notes..."
+                disabled={!isEditing}
+              />
             </div>
-          </section>
+            <div>
+              <h3>Alerts</h3>
+              <textarea
+                className="health-textarea"
+                value={alerts}
+                onChange={(e) => setAlerts(e.target.value)}
+                placeholder="Enter alerts..."
+                disabled={!isEditing}
+              />
+            </div>
+          </div>
+          {isEditing ? (
+            <button className="action-button" onClick={handleSave}>
+              <Save size={18} />
+              Save
+            </button>
+          ) : (
+            <button className="action-button" onClick={handleEdit}>
+              <Edit2 size={18} />
+              Edit
+            </button>
+          )}
         </div>
 
         <div className="section-box">
-          <section className="vaccination-info">
-            <header className="section-header">Vaccinations</header>
-            <div className="vaccination-grid">
-              <div className="vaccination-column">Shot</div>
-              <div className="vaccination-column">Date</div>
-              <div className="vaccination-column">Next Due</div>
-
-              {vaccinations.length > 0 ? (
-                vaccinations.map((vaccination) => (
-                  <React.Fragment key={vaccination.id}>
-                    <div className="vaccination-item">{vaccination.name}</div>
-                    <div className="vaccination-item">
-                      {vaccination.date_prescribed || "N/A"}
-                    </div>
-                    <div className="vaccination-item">
-                      {vaccination.next_due || "N/A"}
-                    </div>
-                  </React.Fragment>
-                ))
-              ) : (
-                <>
-                  <div className="vaccination-item">
-                    No vaccinations available
-                  </div>
-                  <div className="vaccination-item"></div>
-                  <div className="vaccination-item"></div>
-                </>
-              )}
-            </div>
-          </section>
+          <h2 className="section-header">Vaccinations</h2>
+          <div className="vaccination-grid">
+            {vaccinations.length > 0 ? (
+              vaccinations.map((vaccination) => (
+                <div key={vaccination.id} className="vaccination-item">
+                  <div className="vaccination-name">{vaccination.name}</div>
+                  <div className="vaccination-date">Date: {formatDate(vaccination.date_prescribed)}</div>
+                  <div className="vaccination-next-due">Next Due: {formatDate(vaccination.next_due)}</div>
+                </div>
+              ))
+            ) : (
+              <div className="vaccination-item">No vaccinations available</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
