@@ -146,7 +146,7 @@ const Layout = () => {
     } else if (location.pathname === '/newPatient') {
       return <NewPatient />;
     } else if (location.pathname === '/patient') {
-      return <PatientMain />;
+      return <PatientMain globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === '/Financial') {
       return <Financial />;
     }else if (location.pathname === '/healthStatus') {
