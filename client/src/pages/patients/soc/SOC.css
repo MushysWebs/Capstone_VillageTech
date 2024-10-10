@@ -1,174 +1,233 @@
-/* Main Page */
 .SOC-main {
-    display: flex;
-    padding: 20px;
-    height: 100vh; /* Make sure the container always takes the full viewport height */
-    box-sizing: border-box;
-    width: 100%;
+  display: flex;
+  padding: 20px;
+  height: calc(100vh - 60px);
+  width: 95%;
+  margin: 0 auto;
+  overflow-y: hidden;
 }
 
-/* SOC and Comments, no Sideabar */
+.SOC-patient-sidebar {
+  width: 250px;
+  background-color: #f8fafc;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  height: calc(100vh - 60px);
+  position: fixed;
+  left: 0;
+  top: 60px;
+  overflow-y: auto;
+  z-index: 1;
+}
+
 .SOC-page {
-    width: 100%;
-    min-width: 780px;
-    height: 100%;
-    min-height: 600px;
-    max-height: 100%;
-    margin: 0 0 0 8px;
-    padding: 1rem;
-    background-color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 14px;
-    overflow-y: auto;
+  width: calc(100% - 270px);
+  margin-left: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* SOC Portion */
-.standard-of-care {
-    min-height: 60vh;  /* Ensuring 60vh minimum height */
-    background-color: #f2f0f0;
-    border-radius: 18px;
-    margin-bottom: 10px; /* Separate from the comments section */
-    flex-grow: 1; /* Allow it to grow as needed */
-    overflow-x: auto; /* Add horizontal scrollbar if content overflows */
-    overflow-y: auto; /* Allow internal vertical scrolling if content exceeds */
-    white-space: nowrap; /* Prevent text from wrapping and shrinking horizontally */
+.SOC-section-box {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border: 1px solid #e6e6e6;
+  margin-top: 20px;
 }
 
-.soc-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;  /* Match Figma's column proportions */
-    background-color: #e0e0e0;  /* Figma background color */
-    font-weight: bold;
-    font-size: 16px;
-    color: #3d3d3d;
+.SOC-section-header {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  color: #09ace0;
+  border-bottom: 2px solid #09ace0;
+  padding-bottom: 10px;
 }
 
-.soc-header p {
-    margin: 0;
-    text-align: center;  /* Keep text centered */
+.SOC-soc-table th,
+.SOC-comments-table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #34495e;
+  padding: 10px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
 }
 
-/* Comments Portion */
-.comments-section {
-    min-height: 60vh;  /* Ensuring 60vh minimum height */
-    background-color: #f2f0f0;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    flex-grow: 1; /* Allow it to grow as needed */
-    overflow-x: auto; /* Add horizontal scrollbar if content overflows */
-    overflow-y: auto; /* Enable vertical scrolling inside comments */
-    white-space: nowrap; /* Prevent shrinking horizontally */
+.SOC-soc-table td,
+.SOC-comments-table td {
+  padding: 10px;
+  border-bottom: 1px solid #e6e6e6;
 }
 
-.comments-header {
-    display: grid;
-    grid-template-columns: 3fr 1fr 1fr 1fr;  /* Adjust column proportions based on Figma */
-    background-color: #e0e0e0;
-    font-weight: bold;
-    font-size: 16px;
-    color: #3d3d3d;
+.SOC-required,
+.SOC-core,
+.SOC-non-core {
+  border-radius: 6px;
+  font-size: 0.9rem;
+  padding: 4px 8px;
 }
 
-.comments-header p {
-    margin: 0;
-    text-align: center;
+.SOC-required {
+  background-color: #ffebee;
+  color: #d32f2f;
 }
 
-
-/* Titles */
-.standard-of-care .title, .comments-section .title {
-    display: flex;
-    align-items: center;
-    background-color: #ccc;
-    border-radius: 10px;
-    margin: 0;
-    padding: 10px;
-    font-size: 18px;
-    font-weight: bold;
+.SOC-core {
+  background-color: #fff3e0;
+  color: #f57c00;
 }
 
-/* Standard of Care and Comments Headers */
-.soc-header, .comments-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;  /* Standard of Care header layout */
-    padding: 10px 15px;
-    background-color: #e0e0e0;
-    border-radius: 10px;
-    font-weight: bold;
-    color: #3d3d3d;
+.SOC-non-core {
+  background-color: #e0f7fa;
+  color: #00796b;
 }
 
-.comments-header {
-    grid-template-columns: 3fr 1fr 1fr 1fr;  /* Comments header layout */
+.SOC-soc-table {
+  width: 100%;
 }
 
-/* Dummy List Items for Testing */
-.soc-table, .comments-table {
-    padding: 10px;
-    overflow-y: auto;
+.SOC-soc-table th,
+.SOC-soc-table td {
+  text-align: left;
+  border-bottom: 1px solid #e6e6e6;
+  white-space: nowrap;
 }
 
-.soc-column {
-    display: grid;
-    grid-template-columns: 3fr 1fr 1fr 1fr;  /* More space for the Treatment/Vaccine column */
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    font-size: 14px;
-    color: #4a4a4a;
+.SOC-soc-table tr:hover,
+.SOC-comments-table tr:hover {
+  background-color: #e6f7ff;
 }
 
-/* Comments Rows */
-.comments-column {
-    display: grid;
-    grid-template-columns: 4fr 1fr 1fr 1fr;  /* More space for the Comment column */
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    font-size: 14px;
-    color: #4a4a4a;
+.SOC-comments-section {
+  margin-top: 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border: 1px solid #e6e6e6;
 }
 
-/* Modals */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 500px;
-    width: 100%;
-  }
-  
-  .modal-actions {
-    margin-top: 20px;
-  }
-  
-  .modal-actions button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .modal-actions button:hover {
-    background-color: #0056b3;
-  }
-  
-/* Extra */
-button {
-    background-color: #ccc;
-    border: transparent;
-    font-size: x-large;
+.SOC-comments-table {
+  width: 100%;
+}
+
+.SOC-add-comment-form {
+  margin-top: 20px;
+}
+
+.SOC-add-comment-form h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+
+.SOC-add-comment-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.SOC-add-event-button,
+.SOC-add-comment-button {
+  background-color: #09ace0;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.SOC-add-event-button:hover,
+.SOC-add-comment-button:hover {
+  background-color: #007bbf;
+}
+
+.SOC-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.SOC-modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.SOC-modal-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.SOC-modal-content form textarea,
+.SOC-modal-content form input,
+.SOC-modal-content form select {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.SOC-close-modal {
+  background-color: #ff4d4d;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.SOC-close-modal:hover {
+  background-color: #d43535;
+}
+
+.SOC-button-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.SOC-add-event-button-modal,
+.SOC-add-comment-button-modal,
+.SOC-close-modal {
+  background-color: #09ace0;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  width: 48%;
+}
+
+.SOC-add-event-button:hover {
+  background-color: #007bbf;
+}
+
+.SOC-close-modal {
+  background-color: #ff4d4d;
+}
+
+.SOC-close-modal:hover {
+  background-color: #d43535;
 }
