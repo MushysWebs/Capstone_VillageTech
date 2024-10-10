@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./NewPatient.css";
 import { supabase } from "../../../components/routes/supabaseClient";
-import PatientTabs from '../../../components/patientSideBar/PatientTabs'
+import PatientTabs from '../../../components/patientSidebar/PatientTabs'
 
 const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
   const [owners, setOwners] = useState([]);

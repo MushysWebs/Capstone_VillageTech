@@ -3,7 +3,7 @@ import { supabase } from "../../../components/routes/supabaseClient";
 import { Link } from "react-router-dom";
 import { usePatient } from "../../../context/PatientContext";
 import "./Financial.css";
-import PatientTabs from '../../../components/patientSideBar/PatientTabs'
+import PatientTabs from '../../../components/patientSidebar/PatientTabs'
 import AddEstimateModal from "../../../components/addEstimateModal/AddEstimateModal";
 
 const Financial = () => {

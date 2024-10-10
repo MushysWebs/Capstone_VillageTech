@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import PatientTabs from '../../../components/patientSideBar/PatientTabs';
+import PatientTabs from '../../../components/patientSidebar/PatientTabs';
 import { usePatient } from "../../../context/PatientContext";
 import { Edit2, Save } from 'lucide-react';
 import "./HealthStatus.css";
