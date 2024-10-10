@@ -3,7 +3,7 @@ import { supabase } from "../../../components/routes/supabaseClient";
 import { usePatient } from "../../../context/PatientContext";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import "./SOC.css";
-import PatientTabs from "../../../components/patientSidebar/PatientTabs";
+import PatientTabs from "../../../components/patientsidebar/PatientTabs";
 
 const SOC = () => {
   const { selectedPatient } = usePatient();
