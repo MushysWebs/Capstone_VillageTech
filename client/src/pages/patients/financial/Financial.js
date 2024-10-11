@@ -220,7 +220,7 @@ const Financial = () => {
                       </td>
                       <td>
                         <button
-                          className="cancel-button"
+                          className="financial-cancel-button"
                           onClick={() => cancelEstimate(item)}
                         >
                           Cancel
@@ -298,7 +298,7 @@ const Financial = () => {
                         </td>
                         <td>
                           <button
-                            className="cancel-button"
+                            className="financial-cancel-button"
                             onClick={() => cancelInvoice(item)}
                           >
                             Cancel

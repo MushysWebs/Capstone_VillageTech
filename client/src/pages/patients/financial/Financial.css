@@ -9,19 +9,15 @@
 .financial-page {
   width: calc(100% - 270px);
   margin-left: 20px;
-  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   padding-bottom: 50px;
-  padding: 20px;
-  height: 100vh;
 }
 
 .patient-header {
   margin-left: 0px;
 }
-
 
 .financial-h1 {
   display: flex;
@@ -153,25 +149,19 @@
   background-color: #eef2f7;
 }
 
+
 .financial-cancel-button {
   padding: 8px 12px;
   border: 1px solid #e0e0e0;
   border-radius: 5px;
   background-color: white;
   cursor: pointer;
-  position: relative;
+  display: inline-block;
 }
 
 .financial-cancel-button:hover {
   background-color: #e74c3c;
   color: white;
-}
-
-
-@media (max-width: 768px) {
-  .financial-page {
-    padding-right: 15px;
-  }
 }
 
 .convert-button {
@@ -186,3 +176,8 @@
   color: white;
 }
 
+@media (max-width: 768px) {
+  .financial-page {
+    padding-right: 15px;
+  }
+}
