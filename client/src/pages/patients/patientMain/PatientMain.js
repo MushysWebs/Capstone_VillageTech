@@ -15,7 +15,7 @@ const PatientMain = ({ globalSearchTerm }) => {
     useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedPatient, setEditedPatient] = useState(null);
-  const [owner, setOwner] = useState(null); // New state to store owner information
+  const [owner, setOwner] = useState(null);
   const [error, setError] = useState(null);
   const supabase = useSupabaseClient();
 
@@ -36,12 +36,12 @@ const PatientMain = ({ globalSearchTerm }) => {
     setFilteredPatients(filtered);
   }, [globalSearchTerm, patients]);
 
-  // New useEffect to fetch owner when selectedPatient changes
+ 
   useEffect(() => {
     if (selectedPatient?.owner_id) {
-      fetchOwner(selectedPatient.owner_id); // Fetch owner only if a patient is selected
+      fetchOwner(selectedPatient.owner_id);
     }
-  }, [selectedPatient]); // This useEffect only runs when selectedPatient changes
+  }, [selectedPatient]); 
 
   const handleAddAppointment = () => {
     setIsAddAppointmentModalOpen(true);
@@ -67,7 +67,7 @@ const PatientMain = ({ globalSearchTerm }) => {
 
   const fetchOwner = async (ownerId) => {
     try {
-      console.log("Fetching owner with ID:", ownerId); // Log owner_id for debugging
+      console.log("Fetching owner with ID:", ownerId); 
 
       const { data: ownerData, error } = await supabase
         .from("owners")
@@ -79,9 +79,9 @@ const PatientMain = ({ globalSearchTerm }) => {
         throw error;
       }
 
-      console.log("Fetched owner data:", ownerData); // Log the fetched owner data
+      console.log("Fetched owner data:", ownerData); 
 
-      setOwner(ownerData); // Store owner data in state
+      setOwner(ownerData); 
     } catch (error) {
       console.error("Error fetching owner:", error);
       setError("Failed to fetch owner data");
@@ -198,8 +198,8 @@ const PatientMain = ({ globalSearchTerm }) => {
                 selectedPatient?.id === patient.id ? "active" : ""
               }`}
               onClick={() => {
-                setSelectedPatient(patient); // Update context's selectedPatient
-                fetchOwner(patient.owner_id); // Fetch owner based on patient selection
+                setSelectedPatient(patient); 
+                fetchOwner(patient.owner_id); 
                 console.log("Selected Patient in PatientMain:", patient);
               }}
             >
@@ -238,7 +238,7 @@ const PatientMain = ({ globalSearchTerm }) => {
                           type="text"
                           name="owner"
                           value={owner?.name || ""}
-                          readOnly // Owner name is not editable
+                          readOnly 
                         />
                       </p>
                       <p>
