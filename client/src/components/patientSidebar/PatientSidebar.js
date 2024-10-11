@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./PatientSidebar.css";
+import "./PatientSidebar.css"; // Keeping this import unchanged
 import { usePatient } from "../../context/PatientContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
@@ -101,20 +101,20 @@ const PatientSidebar = () => {
   } = selectedPatient;
 
   return (
-    <div className="PatientSidebar">
-      <div className="patientHeader">
-        <div className="patientImg">
+    <div className="Sidebar">
+      <div className="sidebarHeader">
+        <div className="sidebarImg">
           <img
             src={imageUrl || `/api/placeholder/80/80`}
             alt={patientName}
             className="contact-header-avatar"
           />
         </div>
-        <h2 className="patientName">{patientName}</h2>
+        <h2 className="sidebarName">{patientName}</h2>
       </div>
 
-      <div className="patientInfo">
-        <dl className="patient-body">
+      <div className="sidebarInfo">
+        <dl className="sidebar-body">
           <dt>
             <strong>Patient ID:</strong>
           </dt>
@@ -137,20 +137,20 @@ const PatientSidebar = () => {
         </dl>
       </div>
 
-      <div className="patientDemeanor">
+      <div className="sidebarDemeanor">
         <h3 className="demeanor-header">Demeanor</h3>
         <div className="demeanor-container">
           <p>{demeanor}</p>
         </div>
       </div>
 
-      <div className="patient-owner">
+      <div className="sidebar-owner">
         <h3>Owner</h3>
         <p className="owner-name">{owner?.name || "N/A"}</p>
         <p>{owner?.phone || "N/A"}</p>
       </div>
 
-      <div className="patientApp">
+      <div className="sidebarApp">
         <h3>Appointments</h3>
         {appointments.length > 0 ? (
           appointments.map((app, index) => (
@@ -179,7 +179,7 @@ const PatientSidebar = () => {
         )}
       </div>
 
-      <div className="patientSOC">
+      <div className="sidebarSOC">
         <div className="event-section">
           <h3 className="soc-event">SOC Event</h3>
           <h3 className="next-due">Next Due</h3>
@@ -198,7 +198,7 @@ const PatientSidebar = () => {
         </div>
       </div>
 
-      <div className="patientPreferredDoctor">
+      <div className="sidebarPreferredDoctor">
         <h3>Preferred Doctor</h3>
         <p>{preferredDoctor || "N/A"}</p>
       </div>
