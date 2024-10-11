@@ -1,8 +1,8 @@
-.patientMain-page {
+.patient-main {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 60px);
-  padding: 20px;
+  padding: 20px 40px;
 }
 
 .patientMain-tabs {
