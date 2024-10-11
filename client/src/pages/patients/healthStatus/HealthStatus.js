@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import PatientTabs from '../../../components/patientSidebar/PatientTabs';
+import PatientTabs from "../../../components/patientSidebar/PatientTabs";
+import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import { usePatient } from "../../../context/PatientContext";
-import { Edit2, Save } from 'lucide-react';
+import { Edit2, Save } from "lucide-react";
 import "./HealthStatus.css";
 
 const HealthStatus = () => {
@@ -61,14 +62,14 @@ const HealthStatus = () => {
   };
 
   return (
-    <div className="patient-main">
-      <header className="patient-header">
-        <PatientTabs />
-      </header>
+    <div className="health-main">
+      <PatientSidebar />
 
-      <div className="health-status-container">
-        {error && <div className="error-message">{error}</div>}
-        
+      <div className="health-status-page">
+        <header className="patient-header">
+          <PatientTabs />
+        </header>
+
         <div className="section-box">
           <h2 className="section-header">Patient Information</h2>
           <div className="info-grid">
@@ -143,8 +144,12 @@ const HealthStatus = () => {
               vaccinations.map((vaccination) => (
                 <div key={vaccination.id} className="vaccination-item">
                   <div className="vaccination-name">{vaccination.name}</div>
-                  <div className="vaccination-date">Date: {formatDate(vaccination.date_prescribed)}</div>
-                  <div className="vaccination-next-due">Next Due: {formatDate(vaccination.next_due)}</div>
+                  <div className="vaccination-date">
+                    Date: {formatDate(vaccination.date_prescribed)}
+                  </div>
+                  <div className="vaccination-next-due">
+                    Next Due: {formatDate(vaccination.next_due)}
+                  </div>
                 </div>
               ))
             ) : (
