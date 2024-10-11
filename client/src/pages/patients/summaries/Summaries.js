@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { usePatient } from "../../../context/PatientContext";
-import PatientTabs from '../../../components/patientSidebar/PatientTabs';
+import PatientTabs from '../../../components/PatientTabs';
 import PatientSidebar from '../../../components/patientSidebar/PatientSidebar';
 import "./Summaries.css";
 

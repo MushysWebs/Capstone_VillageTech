@@ -22,12 +22,10 @@
 .financial-h1 {
   display: flex;
   justify-content: center;
-  font-family: "Roboto", sans-serif;
   font-weight: 400;
 }
 
 .financial-h2 {
-  font-family: "Roboto", sans-serif;
   font-weight: 400;
 }
 
