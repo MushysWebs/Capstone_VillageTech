@@ -174,13 +174,11 @@ const Summaries = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* Example row data */}
                 <tr>
                   <td>Follow-up required next week</td>
                   <td>Dr. Smith</td>
                   <td>10/05/2024</td>
                 </tr>
-                {/* If no data */}
                 <tr>
                   <td colSpan="3" className="summaries-notes-empty">
                     No summary notes available
