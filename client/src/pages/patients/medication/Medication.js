@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { usePatient } from "../../../context/PatientContext";
-import PatientTabs from '../../../components/patientSidebar/PatientTabs';
-import { Search, AlertCircle, Activity, FileText } from 'lucide-react';
+import PatientTabs from "../../../components/patientSidebar/PatientTabs";
+import { Search, AlertCircle, Activity, FileText } from "lucide-react";
+import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import "./Medication.css";
 
 const MedicationHistory = () => {
@@ -25,12 +26,25 @@ const MedicationHistory = () => {
   const fetchPatientData = async () => {
     setLoading(true);
     try {
-      const [medicationData, allergyData, vitalData, noteData] = await Promise.all([
-        supabase.from("medications").select("*").eq("patient_id", selectedPatient.id),
-        supabase.from("patient_allergies").select("*").eq("patient_id", selectedPatient.id),
-        supabase.from("patient_vitals").select("*").eq("patient_id", selectedPatient.id),
-        supabase.from("patient_notes").select("*").eq("patient_id", selectedPatient.id)
-      ]);
+      const [medicationData, allergyData, vitalData, noteData] =
+        await Promise.all([
+          supabase
+            .from("medications")
+            .select("*")
+            .eq("patient_id", selectedPatient.id),
+          supabase
+            .from("patient_allergies")
+            .select("*")
+            .eq("patient_id", selectedPatient.id),
+          supabase
+            .from("patient_vitals")
+            .select("*")
+            .eq("patient_id", selectedPatient.id),
+          supabase
+            .from("patient_notes")
+            .select("*")
+            .eq("patient_id", selectedPatient.id),
+        ]);
 
       setMedications(medicationData.data || []);
       setAllergies(allergyData.data || []);
@@ -77,15 +91,17 @@ const MedicationHistory = () => {
   );
 
   return (
-    <div className="patient-main">
-      <header className="patient-header">
-        <PatientTabs />
-      </header>
+    <div className="medication-main">
+      <PatientSidebar />
 
-      <div className="medication-content">
-        <div className="section-box">
-          <h2 className="section-header">
-            <Search size={24} style={{ marginRight: '10px' }} />
+      <div className="medication-page">
+        <header className="medication-patient-header">
+          <PatientTabs />
+        </header>
+
+        <div className="medication-section-box">
+          <h2 className="medication-section-header">
+            <Search size={24} style={{ marginRight: "10px" }} />
             Medication History
           </h2>
           <input
@@ -99,63 +115,63 @@ const MedicationHistory = () => {
             <p className="loading-message">Loading medications...</p>
           ) : (
             renderTable(filteredMedications, [
-              { key: 'name', label: 'Name' },
-              { key: 'dosage', label: 'Dosage' },
-              { key: 'frequency', label: 'Frequency' },
-              { key: 'date_prescribed', label: 'Date Prescribed' },
-              { key: 'end_date', label: 'End Date' },
-              { key: 'reason', label: 'Reason' },
-              { key: 'doctor', label: 'Prescribing Doctor' },
-              { key: 'instructions', label: 'Instructions' },
-              { key: 'refills', label: 'Refills' },
-              { key: 'status', label: 'Status' }
+              { key: "name", label: "Name" },
+              { key: "dosage", label: "Dosage" },
+              { key: "frequency", label: "Frequency" },
+              { key: "date_prescribed", label: "Date Prescribed" },
+              { key: "end_date", label: "End Date" },
+              { key: "reason", label: "Reason" },
+              { key: "doctor", label: "Prescribing Doctor" },
+              { key: "instructions", label: "Instructions" },
+              { key: "refills", label: "Refills" },
+              { key: "status", label: "Status" },
             ])
           )}
         </div>
 
-        <div className="section-box">
-          <h2 className="section-header">
-            <AlertCircle size={24} style={{ marginRight: '10px' }} />
+        <div className="medication-section-box">
+          <h2 className="medication-section-header">
+            <AlertCircle size={24} style={{ marginRight: "10px" }} />
             Allergies
           </h2>
           {loading ? (
             <p className="loading-message">Loading allergies...</p>
           ) : (
             renderTable(allergies, [
-              { key: 'name', label: 'Allergy' },
-              { key: 'reaction', label: 'Reaction' }
+              { key: "name", label: "Allergy" },
+              { key: "reaction", label: "Reaction" },
             ])
           )}
         </div>
 
-        <div className="section-box">
-          <h2 className="section-header">
-            <Activity size={24} style={{ marginRight: '10px' }} />
+        <div className="medication-section-box">
+          <h2 className="medication-section-header">
+            <Activity size={24} style={{ marginRight: "10px" }} />
             Vitals
           </h2>
           {loading ? (
             <p className="loading-message">Loading vitals...</p>
           ) : (
             renderTable(vitals, [
-              { key: 'date', label: 'Date' },
-              { key: 'weight', label: 'Weight' },
-              { key: 'temperature', label: 'Temperature' },
-              { key: 'heart_rate', label: 'Heart Rate' }
+              { key: "date", label: "Date" },
+              { key: "weight", label: "Weight" },
+              { key: "temperature", label: "Temperature" },
+              { key: "heart_rate", label: "Heart Rate" },
             ])
           )}
         </div>
 
-        <div className="section-box">
-          <h2 className="section-header">
-            <FileText size={24} style={{ marginRight: '10px' }} />
+        <div className="medication-section-box">
+          <h2 className="medication-section-header">
+            <FileText size={24} style={{ marginRight: "10px" }} />
             Notes
           </h2>
           {loading ? (
             <p className="loading-message">Loading notes...</p>
           ) : (
             renderTable(notes, [
-              { key: 'date', label: 'Date' },
-              { key: 'note', label: 'Note' }
+              { key: "date", label: "Date" },
+              { key: "note", label: "Note" },
             ])
           )}
         </div>
