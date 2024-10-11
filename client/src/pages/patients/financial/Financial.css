@@ -1,4 +1,25 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap");
+.financial-main {
+  display: flex;
+  padding: 20px;
+  height: calc(100vh - 60px);
+  width: 97.5%;
+  margin-left: 22px;
+}
+
+.financial-page {
+  width: calc(100% - 270px);
+  margin-left: 20px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: 50px;
+}
+
+.patient-header {
+  margin-left: 0px;
+}
+
 
 .financial-h1 {
   display: flex;
@@ -12,47 +33,13 @@
   font-weight: 400;
 }
 
-.patient-main {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  overflow-y: auto; /* Ensure the container allows vertical scrolling */
-  height: 100vh; /* Ensure it takes up the full viewport height */
-}
-
-.patient-header {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 20px;
-  margin-left: 10px;
-}
-
-.patient-tabs {
-  display: flex;
-  gap: 10px;
-}
-
-.tab-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #e6e6e6;
-  color: black;
-  text-decoration: none;
-  transition: background-color 0.3s;
-}
-
-.tab-button:hover {
-  background-color: #bfbfbf;
-}
-
 .estimate-section {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
   margin-bottom: 2rem;
-  margin: 50px;
+  margin-right: 27px;
   max-height: 400px;
   overflow-y: auto;
 }
@@ -177,4 +164,10 @@
 .cancel-button:hover {
   background-color: #e74c3c;
   color: white;
+}
+
+@media (max-width: 768px) {
+  .financial-page {
+    padding-right: 15px;
+  }
 }
