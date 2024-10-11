@@ -173,64 +173,22 @@ const Financial = () => {
               <h2 className="financial-h2">Estimates</h2>
             </div>
 
-          <div className="table-container">
-            <table className="estimate-table">
-              <thead>
-                <tr>
-                  <th>Number</th>
-                  <th>Name</th>
-                  <th>Patient</th>
-                  <th>Low Total</th>
-                  <th>High Total</th>
-                  <th>Deposit</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Convert to Invoice</th>
-                  <th>Cancel</th>
-                  <th>Last Update</th>
-                  <th>Edit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {estimateData.map((item) => (
-                  <tr key={item.estimate_id}>
-                    <td>{item.estimate_id}</td>
-                    <td>{item.estimate_name}</td>
-                    <td>{selectedPatient.name}</td>
-                    <td>{formatCurrency(item.estimate_lowtotal)}</td>
-                    <td>{formatCurrency(item.estimate_hightotal)}</td>
-                    <td>{formatCurrency(item.estimate_deposit)}</td>
-                    <td>{new Date(item.estimate_date).toLocaleDateString()}</td>
-                    <td>
-                      <button className={getStatusClass(item.estimate_status)}>
-                        {item.estimate_status}
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className="convert-button"
-                        onClick={() => convertEstimateToInvoice(item)}
-                      >
-                        Convert to Invoice
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className="financial-cancel-button"
-                        onClick={() => cancelEstimate(item)}
-                      >
-                        Cancel
-                      </button>
-                    </td>
-                    <td>{new Date(item.last_update).toLocaleString()}</td>
-                    <td>
-                      <button
-                        className="financial-edit-button"
-                        onClick={() => handleEditClick(item)}
-                      >
-                        Edit
-                      </button>
-                    </td>
+            <div className="table-container">
+              <table className="estimate-table">
+                <thead>
+                  <tr>
+                    <th>Number</th>
+                    <th>Name</th>
+                    <th>Patient</th>
+                    <th>Low Total</th>
+                    <th>High Total</th>
+                    <th>Deposit</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Convert to Invoice</th>
+                    <th>Cancel</th>
+                    <th>Last Update</th>
+                    <th>Edit</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -262,11 +220,8 @@ const Financial = () => {
                       </td>
                       <td>
                         <button
-
                           className="cancel-button"
                           onClick={() => cancelEstimate(item)}
-                          className="financial-cancel-button"
-                          onClick={() => cancelInvoice(item)}
                         >
                           Cancel
                         </button>
@@ -286,7 +241,6 @@ const Financial = () => {
               </table>
             </div>
           </div>
-
           <div className="estimate-section">
             <h2 className="financial-h2">Pending Invoices</h2>
             <div className="table-container">
