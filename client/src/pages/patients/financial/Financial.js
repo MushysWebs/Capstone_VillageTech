@@ -241,7 +241,6 @@ const Financial = () => {
               </table>
             </div>
           </div>
-
           <div className="estimate-section">
             <h2 className="financial-h2">Pending Invoices</h2>
             <div className="table-container">
