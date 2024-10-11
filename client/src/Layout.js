@@ -15,6 +15,7 @@ import HealthStatus from './pages/patients/healthStatus/HealthStatus';
 import SOC from './pages/patients/soc/SOC';
 import Summaries from './pages/patients/summaries/Summaries';
 import Medication from './pages/patients/medication/Medication';
+import Clinical from './pages/patients/clinical/Clinical'; 
 
 
 
@@ -157,6 +158,8 @@ const Layout = () => {
       return <Summaries />;
     } else if (location.pathname === '/medication') {
       return <Medication />
+    } else if (location.pathname === '/clinical') { 
+      return <Clinical />; 
     }
     return null;
   };
@@ -164,7 +167,7 @@ const Layout = () => {
   const renderSidebarLink = (to, icon, text) => {
     const isActive = () => {
       if (to === '/patient') {
-        return ['/patient', '/SOC', '/Financial', '/summaries', '/healthStatus', '/medication', '/newPatient'].includes(location.pathname);
+        return ['/patient', '/SOC', '/Financial', '/summaries', '/healthStatus', '/medication', '/newPatient', '/clinical'].includes(location.pathname);
       }
       return location.pathname === to;
     };
