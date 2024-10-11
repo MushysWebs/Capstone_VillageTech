@@ -1,5 +1,127 @@
+.summaries-main {
+    display: flex;
+    padding: 20px;
+    height: calc(100vh - 60px);
+    width: 97.5%;
+    margin-left: 22px;
+  }
+  
+  .summaries-page {
+    width: calc(100% - 270px);
+    margin-left: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding-bottom: 50px;
+  }
+  
+  .patient-header {
+    margin-left: 0px;
+  }
+  
+  .summaries-h2, 
+  .financial-h2 {
+    font-weight: 600;
+    font-size: 1.5rem;
+    padding-bottom: 10px;
+    color: #09ace0;
+    border-bottom: 2px solid #09ace0;
+    margin-bottom: 1rem;
+    width: 100%;
+    box-sizing: border-box; 
+  }
+  
+  .summaries-section,
+  .summaries-notes-section {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    margin-right: 27px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e6e6e6;
+  }
+  
+  .summaries-header-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .summaries-table-container {
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .summaries-invoices-table th,
+  .summaries-invoices-table td,
+  .summaries-notes-table th,
+  .summaries-notes-table td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .summaries-invoices-table th,
+  .summaries-notes-table th {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+  }
+  
+  .summaries-invoices-table td,
+  .summaries-notes-table td {
+    font-size: 0.95rem;
+    color: #2c3e50;
+  }
+  
+  .summaries-invoices-table tr:hover,
+  .summaries-notes-table tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .summaries-notes-header {
+    font-weight: 600;
+    font-size: 1.5rem;
+    padding-bottom: 10px;
+    color: #09ace0;
+    border-bottom: 2px solid #09ace0; 
+    margin-bottom: 1rem;
+  }
+  
+  .summaries-notes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .summaries-notes-empty {
+    text-align: center;
+    color: #7f8c8d;
+    padding: 20px;
+    font-style: italic;
+  }
+  
+  .status-pending {
+    border: 1px solid #e6b249;
+    padding: 5px;
+    border-radius: 6px;
+    color: white;
+    background-color: #e6b249;
+  }
 
-.owner-header p {
+  .owner-header p {
     color: #7f8c8d;
     font-weight: 600;
-}
+  }
+  
+  @media (max-width: 768px) {
+    .summaries-page {
+      padding-right: 15px;
+    }
+  }
+  
