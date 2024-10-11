@@ -1,10 +1,10 @@
-.PatientSidebar {
+.Sidebar {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
   max-width: 300px;
-  height: 100%;
+  height:fit-content;
   padding: 20px;
   background-color: #ffffff;
   border-radius: 15px;
@@ -17,14 +17,14 @@
   margin-left: 5px;
 }
 
-.patientHeader {
+.sidebarHeader {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
 }
 
-.patientImg img {
+.sidebarImg img {
   width: 125px;
   height: 125px;
   object-fit: cover;
@@ -33,68 +33,71 @@
   border-radius: 10px;
 }
 
-.patientName {
+.sidebarName {
   font-size: 24px;
-  color: #333;
+  color: #666;
   margin: 0;
   flex-grow: 1;
   display: flex;
   justify-content: center;
 }
 
-.patientInfo {
+.sidebarInfo {
   text-align: left;
   width: 100%;
   margin-bottom: 10px;
 }
 
-.patient-body {
+.sidebar-body {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 3px 10px;
+  margin:8px;
 }
 
-.patient-body dt {
+.sidebar-body dt {
   font-weight: bold;
-  color: #333;
+  color: #666;
   margin: 0;
 }
 
-.patient-body dd {
+.sidebar-body dd {
   margin: 0;
   font-size: 14px;
   color: #666;
 }
 
-.patient-owner,
-.patientApp,
-.patientSOC,
-.patientDemeanor,
-.patientPreferredDoctor {
+.sidebar-owner,
+.sidebarApp,
+.sidebarSOC,
+.sidebarDemeanor,
+.sidebarPreferredDoctor {
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   padding: 10px;
-  background-color: #f2f0f0;
+  background-color: #f8f9fa;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ddd;
 }
 
-.patientDemeanor h3,
-.patient-owner h3,
-.patientApp h3,
-.patientSOC h3,
-.patientPreferredDoctor h3 {
+.sidebarDemeanor h3,
+.sidebar-owner h3,
+.sidebarApp h3,
+.sidebarSOC h3,
+.sidebarPreferredDoctor h3 {
   font-size: 16px;
-  color: #333;
+  color: #09ace0; 
   margin: 0 0 5px 0;
+  border-bottom: 1px solid #09ace0;
 }
 
-.patientDemeanor p,
-.patient-owner p,
-.patientApp p,
-.patientSOC p,
-.patient-body p,
-.patientPreferredDoctor p {
+.sidebarDemeanor p,
+.sidebar-owner p,
+.sidebarApp p,
+.sidebarSOC p,
+.sidebar-body p,
+.sidebarPreferredDoctor p {
   margin: 0 0 5px 0;
   font-size: 14px;
   color: #666;
@@ -148,15 +151,16 @@
   margin: 0;
 }
 
-.PatientSidebar h3,
-.PatientSidebar p {
+.Sidebar h3,
+.Sidebar p {
   margin: 0 0 5px 0;
 }
 
-.patientApp > div {
+.sidebarApp > div {
   margin-bottom: 5px;
 }
 
-.patientApp p {
+.sidebarApp p {
   margin: 0 0 3px 0;
 }
+
