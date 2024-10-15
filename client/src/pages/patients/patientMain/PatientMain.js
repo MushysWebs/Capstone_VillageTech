@@ -145,8 +145,8 @@ const PatientMain = ({ globalSearchTerm }) => {
       <header className="patient-header">
         <div className="patientMain-tabs">
           <Link
-            to="/patient/clinical"
-            className={`tab-button ${location.pathname === "/patient/clinical" ? "active" : ""}`}
+            to="/clinical"
+            className={`tab-button ${location.pathname === "/clinical" ? "active" : ""}`}
           >
             Clinical
           </Link>
