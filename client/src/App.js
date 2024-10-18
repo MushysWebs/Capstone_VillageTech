@@ -23,6 +23,7 @@ import SOC from "./pages/patients/soc/SOC";
 import Summaries from "./pages/patients/summaries/Summaries";
 import Medication from "./pages/patients/medication/Medication";
 import Clinical from "./pages/patients/clinical/Clinical";
+import FinancialReports from "./pages/reporting/financialReports/FinancialReports";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/summaries" element={<Summaries />} />
                 <Route path="/medication" element={<Medication />} />
                 <Route path="/clinical" element={<Clinical />} />
+                <Route path="/reporting" element={<FinancialReports />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
