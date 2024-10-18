@@ -15,6 +15,7 @@ import {
 } from 'date-fns';
 import './CalendarView.css';
 import AddAppointment from './AddAppointment';
+import ClockInOut from '../../../components/clockInOut/ClockInOut';
 
 const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -206,7 +207,7 @@ const CalendarView = ({ searchTerm, firstName }) => {
       <div className="calendarView__header">
         <h1>Hello, {firstName}!</h1>
         <div className="calendarView__headerButtons">
-          <button className="calendarView__actionButton">Clock In</button>
+        <ClockInOut />
           <button className="calendarView__actionButton">View Hours</button>
         </div>
       </div>
