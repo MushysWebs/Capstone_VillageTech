@@ -4,6 +4,12 @@ html, body {
     overflow: hidden; /* Prevent body scrolling, let the container handle it */
 }
 
+.financial-reports-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
 .container {
     display: flex;
     flex-direction: column; /* Stack children vertically */

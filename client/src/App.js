@@ -41,7 +41,7 @@ function App() {
                 <Route path="/patient" element={<PatientMain />} />
                 <Route path="/SOC" element={<SOC />} />
                 <Route path="/newPatient" element={<NewPatient />} />
-                <Route path="/financial" element={<Financial />} />
+                <Route path="/reporting" element={<FinancialReports />} />
                 <Route path="/healthStatus" element={<HealthStatus />} />
                 <Route path="/summaries" element={<Summaries />} />
                 <Route path="/medication" element={<Medication />} />

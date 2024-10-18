@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import FinancialReportCard from "./FinancialReportCard";
-import TotalSalesCard from "./TotalSalesCard"; // Import the new card
-import "./FinancialReports.css"; // Import your CSS file
+import TotalSalesCard from "./TotalSalesCard"; 
+import "./FinancialReports.css"; 
+import ReportingTabs from "../../../components/ReportingTabs";
 
 const FinancialReports = () => {
   const data1 = [
@@ -43,6 +44,8 @@ const FinancialReports = () => {
   };
 
   return (
+    <div className="financial-reports-container">
+      <ReportingTabs />
     <div className="container">
       <TotalSalesCard totalSales={totalSales} />
 
@@ -103,6 +106,7 @@ const FinancialReports = () => {
           </table>
         </div>
       </div>
+    </div>
     </div>
   );
 };
