@@ -17,6 +17,7 @@ import Summaries from "./pages/patients/summaries/Summaries";
 import Medication from "./pages/patients/medication/Medication";
 import Clinical from "./pages/patients/clinical/Clinical";
 import FinancialReports from "./pages/reporting/financialReports/FinancialReports";
+import ReportHistory from "./pages/reporting/reportHistory/ReportHistory";
 
 const Layout = () => {
   const [theme, setTheme] = useState("light");
@@ -163,6 +164,8 @@ const Layout = () => {
       return <Clinical />;
     } else if (location.pathname === "/reporting") {
       return <FinancialReports />;
+    } else if (location.pathname === "/reporting/history") {
+      return <ReportHistory />;
     }
     return null;
   };
@@ -180,6 +183,9 @@ const Layout = () => {
           "/newPatient",
           "/clinical",
         ].includes(location.pathname);
+      }
+      if (to === "/reporting") {
+        return location.pathname.startsWith("/reporting");
       }
       return location.pathname === to;
     };

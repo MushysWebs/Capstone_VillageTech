@@ -1,0 +1,33 @@
+.financial-reports-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .report-history-container {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+  }
+  
+  .report-table {
+    margin-top: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .MuiTableCell-head {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  .MuiTableRow-root:nth-of-type(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .MuiButton-containedPrimary {
+    background-color: #09ACE0;
+  }
+  
+  .MuiButton-containedPrimary:hover {
+    background-color: #0789b4;
+  }
