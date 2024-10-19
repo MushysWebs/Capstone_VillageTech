@@ -45,7 +45,7 @@ const Login = () => {
   };
 
   return (
-    <div className={`container ${theme}-theme nunito-light`}>
+    <div className={`login-container ${theme}-theme nunito-light`}>
       <div className="sidebar">
         <img
           src={theme === 'light' ? "/whitevillagetech.svg" : "/villagetech.svg"}
@@ -53,14 +53,14 @@ const Login = () => {
           className="logo"
         />
       </div>
-      <div className="form-container">
+      <div className="login-form-container">
         <img
           src={theme === 'light' ? "/floweronly.svg" : "/whiteflower.svg"}
           alt="Logo"
           className="center-logo"
         />
         <h2 className="welcome-text">Welcome back!</h2>
-        <form className="form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="employeeId" className="input-label">Employee ID</label>
             <input
