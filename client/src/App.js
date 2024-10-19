@@ -24,6 +24,7 @@ import Summaries from "./pages/patients/summaries/Summaries";
 import Medication from "./pages/patients/medication/Medication";
 import Clinical from "./pages/patients/clinical/Clinical";
 import FinancialReports from "./pages/reporting/financialReports/FinancialReports";
+import ReportHistory from "./pages/reporting/reportHistory/ReportHistory";
 
 function App() {
   return (
@@ -41,12 +42,13 @@ function App() {
                 <Route path="/patient" element={<PatientMain />} />
                 <Route path="/SOC" element={<SOC />} />
                 <Route path="/newPatient" element={<NewPatient />} />
-                <Route path="/reporting" element={<FinancialReports />} />
+                <Route path="/Financial" element={<FinancialReports />} />
                 <Route path="/healthStatus" element={<HealthStatus />} />
                 <Route path="/summaries" element={<Summaries />} />
                 <Route path="/medication" element={<Medication />} />
                 <Route path="/clinical" element={<Clinical />} />
                 <Route path="/reporting" element={<FinancialReports />} />
+                <Route path="/reporting/history" element={<ReportHistory />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
