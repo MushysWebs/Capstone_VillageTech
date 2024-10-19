@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSupabaseClient, useSession } from "@supabase/auth-helpers-react";
-import "./pages/dashboard/Dashboard.css";
-import AdminPage from "./pages/admin/Admin";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Contacts from "./pages/contacts/Contacts";
-import AuthGuard from "./components/auth/AuthGuard";
-import MessagingPage from "./pages/message/MessagingPage";
-import SignoutButton from "./components/auth/SignOut";
-import NewPatient from "./pages/patients/newPatient/NewPatient";
-import PatientMain from "./pages/patients/patientMain/PatientMain";
-import Financial from "./pages/patients/financial/Financial";
-import HealthStatus from "./pages/patients/healthStatus/HealthStatus";
-import SOC from "./pages/patients/soc/SOC";
-import Summaries from "./pages/patients/summaries/Summaries";
-import Medication from "./pages/patients/medication/Medication";
-import Clinical from "./pages/patients/clinical/Clinical";
+
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
+import './pages/dashboard/Dashboard.css';
+import AdminPage from './pages/admin/Admin';
+import Dashboard from './pages/dashboard/Dashboard';
+import Contacts from './pages/contacts/Contacts';
+import AuthGuard from './components/auth/AuthGuard';
+import MessagingPage from './pages/message/MessagingPage';
+import SignoutButton from './components/auth/SignOut';
+import NewPatient from './pages/patients/newPatient/NewPatient';
+import PatientMain from './pages/patients/patientMain/PatientMain';
+import Financial from './pages/patients/financial/Financial';
+import HealthStatus from './pages/patients/healthStatus/HealthStatus';
+import SOC from './pages/patients/soc/SOC';
+import Summaries from './pages/patients/summaries/Summaries';
+import Medication from './pages/patients/medication/Medication';
+import Clinical from './pages/patients/clinical/Clinical'; 
+import Payments from './pages/payments/Payments';
 import FinancialReports from "./pages/reporting/financialReports/FinancialReports";
 import ReportHistory from "./pages/reporting/reportHistory/ReportHistory";
 
@@ -81,19 +83,16 @@ const Layout = () => {
       setUnreadMessages([]);
     }
   };
-
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications) {
       checkUnreadMessages();
     }
   };
-
   const handleMessageClick = (senderId) => {
     navigate("/messages", { state: { selectedStaffId: senderId } });
     setShowNotifications(false);
   };
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {
@@ -103,14 +102,12 @@ const Layout = () => {
       minute: "2-digit",
     });
   };
-
   const searchContainerStyles = {
     position: "relative",
     display: "flex",
     alignItems: "center",
     backgroundColor: theme === "dark" ? "#363D3F" : "transparent",
   };
-
   const searchInputStyles = {
     padding: "8px 15px 8px 35px",
     borderRadius: "20px",
@@ -129,6 +126,7 @@ const Layout = () => {
     left: "10px",
     transition: "all 0.3s ease",
   };
+
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
@@ -166,8 +164,9 @@ const Layout = () => {
       return <FinancialReports />;
     } else if (location.pathname === "/reporting/history") {
       return <ReportHistory />;
+    } else if (location.pathname === "/payments") {
+      return <Payments />;  
     }
-    return null;
   };
 
   const renderSidebarLink = (to, icon, text) => {
@@ -200,7 +199,6 @@ const Layout = () => {
       </li>
     );
   };
-
   return (
     <AuthGuard>
       <div className={`dashboard-container ${theme}`}>
@@ -212,6 +210,7 @@ const Layout = () => {
               {renderSidebarLink("/patient", "fa-user", "Patients")}
               {renderSidebarLink("/financial", "fa-dollar-sign", "Financial")}
               {renderSidebarLink("/reporting", "fa-chart-bar", "Reporting")}
+              {renderSidebarLink('/payments', 'fa-dollar-sign', 'Payments')}
             </ul>
           </nav>
         </aside>
@@ -317,5 +316,4 @@ const Layout = () => {
     </AuthGuard>
   );
 };
-
 export default Layout;
