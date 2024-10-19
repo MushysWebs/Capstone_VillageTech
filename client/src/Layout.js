@@ -208,9 +208,8 @@ const Layout = () => {
               {renderSidebarLink("/dashboard", "fa-home", "Dashboard")}
               {renderSidebarLink("/contacts", "fa-address-book", "Contacts")}
               {renderSidebarLink("/patient", "fa-user", "Patients")}
-              {renderSidebarLink("/financial", "fa-dollar-sign", "Financial")}
-              {renderSidebarLink("/reporting", "fa-chart-bar", "Reporting")}
               {renderSidebarLink('/payments', 'fa-dollar-sign', 'Payments')}
+              {renderSidebarLink("/reporting", "fa-chart-bar", "Reporting")}
             </ul>
           </nav>
         </aside>
