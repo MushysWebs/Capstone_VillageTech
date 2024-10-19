@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
-import { PatientProvider } from "./context/PatientContext"; // Use PatientContext
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { PatientProvider } from "./context/PatientContext"; 
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "./components/routes/supabaseClient";
 import Login from "./pages/login/Login";
@@ -23,35 +18,43 @@ import SOC from "./pages/patients/soc/SOC";
 import Summaries from "./pages/patients/summaries/Summaries";
 import Medication from "./pages/patients/medication/Medication";
 import Clinical from "./pages/patients/clinical/Clinical";
+import Payments from "./pages/payments/Payments";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 function App() {
   return (
-    <SessionContextProvider supabaseClient={supabase}>
-      <Router>
-        <PatientProvider>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route element={<PrivateRoute />}>
-              <Route element={<Layout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/messages" element={<MessagingPage />} />
-                <Route path="/contacts" element={<Contacts />} />
-                <Route path="/patient" element={<PatientMain />} />
-                <Route path="/SOC" element={<SOC />} />
-                <Route path="/newPatient" element={<NewPatient />} />
-                <Route path="/financial" element={<Financial />} />
-                <Route path="/healthStatus" element={<HealthStatus />} />
-                <Route path="/summaries" element={<Summaries />} />
-                <Route path="/medication" element={<Medication />} />
-                <Route path="/clinical" element={<Clinical />} />
+    <Elements stripe={stripePromise}>
+      <SessionContextProvider supabaseClient={supabase}>
+        <Router>
+          <PatientProvider>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route element={<PrivateRoute />}>
+                <Route element={<Layout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/messages" element={<MessagingPage />} />
+                  <Route path="/contacts" element={<Contacts />} />
+                  <Route path="/patient" element={<PatientMain />} />
+                  <Route path="/SOC" element={<SOC />} />
+                  <Route path="/newPatient" element={<NewPatient />} />
+                  <Route path="/financial" element={<Financial />} />
+                  <Route path="/healthStatus" element={<HealthStatus />} />
+                  <Route path="/summaries" element={<Summaries />} />
+                  <Route path="/medication" element={<Medication />} />
+                  <Route path="/clinical" element={<Clinical />} />
+                  <Route path="/payments" element={<Payments />} />
+                </Route>
               </Route>
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </PatientProvider>
-      </Router>
-    </SessionContextProvider>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </PatientProvider>
+        </Router>
+      </SessionContextProvider>
+    </Elements>
   );
 }
 

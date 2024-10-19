@@ -10,15 +10,13 @@ import MessagingPage from './pages/message/MessagingPage';
 import SignoutButton from './components/auth/SignOut';
 import NewPatient from './pages/patients/newPatient/NewPatient';
 import PatientMain from './pages/patients/patientMain/PatientMain';
-import Financial from './pages/patients/financial/Financial'
+import Financial from './pages/patients/financial/Financial';
 import HealthStatus from './pages/patients/healthStatus/HealthStatus';
 import SOC from './pages/patients/soc/SOC';
 import Summaries from './pages/patients/summaries/Summaries';
 import Medication from './pages/patients/medication/Medication';
 import Clinical from './pages/patients/clinical/Clinical'; 
-
-
-
+import Payments from './pages/payments/Payments';
 
 const Layout = () => {
   const [theme, setTheme] = useState('light');
@@ -35,7 +33,6 @@ const Layout = () => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
-
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -101,7 +98,6 @@ const Layout = () => {
     });
   };
 
-
   const searchContainerStyles = {
     position: 'relative',
     display: 'flex',
@@ -127,6 +123,7 @@ const Layout = () => {
     left: '10px',
     transition: 'all 0.3s ease',
   };
+
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
@@ -136,38 +133,42 @@ const Layout = () => {
   };
 
   const renderMainContent = () => {
-    if (location.pathname === '/admin') {
-      return <AdminPage globalSearchTerm={globalSearchTerm} />;
-    } else if (location.pathname === '/dashboard') {
-      return <Dashboard globalSearchTerm={globalSearchTerm} />;
-    } else if (location.pathname === '/messages') {
-      return <MessagingPage />;
-    } else if (location.pathname === '/contacts') {
-      return <Contacts globalSearchTerm={globalSearchTerm} />;
-    } else if (location.pathname === '/newPatient') {
-      return <NewPatient />;
-    } else if (location.pathname === '/patient') {
-      return <PatientMain globalSearchTerm={globalSearchTerm} />;
-    } else if (location.pathname === '/Financial') {
-      return <Financial />;
-    }else if (location.pathname === '/healthStatus') {
-      return <HealthStatus />;
-    } else if (location.pathname === '/SOC') {
-      return <SOC />;
-    } else if (location.pathname === '/summaries') {
-      return <Summaries />;
-    } else if (location.pathname === '/medication') {
-      return <Medication />
-    } else if (location.pathname === '/clinical') { 
-      return <Clinical />; 
+    switch (location.pathname) {
+      case '/admin':
+        return <AdminPage globalSearchTerm={globalSearchTerm} />;
+      case '/dashboard':
+        return <Dashboard globalSearchTerm={globalSearchTerm} />;
+      case '/messages':
+        return <MessagingPage />;
+      case '/contacts':
+        return <Contacts globalSearchTerm={globalSearchTerm} />;
+      case '/newPatient':
+        return <NewPatient />;
+      case '/patient':
+        return <PatientMain globalSearchTerm={globalSearchTerm} />;
+      case '/financial':
+        return <Financial />;
+      case '/healthStatus':
+        return <HealthStatus />;
+      case '/SOC':
+        return <SOC />;
+      case '/summaries':
+        return <Summaries />;
+      case '/medication':
+        return <Medication />;
+      case '/clinical':
+        return <Clinical />;
+      case '/payments':
+        return <Payments />;
+      default:
+        return null;
     }
-    return null;
   };
 
   const renderSidebarLink = (to, icon, text) => {
     const isActive = () => {
       if (to === '/patient') {
-        return ['/patient', '/SOC', '/Financial', '/summaries', '/healthStatus', '/medication', '/newPatient', '/clinical'].includes(location.pathname);
+        return ['/patient', '/SOC', '/financial', '/summaries', '/healthStatus', '/medication', '/newPatient', '/clinical'].includes(location.pathname);
       }
       return location.pathname === to;
     };
@@ -191,7 +192,7 @@ const Layout = () => {
               {renderSidebarLink('/dashboard', 'fa-home', 'Dashboard')}
               {renderSidebarLink('/contacts', 'fa-address-book', 'Contacts')}
               {renderSidebarLink('/patient', 'fa-user', 'Patients')}
-              {renderSidebarLink('/financial', 'fa-dollar-sign', 'Financial')}
+              {renderSidebarLink('/payments', 'fa-dollar-sign', 'Payments')}
               {renderSidebarLink('/reporting', 'fa-chart-bar', 'Reporting')}
             </ul>
           </nav>
