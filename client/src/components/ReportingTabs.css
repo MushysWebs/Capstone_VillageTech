@@ -1,0 +1,36 @@
+.reporting-tabs {
+    display: flex;
+    gap: 20px;
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-left: 40px;
+  }
+  
+  .reporting-tabs .tab-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e6e6e6;
+    color: black;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .reporting-tabs .tab-button:hover {
+    background-color: #bfbfbf;
+  }
+  
+  .reporting-tabs .tab-button.active {
+    background-color: #09ACE0;
+    color: white;
+  }
+  
+  .reporting-tabs .end-of-day-button {
+    margin-left: auto;
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .reporting-tabs .end-of-day-button:hover {
+    background-color: #218838;
+  }

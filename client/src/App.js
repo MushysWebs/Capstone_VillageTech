@@ -21,7 +21,8 @@ import Clinical from "./pages/patients/clinical/Clinical";
 import Payments from "./pages/payments/Payments";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-
+import FinancialReports from "./pages/reporting/financialReports/FinancialReports";
+import ReportHistory from "./pages/reporting/reportHistory/ReportHistory";
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
                   <Route path="/medication" element={<Medication />} />
                   <Route path="/clinical" element={<Clinical />} />
                   <Route path="/payments" element={<Payments />} />
+                  <Route path="/reporting/history" element={<ReportHistory />} />
                 </Route>
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />

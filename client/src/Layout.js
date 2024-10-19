@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
@@ -17,12 +18,14 @@ import Summaries from './pages/patients/summaries/Summaries';
 import Medication from './pages/patients/medication/Medication';
 import Clinical from './pages/patients/clinical/Clinical'; 
 import Payments from './pages/payments/Payments';
+import FinancialReports from "./pages/reporting/financialReports/FinancialReports";
+import ReportHistory from "./pages/reporting/reportHistory/ReportHistory";
 
 const Layout = () => {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState("light");
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
+  const [globalSearchTerm, setGlobalSearchTerm] = useState("");
   const [unreadMessages, setUnreadMessages] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,15 +41,20 @@ const Layout = () => {
     if (session?.user?.id) {
       checkUnreadMessages();
       const subscription = supabase
-        .channel('public:messages')
-        .on('INSERT', payload => {
+        .channel("public:messages")
+        .on("INSERT", (payload) => {
           if (payload.new.recipient_id === session.user.id) {
-            setUnreadMessages(prev => [...prev, payload.new]);
+            setUnreadMessages((prev) => [...prev, payload.new]);
           }
         })
-        .on('UPDATE', payload => {
-          if (payload.new.recipient_id === session.user.id && payload.new.read) {
-            setUnreadMessages(prev => prev.filter(msg => msg.id !== payload.new.id));
+        .on("UPDATE", (payload) => {
+          if (
+            payload.new.recipient_id === session.user.id &&
+            payload.new.read
+          ) {
+            setUnreadMessages((prev) =>
+              prev.filter((msg) => msg.id !== payload.new.id)
+            );
           }
         })
         .subscribe();
@@ -62,70 +70,65 @@ const Layout = () => {
 
     try {
       const { data, error } = await supabase
-        .from('messages')
-        .select('*, sender:staff!sender_id(full_name)')
-        .eq('recipient_id', session.user.id)
-        .eq('read', false)
-        .order('created_at', { ascending: false });
+        .from("messages")
+        .select("*, sender:staff!sender_id(full_name)")
+        .eq("recipient_id", session.user.id)
+        .eq("read", false)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setUnreadMessages(data || []);
     } catch (error) {
-      console.error('Error checking unread messages:', error);
+      console.error("Error checking unread messages:", error);
       setUnreadMessages([]);
     }
   };
-
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications) {
       checkUnreadMessages();
     }
   };
-
   const handleMessageClick = (senderId) => {
-    navigate('/messages', { state: { selectedStaffId: senderId } });
+    navigate("/messages", { state: { selectedStaffId: senderId } });
     setShowNotifications(false);
   };
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
-
   const searchContainerStyles = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: theme === 'dark' ? '#363D3F' : 'transparent',
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    backgroundColor: theme === "dark" ? "#363D3F" : "transparent",
   };
-
   const searchInputStyles = {
-    padding: '8px 15px 8px 35px',
-    borderRadius: '20px',
-    border: 'none',
-    fontSize: '20px',
-    marginLeft: '10px',
-    backgroundColor: theme === 'dark' ? '#363D3F' : 'transparent',
-    color: theme === 'dark' ? 'white' : '#09ACE0',
-    outline: 'none',
-    boxShadow: 'none',
+    padding: "8px 15px 8px 35px",
+    borderRadius: "20px",
+    border: "none",
+    fontSize: "20px",
+    marginLeft: "10px",
+    backgroundColor: theme === "dark" ? "#363D3F" : "transparent",
+    color: theme === "dark" ? "white" : "#09ACE0",
+    outline: "none",
+    boxShadow: "none",
   };
 
   const searchIconStyles = {
-    color: theme === 'dark' ? 'white' : '#09ACE0',
-    position: 'absolute',
-    left: '10px',
-    transition: 'all 0.3s ease',
+    color: theme === "dark" ? "white" : "#09ACE0",
+    position: "absolute",
+    left: "10px",
+    transition: "all 0.3s ease",
   };
 
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const handleGlobalSearch = (e) => {
@@ -133,67 +136,81 @@ const Layout = () => {
   };
 
   const renderMainContent = () => {
-    switch (location.pathname) {
-      case '/admin':
-        return <AdminPage globalSearchTerm={globalSearchTerm} />;
-      case '/dashboard':
-        return <Dashboard globalSearchTerm={globalSearchTerm} />;
-      case '/messages':
-        return <MessagingPage />;
-      case '/contacts':
-        return <Contacts globalSearchTerm={globalSearchTerm} />;
-      case '/newPatient':
-        return <NewPatient />;
-      case '/patient':
-        return <PatientMain globalSearchTerm={globalSearchTerm} />;
-      case '/financial':
-        return <Financial />;
-      case '/healthStatus':
-        return <HealthStatus />;
-      case '/SOC':
-        return <SOC />;
-      case '/summaries':
-        return <Summaries />;
-      case '/medication':
-        return <Medication />;
-      case '/clinical':
-        return <Clinical />;
-      case '/payments':
-        return <Payments />;
-      default:
-        return null;
+    if (location.pathname === "/admin") {
+      return <AdminPage globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === "/dashboard") {
+      return <Dashboard globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === "/messages") {
+      return <MessagingPage />;
+    } else if (location.pathname === "/contacts") {
+      return <Contacts globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === "/newPatient") {
+      return <NewPatient />;
+    } else if (location.pathname === "/patient") {
+      return <PatientMain globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === "/Financial") {
+      return <Financial />;
+    } else if (location.pathname === "/healthStatus") {
+      return <HealthStatus />;
+    } else if (location.pathname === "/SOC") {
+      return <SOC />;
+    } else if (location.pathname === "/summaries") {
+      return <Summaries />;
+    } else if (location.pathname === "/medication") {
+      return <Medication />;
+    } else if (location.pathname === "/clinical") {
+      return <Clinical />;
+    } else if (location.pathname === "/reporting") {
+      return <FinancialReports />;
+    } else if (location.pathname === "/reporting/history") {
+      return <ReportHistory />;
+    } else if (location.pathname === "/payments") {
+      return <Payments />;  
     }
   };
 
   const renderSidebarLink = (to, icon, text) => {
     const isActive = () => {
-      if (to === '/patient') {
-        return ['/patient', '/SOC', '/financial', '/summaries', '/healthStatus', '/medication', '/newPatient', '/clinical'].includes(location.pathname);
+      if (to === "/patient") {
+        return [
+          "/patient",
+          "/SOC",
+          "/Financial",
+          "/summaries",
+          "/healthStatus",
+          "/medication",
+          "/newPatient",
+          "/clinical",
+        ].includes(location.pathname);
+      }
+      if (to === "/reporting") {
+        return location.pathname.startsWith("/reporting");
       }
       return location.pathname === to;
     };
+    
 
     return (
-      <li className={isActive() ? 'active' : ''} draggable="false">
+      <li className={isActive() ? "active" : ""} draggable="false">
         <Link to={to} draggable="false">
-          <i className={`fas ${icon}`} draggable="false"></i>{' '}
+          <i className={`fas ${icon}`} draggable="false"></i>{" "}
           <span draggable="false">{text}</span>
         </Link>
       </li>
     );
   };
-
   return (
     <AuthGuard>
       <div className={`dashboard-container ${theme}`}>
         <aside className="sidebar nunito-light">
           <nav>
             <ul>
-              {renderSidebarLink('/dashboard', 'fa-home', 'Dashboard')}
-              {renderSidebarLink('/contacts', 'fa-address-book', 'Contacts')}
-              {renderSidebarLink('/patient', 'fa-user', 'Patients')}
+              {renderSidebarLink("/dashboard", "fa-home", "Dashboard")}
+              {renderSidebarLink("/contacts", "fa-address-book", "Contacts")}
+              {renderSidebarLink("/patient", "fa-user", "Patients")}
+              {renderSidebarLink("/financial", "fa-dollar-sign", "Financial")}
+              {renderSidebarLink("/reporting", "fa-chart-bar", "Reporting")}
               {renderSidebarLink('/payments', 'fa-dollar-sign', 'Payments')}
-              {renderSidebarLink('/reporting', 'fa-chart-bar', 'Reporting')}
             </ul>
           </nav>
         </aside>
@@ -202,20 +219,29 @@ const Layout = () => {
             <div className="header-left">
               <Link
                 to="/messages"
-                className={`header-button blue-button nunito-regular ${location.pathname === '/messages' ? 'active' : ''}`}
+                className={`header-button blue-button nunito-regular ${
+                  location.pathname === "/messages" ? "active" : ""
+                }`}
                 draggable="false"
               >
-                <i className="fas fa-envelope" draggable="false"></i> <span draggable="false">Messages</span>
+                <i className="fas fa-envelope" draggable="false"></i>{" "}
+                <span draggable="false">Messages</span>
               </Link>
               <Link
                 to="/admin"
-                className={`header-button blue-button nunito-regular ${location.pathname === '/admin' ? 'active' : ''}`}
+                className={`header-button blue-button nunito-regular ${
+                  location.pathname === "/admin" ? "active" : ""
+                }`}
                 draggable="false"
               >
-                <i className="fas fa-user-shield" draggable="false"></i> <span draggable="false">Admin</span>
+                <i className="fas fa-user-shield" draggable="false"></i>{" "}
+                <span draggable="false">Admin</span>
               </Link>
               <div className="search-container" style={searchContainerStyles}>
-                <i className="fas fa-search search-icon" style={searchIconStyles}></i>
+                <i
+                  className="fas fa-search search-icon"
+                  style={searchIconStyles}
+                ></i>
                 <input
                   type="text"
                   placeholder="Search"
@@ -230,19 +256,31 @@ const Layout = () => {
               <button className="header-button blue-button" draggable="false">
                 <span draggable="false">Save</span>
               </button>
-              <button className="notification-button" onClick={handleNotificationClick} draggable="false">
+              <button
+                className="notification-button"
+                onClick={handleNotificationClick}
+                draggable="false"
+              >
                 <i className="fas fa-bell" draggable="false"></i>
                 {unreadMessages.length > 0 && (
-                  <span className="notification-badge" draggable="false">{unreadMessages.length}</span>
+                  <span className="notification-badge" draggable="false">
+                    {unreadMessages.length}
+                  </span>
                 )}
               </button>
               <button className="user-button" draggable="false">
                 <i className="fas fa-user" draggable="false"></i>
               </button>
-              <button className="settings-button" onClick={toggleTheme} draggable="false">
+              <button
+                className="settings-button"
+                onClick={toggleTheme}
+                draggable="false"
+              >
                 <i className="fas fa-cog" draggable="false"></i>
               </button>
-              <span className="time-display" draggable="false">{currentTime.toLocaleTimeString()}</span>
+              <span className="time-display" draggable="false">
+                {currentTime.toLocaleTimeString()}
+              </span>
               <SignoutButton />
             </div>
           </header>
@@ -255,10 +293,20 @@ const Layout = () => {
               <p>No new notifications</p>
             ) : (
               unreadMessages.map((message) => (
-                <div key={message.id} className="notification" onClick={() => handleMessageClick(message.sender_id)} draggable="false">
-                  <h3 draggable="false">New message from {message.sender.full_name}</h3>
+                <div
+                  key={message.id}
+                  className="notification"
+                  onClick={() => handleMessageClick(message.sender_id)}
+                  draggable="false"
+                >
+                  <h3 draggable="false">
+                    New message from {message.sender.full_name}
+                  </h3>
                   <p draggable="false">{message.content.substring(0, 50)}...</p>
-                  <p draggable="false"><i className="far fa-clock" draggable="false"></i> {formatDate(message.created_at)}</p>
+                  <p draggable="false">
+                    <i className="far fa-clock" draggable="false"></i>{" "}
+                    {formatDate(message.created_at)}
+                  </p>
                 </div>
               ))
             )}
@@ -268,5 +316,4 @@ const Layout = () => {
     </AuthGuard>
   );
 };
-
 export default Layout;

@@ -171,6 +171,32 @@
   z-index: 3;
 }
 
+.calendarView__headerButtons .clock-in-out {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+}
+
+.calendarView__headerButtons .clock-in-out button {
+  background-color: #09ACE0;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.calendarView__headerButtons .clock-in-out button:hover {
+  background-color: #0789b4;
+}
+
+.calendarView__headerButtons .clock-in-out p {
+  font-size: 14px;
+  margin: 0 10px 0 0;
+  color: #333;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .calendarView__header,

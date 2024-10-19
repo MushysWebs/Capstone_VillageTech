@@ -40,7 +40,7 @@
     font-style: normal;
   }
   
-  .container {
+  .login-container {
     display: flex;
     height: 100vh;
     padding-bottom: 0; /* Remove bottom padding to use full height */
@@ -64,7 +64,7 @@
     margin-bottom: 20px;
   }
   
-  .form-container {
+  .login-form-container {
     width: 80%; /* Take up the rest of the space */
     display: flex;
     flex-direction: column;
@@ -86,7 +86,7 @@
     color: #09ACE0;
   }
   
-  .form {
+  .login-form {
     width: 100%;
     max-width: 400px;
     display: flex;
