@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { useSupabaseClient } from '@supabase/auth-helpers-react'; 
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import PatientSidebar from "../../components/patientSidebar/PatientSidebar";
-import PatientTabs from "../../components/PatientTabs";
-import { usePatient } from '../../context/PatientContext';
-import './Payments.css';
+import Receipt from "./Receipt";
+import { usePatient } from "../../context/PatientContext";
+import "./Payments.css";
 
 const Payments = () => {
-  const { selectedPatient } = usePatient(); 
+  const { selectedPatient } = usePatient();
   const [invoiceData, setInvoiceData] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState(""); 
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const supabase = useSupabaseClient(); 
+  const [receiptUrl, setReceiptUrl] = useState("");
+  const supabase = useSupabaseClient();
   const stripe = useStripe();
   const elements = useElements();
 
-
   const formatCurrency = (value) => {
-    return value.toLocaleString('en-CA', {
-      style: 'currency',
-      currency: 'CAD',
+    return value.toLocaleString("en-CA", {
+      style: "currency",
+      currency: "CAD",
       minimumFractionDigits: 2,
     });
   };
@@ -50,6 +51,8 @@ const Payments = () => {
 
   const handleInvoiceSelect = (invoice) => {
     setSelectedInvoice(invoice);
+    setSuccess(false);
+    setPaymentMethod("");
   };
 
   const handlePaymentMethodChange = (method) => {
@@ -66,7 +69,6 @@ const Payments = () => {
 
         if (error) throw error;
         fetchInvoiceData();
-        setSelectedInvoice(null);
       } catch (err) {
         console.error("Error marking invoice as paid:", err.message);
       }
@@ -77,29 +79,32 @@ const Payments = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-  
+
     if (!stripe || !elements) {
-      setError('Stripe has not loaded yet.');
+      setError("Stripe has not loaded yet.");
       setLoading(false);
       return;
     }
-  
+
     const cardElement = elements.getElement(CardElement);
-  
+
     try {
       console.log("Creating payment intent...");
 
-      const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}/functions/v1/create_payment_intent`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          amount: selectedInvoice.invoice_total * 100,
-          currency: 'cad',
-        }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/create_payment_intent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            amount: selectedInvoice.invoice_total * 100,
+            currency: "cad",
+          }),
+        }
+      );
 
       const paymentIntentData = await response.json();
 
@@ -110,7 +115,7 @@ const Payments = () => {
         setLoading(false);
         return;
       }
-  
+
       const { client_secret } = paymentIntentData;
 
       const paymentResult = await stripe.confirmCardPayment(client_secret, {
@@ -119,32 +124,59 @@ const Payments = () => {
         },
       });
 
-
       console.log("Stripe payment result:", paymentResult);
-  
+
       if (paymentResult.error) {
         setError(paymentResult.error.message);
         setLoading(false);
-      } else if (paymentResult.paymentIntent && paymentResult.paymentIntent.status === 'succeeded') {
-        const { error: updateError } = await supabase
-          .from("invoices")
-          .update({ stripe_payment_intent: paymentIntentData.id })
-          .eq("invoice_id", selectedInvoice.invoice_id);
+      } else if (
+        paymentResult.paymentIntent &&
+        paymentResult.paymentIntent.status === "succeeded"
+      ) {
+        await markAsPaid();
 
-        if (updateError) {
-          setError(updateError.message);
-        } else {
+        // Delay receipt generation for first load
+        setTimeout(async () => {
+          const receiptFileUrl = generateReceiptPDFUrl();
+
+          await saveReceiptToDatabase(receiptFileUrl);
+
+          setReceiptUrl(receiptFileUrl);
+
           setSuccess(true);
-          markAsPaid();
-        }
+
+          console.log("Receipt generated successfully");
+        }, 500); // Add a delay here to ensure all data is loaded
       } else {
-        setError('Payment failed.');
+        setError("Payment failed.");
       }
     } catch (error) {
       console.error("Error during payment processing:", error);
-      setError('An error occurred during payment processing.');
+      setError("An error occurred during payment processing.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateReceiptPDFUrl = () => {
+    return `https://example.com/receipt_${selectedInvoice?.invoice_id}.pdf`;
+  };
+
+  const saveReceiptToDatabase = async (pdfUrl) => {
+    try {
+      const { data, error } = await supabase.from("receipts").insert({
+        invoice_id: selectedInvoice?.invoice_id,
+        patient_id: selectedPatient.id,
+        receipt_total: selectedInvoice.invoice_total,
+        receipt_pdf_url: pdfUrl,
+      });
+
+      if (error) {
+        throw error;
+      }
+      console.log("Receipt saved to database", data);
+    } catch (err) {
+      console.error("Error saving receipt to database:", err.message);
     }
   };
 
@@ -186,33 +218,71 @@ const Payments = () => {
             </table>
           </div>
         </div>
-  
+
         {selectedInvoice && (
           <div className="payment-method-section">
-            <h2 className="payments-h2">Payment Options for Invoice #{selectedInvoice.invoice_id}</h2>
-            <div className="payment-options">
-              <button onClick={() => handlePaymentMethodChange("cash")}>
-                Pay with Cash
-              </button>
-              <button onClick={() => handlePaymentMethodChange("card")}>
-                Pay with Card
-              </button>
-            </div>
-  
-            {paymentMethod === "card" && (
-              <form onSubmit={handleSubmit}>
-                <CardElement options={{ hidePostalCode: true }} />
-                <button type="submit" disabled={!stripe || loading}>
-                  {loading ? 'Processing...' : `Pay ${formatCurrency(selectedInvoice.invoice_total)}`}
-                </button>
-                {error && <div className="error-message">{error}</div>}
-                {success && <div className="success-message">Payment successful!</div>}
-              </form>
+            {!success && (
+              <>
+                <h2 className="payments-h2">
+                  Payment Options for Invoice #{selectedInvoice.invoice_id}
+                </h2>
+                <div className="payment-options">
+                  <button onClick={() => handlePaymentMethodChange("cash")}>
+                    Pay with Cash
+                  </button>
+                  <button onClick={() => handlePaymentMethodChange("card")}>
+                    Pay with Card
+                  </button>
+                </div>
+
+                {paymentMethod === "card" && (
+                  <form onSubmit={handleSubmit}>
+                    <CardElement options={{ hidePostalCode: true }} />
+                    <button type="submit" disabled={!stripe || loading}>
+                      {loading
+                        ? "Processing..."
+                        : `Pay ${formatCurrency(
+                            selectedInvoice.invoice_total
+                          )}`}
+                    </button>
+                    {error && <div className="error-message">{error}</div>}
+                  </form>
+                )}
+
+                {paymentMethod === "cash" && (
+                  <div>
+                    <button onClick={markAsPaid}>Mark as Paid</button>
+                  </div>
+                )}
+              </>
             )}
-  
-            {paymentMethod === "cash" && (
-              <div>
-                <button onClick={markAsPaid}>Mark as Paid</button>
+
+            {success && (
+              <div className="payment-success">
+                {console.log("Invoice:", selectedInvoice)}
+                {console.log("Patient:", selectedPatient)}
+                <h2 className="success-message" style={{ color: "green" }}>
+                  Payment Successful!
+                </h2>
+                <div className="checkmark">✔️</div>
+
+                {selectedInvoice && selectedPatient ? (
+                  <PDFDownloadLink
+                    document={
+                      <Receipt
+                        invoice={selectedInvoice}
+                        patient={selectedPatient}
+                      />
+                    }
+                    fileName={`Receipt_Invoice_${selectedInvoice?.invoice_id}.pdf`}
+                  >
+                    {({ loading }) =>
+                      loading ? "Generating receipt..." : "Download Receipt"
+                    }
+                  </PDFDownloadLink>
+                ) : (
+                  <p>Loading receipt...</p>
+                )}
               </div>
             )}
           </div>
@@ -220,5 +290,6 @@ const Payments = () => {
       </div>
     </div>
   );
-};  
+};
+
 export default Payments;
