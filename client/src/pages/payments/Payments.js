@@ -46,6 +46,7 @@ const Payments = () => {
   };
 
   useEffect(() => {
+    console.log("Stripe Publishable Key:", process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
     fetchInvoiceData();
   }, [selectedPatient, supabase]);
 
@@ -293,3 +294,8 @@ const Payments = () => {
 };
 
 export default Payments;
+
+
+//needs email receipts
+//needs to be able to generate receipt from paying with cash
+//vercel is bugged and pay button doesnt work
