@@ -49,6 +49,7 @@ function App() {
                   <Route path="/clinical" element={<Clinical />} />
                   <Route path="/payments" element={<Payments />} />
                   <Route path="/reporting/history" element={<ReportHistory />} />
+                  <Route path="/reporting" element={<FinancialReports />} />
                 </Route>
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
