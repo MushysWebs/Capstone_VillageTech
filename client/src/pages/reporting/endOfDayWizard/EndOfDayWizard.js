@@ -38,12 +38,22 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
   useEffect(() => {
     if (open) {
       if (reportData) {
-        // Load existing report data
-        setData(reportData);
+        // Transform historical report data to match current structure
+        const transformedData = {
+          employeesStatus: reportData.employee_status || reportData.employeesStatus || [],
+          patientStats: reportData.patient_stats || [],
+          financialSummary: reportData.financial_summary || {
+            invoicesCreated: 0,
+            invoicesPaid: 0,
+            paymentsReceived: 0,
+            paymentsRefunded: 0
+          },
+          profitBreakdown: reportData.profit_breakdown || []
+        };
+        setData(transformedData);
         setComment(reportData.comment || '');
         setLoading(false);
       } else {
-        // Fetch new data for a new report
         fetchData();
       }
     }
@@ -64,7 +74,7 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
         if (invoiceError) throw invoiceError;
   
         const financialSummary = processInvoices(invoices);
-        const patientStats = await calculatePatientStats(invoices); // Now awaiting this call
+        const patientStats = await calculatePatientStats(invoices);
         const profitBreakdown = calculateProfitBreakdown(invoices);
   
         // dummy data for employee status. TODO
@@ -220,54 +230,72 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       onClose();
       return;
     }
-
+  
     const reportToSave = {
       date: new Date().toISOString().split('T')[0],
       employee_status: data.employeesStatus,
       patient_stats: data.patientStats,
       financial_summary: data.financialSummary,
       profit_breakdown: data.profitBreakdown,
-      comment: comment
+      comment: comment,
+      created_at: new Date().toISOString()
     };
-
-    const { data: savedReport, error } = await supabase
-      .from('end_of_day_reports')
-      .insert(reportToSave);
-
-    if (error) {
-      console.error('Error saving report:', error);
-    } else {
+  
+    try {
+      const { data: savedReport, error } = await supabase
+        .from('end_of_day_reports')
+        .insert(reportToSave);
+  
+      if (error) throw error;
       console.log('Report saved successfully:', savedReport);
+      onClose();
+    } catch (error) {
+      console.error('Error saving report:', error);
     }
-
-    onClose();
   };
-
-  const renderEmployeeStatus = () => (
-    <Grid item xs={12}>
-      <Card className="summary-card employee-status">
-        <Typography variant="h6" gutterBottom>Employee Status</Typography>
-        <Grid container spacing={2}>
-          {[
-            { label: 'Still Clocked In', value: data.employeesStatus[0].value, Icon: Person, color: '#4CAF50' },
-            { label: 'Clocked Out', value: data.employeesStatus[1].value, Icon: PersonOff, color: '#FFC107' },
-            { label: 'Absent', value: data.employeesStatus[2].value, Icon: EventBusy, color: '#F44336' },
-            { label: 'Scheduled', value: data.employeesStatus[3].value, Icon: Schedule, color: '#2196F3' },
-          ].map((status, index) => (
-            <Grid item xs={6} sm={3} key={index}>
-              <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
-                <Avatar style={{ backgroundColor: status.color, marginBottom: '8px' }}>
-                  <status.Icon />
-                </Avatar>
-                <Typography variant="h4">{status.value}</Typography>
-                <Typography variant="body2" color="textSecondary" align="center">{status.label}</Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Card>
-    </Grid>
-  );
+  const renderEmployeeStatus = () => {
+    const employeeStats = data?.employee_status || data?.employeesStatus || [
+      { name: 'Still Clocked In', value: 0 },
+      { name: 'Clocked Out', value: 0 },
+      { name: 'Absent', value: 0 },
+      { name: 'Scheduled', value: 0 }
+    ];
+  
+    const statusMap = {
+      'Still Clocked In': { Icon: Person, color: '#4CAF50' },
+      'Clocked Out': { Icon: PersonOff, color: '#FFC107' },
+      'Absent': { Icon: EventBusy, color: '#F44336' },
+      'Scheduled': { Icon: Schedule, color: '#2196F3' }
+    };
+  
+    const formattedStats = Object.entries(statusMap).map(([label, config]) => ({
+      label,
+      value: employeeStats.find(stat => stat.name === label)?.value || 0,
+      Icon: config.Icon,
+      color: config.color
+    }));
+  
+    return (
+      <Grid item xs={12}>
+        <Card className="summary-card employee-status">
+          <Typography variant="h6" gutterBottom>Employee Status</Typography>
+          <Grid container spacing={2}>
+            {formattedStats.map((status, index) => (
+              <Grid item xs={6} sm={3} key={index}>
+                <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
+                  <Avatar style={{ backgroundColor: status.color, marginBottom: '8px' }}>
+                    <status.Icon />
+                  </Avatar>
+                  <Typography variant="h4">{status.value}</Typography>
+                  <Typography variant="body2" color="textSecondary" align="center">{status.label}</Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Card>
+      </Grid>
+    );
+  };
 
   const renderPatientStats = () => {
     const totalPatients = data.patientStats.reduce((acc, curr) => acc + curr.value, 0);
