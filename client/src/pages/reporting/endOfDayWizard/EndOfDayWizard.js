@@ -38,7 +38,7 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
   useEffect(() => {
     if (open) {
       if (reportData) {
-        // Transform historical report data to match current structure
+        // transform old report data to match current implementation of wizard
         const transformedData = {
           employeesStatus: reportData.employee_status || reportData.employeesStatus || [],
           patientStats: reportData.patient_stats || [],

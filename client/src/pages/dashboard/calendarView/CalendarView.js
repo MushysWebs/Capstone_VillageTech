@@ -2,41 +2,45 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { 
   format, 
-  startOfWeek, 
-  addDays, 
-  isSameDay, 
-  differenceInMinutes, 
-  startOfDay, 
-  endOfWeek, 
-  addWeeks, 
-  subWeeks, 
+  startOfDay,
+  addDays,
   subDays,
+  isSameDay,
+  differenceInMinutes,
   areIntervalsOverlapping
 } from 'date-fns';
-import './CalendarView.css';
 import AddAppointment from './AddAppointment';
 import ClockInOut from '../../../components/clockInOut/ClockInOut';
+import './CalendarView.css';
 
 const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('week'); // 'week' or 'day'
   const supabase = useSupabaseClient();
-  const scrollContainerRef = useRef(null);
+  const scrollWrapperRef = useRef(null);
 
   useEffect(() => {
     fetchAppointments();
-    const timer = setInterval(() => {
-      setCurrentDate(new Date());
-    }, 60000); // Update every minute
-    return () => clearInterval(timer);
-  }, [currentDate, viewMode]);
+    // initial scroll to current time
+    scrollToCurrentTime();
+    
+  }, [currentDate]);
+
+  const scrollToCurrentTime = () => {
+    if (scrollWrapperRef.current && isSameDay(currentDate, new Date())) {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const scrollPosition = (hours * 120) + ((minutes / 60) * 120) - (scrollWrapperRef.current.clientWidth / 2);
+      scrollWrapperRef.current.scrollLeft = Math.max(0, scrollPosition);
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
-      const start = viewMode === 'week' ? startOfWeek(currentDate) : startOfDay(currentDate);
-      const end = viewMode === 'week' ? endOfWeek(currentDate) : addDays(startOfDay(currentDate), 1);
+      const start = startOfDay(currentDate);
+      const end = addDays(startOfDay(currentDate), 1);
 
       const { data, error } = await supabase
         .from('appointments')
@@ -96,28 +100,31 @@ const CalendarView = ({ searchTerm, firstName }) => {
     fetchAppointments();
   };
 
-  const renderTimeColumn = () => {
-    return Array.from({ length: 24 }, (_, i) => (
-      <div key={i} className="calendarView__timeSlot">
-        {format(new Date().setHours(i, 0, 0, 0), 'HH:mm')}
-      </div>
-    ));
+  const renderTimeSlots = () => {
+    // create fixed 24-hour time slots
+    const slots = [];
+    for (let i = 0; i < 24; i++) {
+      const displayHour = i.toString().padStart(2, '0');
+      slots.push(
+        <div key={i} className="calendarView__timeSlot">
+          {`${(displayHour)}:00`}
+        </div>
+      );
+    }
+    return slots;
   };
-
-  const renderAppointments = (day) => {
-    const dayAppointments = appointments.filter(app => isSameDay(app.start, day));
-    
-    // Sort appointments by start time
-    dayAppointments.sort((a, b) => a.start.getTime() - b.start.getTime());
   
-    // Function to check if two appointments overlap
+
+  const renderAppointments = () => {
+    const dayAppointments = appointments.filter(app => isSameDay(app.start, currentDate));
+    dayAppointments.sort((a, b) => a.start.getTime() - b.start.getTime());
+    
     const doAppointmentsOverlap = (app1, app2) => 
       areIntervalsOverlapping(
         { start: app1.start, end: app1.end },
         { start: app2.start, end: app2.end }
       );
-  
-    // Group overlapping appointments
+    
     const overlappingGroups = [];
     dayAppointments.forEach(app => {
       const overlappingGroup = overlappingGroups.find(group => 
@@ -130,30 +137,49 @@ const CalendarView = ({ searchTerm, firstName }) => {
         overlappingGroups.push([app]);
       }
     });
-  
+    
     return overlappingGroups.flatMap(group => {
       const isOverlapping = group.length > 1;
       return group.map((app, index) => {
-        const top = (differenceInMinutes(app.start, startOfDay(day)) / 60) * 50;
-        const height = (differenceInMinutes(app.end, app.start) / 60) * 50;
+        const start = new Date(app.start);
+        const end = new Date(app.end);
+  
+        const startHour = start.getHours();
+        const startMinute = start.getMinutes();
+        const endHour = end.getHours();
+        const endMinute = end.getMinutes();
+  
+        // calculate position directly from hours (120px per hour)
+        const left = (startHour * 142) + (startMinute / 60 * 120);
+        const width = ((endHour - startHour) * 120) + ((endMinute - startMinute) / 60 * 120);
         
-        let left = '0%';
-        let width = '100%';
+        let top = '0%';
+        let height = '100%';
         
         if (isOverlapping) {
-          const columnWidth = 100 / group.length;
-          left = `${index * columnWidth}%`;
-          width = `${columnWidth}%`;
+          const rowHeight = 100 / group.length;
+          top = `${index * rowHeight}%`;
+          height = `${rowHeight}%`;
         }
+  
+        // format display time in 24-hour format
+        const displayStart = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
+        const displayEnd = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
   
         return (
           <div
             key={app.id}
             className="calendarView__appointment"
-            style={{ top: `${top}px`, height: `${height}px`, left, width }}
+            style={{ 
+              left: `${left}px`, 
+              width: `${width}px`,
+              top,
+              height,
+              maxHeight: '120px'
+            }}
           >
             <div className="calendarView__appointmentTime">
-              {format(app.start, 'HH:mm')} - {format(app.end, 'HH:mm')}
+              {`${displayStart} - ${displayEnd}`}
             </div>
             <div className="calendarView__appointmentTitle">{app.title}</div>
             <div className="calendarView__appointmentPatient">{app.patient}</div>
@@ -162,44 +188,17 @@ const CalendarView = ({ searchTerm, firstName }) => {
       });
     });
   };
+  
 
-  const renderDayColumn = (day) => (
-    <div className="calendarView__dayColumn">
-      <div className="calendarView__dayHeader">
-        {format(day, 'EEE dd')}
-      </div>
-      <div className="calendarView__dayContent">
-        {renderAppointments(day)}
-        {isSameDay(day, new Date()) && renderCurrentTimeBar(day)}
-      </div>
-    </div>
-  );
-
-  const renderWeekView = () => {
-    const weekStart = startOfWeek(currentDate);
-    return Array.from({ length: 7 }, (_, i) => renderDayColumn(addDays(weekStart, i)));
-  };
-
-  const renderDayView = () => {
-    return renderDayColumn(currentDate);
-  };
-
-  const renderCurrentTimeBar = (day) => {
+  const renderCurrentTimeLine = () => {
     const now = new Date();
-    if (isSameDay(now, day)) {
-      const minutesSinceMidnight = differenceInMinutes(now, startOfDay(day));
-      const top = (minutesSinceMidnight / 60) * 50;
-      return <div className="calendarView__currentTimeBar" style={{ top: `${top}px` }} />;
+    if (isSameDay(now, currentDate)) {
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      const left = (hour * 142) + (minute / 60 * 120);
+      return <div className="calendarView__currentTimeLine" style={{ left: `${left}px` }} />;
     }
     return null;
-  };
-
-  const navigateDate = (direction) => {
-    if (viewMode === 'week') {
-      setCurrentDate(prevDate => direction === 'next' ? addWeeks(prevDate, 1) : subWeeks(prevDate, 1));
-    } else {
-      setCurrentDate(prevDate => direction === 'next' ? addDays(prevDate, 1) : subDays(prevDate, 1));
-    }
   };
 
   return (
@@ -207,40 +206,63 @@ const CalendarView = ({ searchTerm, firstName }) => {
       <div className="calendarView__header">
         <h1>Hello, {firstName}!</h1>
         <div className="calendarView__headerButtons">
-        <ClockInOut />
+          <ClockInOut />
           <button className="calendarView__actionButton">View Hours</button>
         </div>
       </div>
+      
       <div className="calendarView__controls">
         <div className="calendarView__leftControls">
-          <button className="calendarView__actionButton" onClick={() => setIsAddModalOpen(true)}>+ Create Appointment</button>
-          <button className="calendarView__actionButton">View Appointments</button>
-          <button className="calendarView__actionButton" onClick={() => setViewMode(viewMode === 'week' ? 'day' : 'week')}>
-            {viewMode === 'week' ? 'Day View' : 'Week View'}
+          <button 
+            className="calendarView__actionButton" 
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            + Create Appointment
           </button>
+          <button className="calendarView__actionButton">View Appointments</button>
         </div>
         <div className="calendarView__rightControls">
-          <button className="calendarView__controlButton calendarView__todayButton" onClick={() => setCurrentDate(new Date())}>Today</button>
+          <button 
+            className="calendarView__controlButton calendarView__todayButton" 
+            onClick={() => {
+              setCurrentDate(new Date());
+              setTimeout(scrollToCurrentTime, 0);
+            }}
+          >
+            Today
+          </button>
           <span className="calendarView__dateDisplay">
-            {viewMode === 'week'
-              ? `${format(startOfWeek(currentDate), 'MMM d')} - ${format(endOfWeek(currentDate), 'MMM d, yyyy')}`
-              : format(currentDate, 'MMMM d, yyyy')}
+            {format(currentDate, 'MMMM d, yyyy')}
           </span>
-          <button className="calendarView__controlButton calendarView__navButton" onClick={() => navigateDate('prev')}>&#9664;</button>
-          <button className="calendarView__controlButton calendarView__navButton" onClick={() => navigateDate('next')}>&#9654;</button>
+          <button 
+            className="calendarView__controlButton" 
+            onClick={() => setCurrentDate(prev => subDays(prev, 1))}
+          >
+            &#9664;
+          </button>
+          <button 
+            className="calendarView__controlButton" 
+            onClick={() => setCurrentDate(prev => addDays(prev, 1))}
+          >
+            &#9654;
+          </button>
         </div>
       </div>
-      <div className="calendarView__weekContainer">
-        <div className="calendarView__scrollContainer" ref={scrollContainerRef}>
-          <div className="calendarView__timeColumn">
-            {renderTimeColumn()}
-          </div>
-          <div className="calendarView__daysContainer">
-            {viewMode === 'week' ? renderWeekView() : renderDayView()}
+
+      <div className="calendarView__timeline">
+        <div className="calendarView__scrollWrapper" ref={scrollWrapperRef}>
+          <div className="calendarView__contentWrapper">
+            <div className="calendarView__timeHeader">
+              {renderTimeSlots()}
+            </div>
+            <div className="calendarView__appointmentsContainer">
+              {renderAppointments()}
+              {renderCurrentTimeLine()}
+            </div>
           </div>
         </div>
       </div>
-      
+
       {isAddModalOpen && (
         <AddAppointment
           onClose={() => setIsAddModalOpen(false)}

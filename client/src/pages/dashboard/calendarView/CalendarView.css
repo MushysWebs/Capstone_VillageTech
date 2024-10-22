@@ -27,6 +27,32 @@
   gap: 10px;
 }
 
+.calendarView__headerButtons .clock-in-out {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+}
+
+.calendarView__headerButtons .clock-in-out button {
+  background-color: #09ACE0;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.calendarView__headerButtons .clock-in-out button:hover {
+  background-color: #0789b4;
+}
+
+.calendarView__headerButtons .clock-in-out p {
+  font-size: 14px;
+  margin: 0 10px 0 0;
+  color: #333;
+}
+
 .calendarView__actionButton,
 .calendarView__controlButton {
   padding: 8px 16px;
@@ -60,10 +86,6 @@
   color: white;
 }
 
-.calendarView__todayButton:hover {
-  background-color: #0789b4;
-}
-
 .calendarView__controls {
   display: flex;
   justify-content: space-between;
@@ -74,127 +96,227 @@
   font-size: 18px;
   font-weight: bold;
   color: #333;
+  margin: 0 10px;
 }
 
-.calendarView__weekContainer {
-  display: flex;
+.calendarView__timeline {
   flex-grow: 1;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-}
-
-.calendarView__scrollContainer {
   display: flex;
-  flex-grow: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex-direction: column;
   height: calc(100vh - 200px); 
 }
 
-.calendarView__timeColumn {
-  width: 60px;
-  border-right: 1px solid #e0e0e0;
-  flex-shrink: 0;
+.calendarView__scrollWrapper {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  flex-grow: 1;
+  background-color: #fff;
+}
+
+.calendarView__contentWrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: fit-content;
+  flex: 1;
+}
+
+.calendarView__timeHeader {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
   z-index: 2;
+  height: 40px;
+  padding-bottom: 5px;
+}
+
+.calendarView__timeHeader::before {
+  content: '';
+  position: absolute;
+  left: -20px; 
+  right: -2000px; 
+  top: 0;
+  bottom: 0;
+  background-color: #f8f9fa;
+  z-index: -1;
 }
 
 .calendarView__timeSlot {
-  height: 50px;
+  flex: 0 0 120px;
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  border-right: 1px solid #e0e0e0;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  color: #888;
-}
-
-.calendarView__daysContainer {
-  display: flex;
-  flex-grow: 1;
-}
-
-.calendarView__dayColumn {
-  flex: 1;
-  min-width: 150px;
-  border-right: 1px solid #e0e0e0;
-  position: relative;
-}
-
-.calendarView__dayContent {
-  height: 1200px; /* 24 hours * 50px per hour */
-  position: relative;
-}
-
-.calendarView__dayColumn:last-child {
-  border-right: none;
-}
-
-.calendarView__dayHeader {
-  text-align: center;
-  font-weight: bold;
-  padding: 10px;
-  background-color: #f0f0f0;
-  position: sticky;
-  top: 0;
+  background-color: transparent;
   z-index: 1;
 }
+
+.calendarView__timeSlot::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 40px;
+  width: 1px;
+  height: calc(100vh - 300px); 
+  background-color: rgba(224, 224, 224, 0.5);
+  pointer-events: none;
+}
+
+.calendarView__scrollWrapper {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  flex-grow: 1;
+  background-color: #fff;
+  isolation: isolate; 
+}
+
+.calendarView__timeSlot::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 40px; 
+  width: 1px;
+  height: 100vh; 
+  background-color: rgba(224, 224, 224, 0.5);
+  pointer-events: none;
+}
+
+.calendarView__appointmentsContainer {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 95%,
+    rgba(9, 172, 224, 0.1) 100%
+  );
+}
+
 
 .calendarView__appointment {
   position: absolute;
   background-color: #e6f7ff;
   border-left: 3px solid #09ACE0;
-  padding: 0px;
+  padding: 8px;
   border-radius: 4px;
   font-size: 12px;
   overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  z-index: 1;
+  min-height: 60px;
+  cursor: pointer;
+}
+
+.calendarView__appointment:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #e6f7ff 90%
+  );
+  pointer-events: none;
+}
+
+.calendarView__appointment:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   z-index: 2;
+  background-color: #d1efff;
+}
+
+.calendarView__appointment:hover:after {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #d1efff 90%
+  );
 }
 
 .calendarView__appointmentTime {
   font-weight: bold;
-}
-
-.calendarView__appointmentTitle,
-.calendarView__appointmentPatient {
+  margin-bottom: 4px;
+  color: #09ACE0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.calendarView__currentTimeBar {
+.calendarView__appointmentTitle {
+  font-weight: 500;
+  margin-bottom: 2px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendarView__appointmentPatient {
+  color: #666;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendarView__currentTimeLine {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  height: 1024px;
   background-color: #ff0000;
   z-index: 3;
 }
 
-.calendarView__headerButtons .clock-in-out {
-  display: flex;
-  align-items: center;
-  margin-right: 15px;
+.calendarView__currentTimeLine::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
 }
 
-.calendarView__headerButtons .clock-in-out button {
-  background-color: #09ACE0;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.calendarView__scrollWrapper::-webkit-scrollbar {
+  height: 8px;
 }
 
-.calendarView__headerButtons .clock-in-out button:hover {
-  background-color: #0789b4;
+.calendarView__scrollWrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
 }
 
-.calendarView__headerButtons .clock-in-out p {
-  font-size: 14px;
-  margin: 0 10px 0 0;
-  color: #333;
+.calendarView__scrollWrapper::-webkit-scrollbar-thumb {
+  background: #09ACE0;
+  border-radius: 4px;
+}
+
+.calendarView__scrollWrapper::-webkit-scrollbar-thumb:hover {
+  background: #0789b4;
 }
 
 /* Responsive styles */
@@ -202,7 +324,7 @@
   .calendarView__header,
   .calendarView__controls {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 10px;
   }
 
   .calendarView__headerButtons,
@@ -210,7 +332,6 @@
   .calendarView__rightControls {
     width: 100%;
     justify-content: space-between;
-    margin-top: 10px;
   }
 
   .calendarView__actionButton,
@@ -223,64 +344,7 @@
     font-size: 16px;
   }
 
-  .calendarView__weekContainer {
-    display: flex;
-    flex-grow: 1;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-
-  .calendarView__scrollContainer {
-    flex-direction: column;
-  }
-
-  .calendarView__scrollContainer::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  .calendarView__scrollContainer::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  
-  .calendarView__scrollContainer::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-  }
-  
-  .calendarView__scrollContainer::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-  
-
-  .calendarView__timeColumn {
-    width: 60px;
-    border-right: 1px solid #e0e0e0;
-    flex-shrink: 0;
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    background-color: #fff;
-  }
-  
-  .calendarView__timeSlot {
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: #888;
-  }
-
-  .calendarView__daysContainer {
-    flex-direction: column;
-  }
-
-  .calendarView__dayColumn {
-    height: auto;
-    min-height: 200px;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
+  .calendarView__timeline {
+    height: calc(100vh - 250px);
   }
 }
