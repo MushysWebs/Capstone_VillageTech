@@ -51,7 +51,133 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
   
   const fetchData = async () => {
     if (open) {
-      // Simulating data fetching
+      setLoading(true);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // fetch invoices created today
+        const { data: invoices, error: invoiceError } = await supabase
+          .from('invoices')
+          .select('*')
+          .gte('invoice_date', today);
+  
+        if (invoiceError) throw invoiceError;
+  
+        const financialSummary = processInvoices(invoices);
+        const patientStats = await calculatePatientStats(invoices); // Now awaiting this call
+        const profitBreakdown = calculateProfitBreakdown(invoices);
+  
+        // dummy data for employee status. TODO
+        const employeesStatus = [
+          { name: 'Still Clocked In', value: 5 },
+          { name: 'Clocked Out', value: 15 },
+          { name: 'Absent', value: 2 },
+          { name: 'Scheduled', value: 22 },
+        ];
+  
+        setData({
+          employeesStatus,
+          patientStats,
+          financialSummary,
+          profitBreakdown,
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setData({
+          employeesStatus: [],
+          patientStats: [
+            { name: 'New Patients', value: 0 },
+            { name: 'Returning Patients', value: 0 },
+          ],
+          financialSummary: {
+            invoicesCreated: 0,
+            invoicesPaid: 0,
+            paymentsReceived: 0,
+            paymentsRefunded: 0,
+          },
+          profitBreakdown: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const processInvoices = (invoices) => {
+    const invoicesCreated = invoices.length;
+    const invoicesPaid = invoices.filter(inv => inv.invoice_status === 'Completed').length;
+    const paymentsReceived = invoices.reduce((sum, inv) => inv.invoice_status === 'Completed' ? sum + inv.invoice_total : sum, 0);
+    const paymentsRefunded = invoices.reduce((sum, inv) => inv.invoice_status === 'Cancelled' ? sum + inv.invoice_total : sum, 0);
+
+    return {
+      invoicesCreated,
+      invoicesPaid,
+      paymentsReceived,
+      paymentsRefunded,
+    };
+  };
+
+  const calculatePatientStats = async (todaysInvoices) => {
+    try {
+      // unique patient IDs from today's invoices
+      const uniquePatientIds = [...new Set(todaysInvoices.map(inv => inv.patient_id))];
+      
+      // For each patient seen today, check if they have any previous invoices
+      const { data: historicalInvoices, error } = await supabase
+        .from('invoices')
+        .select('patient_id, invoice_date')
+        .in('patient_id', uniquePatientIds)
+        .lt('invoice_date', new Date().toISOString().split('T')[0]) // Only get invoices before today
+        .order('invoice_date', { ascending: true });
+  
+      if (error) throw error;
+  
+      // Create a set of patient IDs who have previous invoices
+      const returningPatientIds = new Set(
+        historicalInvoices.map(inv => inv.patient_id)
+      );
+  
+      // Count new vs returning patients
+      let newPatients = 0;
+      let returningPatients = 0;
+  
+      uniquePatientIds.forEach(patientId => {
+        if (returningPatientIds.has(patientId)) {
+          returningPatients++;
+        } else {
+          newPatients++;
+        }
+      });
+  
+      return [
+        { name: 'New Patients', value: newPatients },
+        { name: 'Returning Patients', value: returningPatients },
+      ];
+    } catch (error) {
+      console.error('Error calculating patient stats:', error);
+      return [
+        { name: 'New Patients', value: 0 },
+        { name: 'Returning Patients', value: 0 },
+      ];
+    }
+  };
+
+  const calculateProfitBreakdown = (invoices) => {
+    // simplified breakdown
+    const totalRevenue = invoices.reduce((sum, inv) => sum + inv.invoice_total, 0);
+    
+    return [
+      { name: 'Medicine', value: totalRevenue * 0.3 },
+      { name: 'Staff Pay', value: totalRevenue * 0.4 }, 
+      { name: 'Utilities', value: totalRevenue * 0.1 }, 
+      { name: 'Other Expenses', value: totalRevenue * 0.1 }, 
+      { name: 'Invoice Revenue', value: totalRevenue },
+    ];
+  };
+  /*
+  data fetching with dummy data
+  const fetchData = async () => {
+    if (open) {
       setTimeout(() => {
         setData({
           employeesStatus: [
@@ -83,6 +209,7 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       }, 2000);
     }
   };
+  */
 
   const handleCommentChange = (event) => {
     setComment(event.target.value);
