@@ -143,7 +143,6 @@ const Admin = ({ globalSearchTerm }) => {
       } catch (error) {
         console.error('Error uploading file:', error);
         setDeleteError('Failed to upload profile picture. Please try again. Error: ' + error.message);
-        // You might want to show this error to the user in the UI
       }
     }
   };
@@ -231,7 +230,6 @@ const Admin = ({ globalSearchTerm }) => {
             </table>
           </div>
         </div>
-        <button className="a-manage-schedule-button">Manage Schedule</button>
 
         {selectedStaff && (
           <div className="a-staff-details-overlay">
