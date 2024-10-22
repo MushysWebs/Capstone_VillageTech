@@ -194,7 +194,7 @@ const Layout = () => {
       <li className={isActive() ? "active" : ""} draggable="false">
         <Link to={to} draggable="false">
           <i className={`fas ${icon}`} draggable="false"></i>{" "}
-          <span draggable="false">{text}</span>
+          <span draggable="true">{text}</span>
         </Link>
       </li>
     );
