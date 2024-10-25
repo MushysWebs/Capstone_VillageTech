@@ -44,11 +44,12 @@
 }
 
 .sidebar .dashboard-button {
-  margin-bottom: 35px
+  margin-top: 2px;
+  margin-bottom: 40px
 }
 
 .sidebar .dashboard-button a {
-  padding: 15px 10px 15px 30px; 
+  padding: 15px 10px 15px 28px; 
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -72,10 +73,6 @@
   background-color: #FFFFFF;
   border-radius: 10px; 
   transition: all 0.3s ease;
-}
-
-.sidebar .dashboard-button ul li:first-child {
-  margin-bottom: 35px;
 }
 
 .sidebar nav ul li:first-child {
