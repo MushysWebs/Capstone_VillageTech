@@ -130,12 +130,17 @@
 
 .action-button.add-appointment-button {
   background-color: #09cb8b;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .action-button.add-appointment-button:hover {
   background-color: #07a470;
 }
-
 .action-button.edit-button {
   background-color: #09ace0;
 }
@@ -225,3 +230,101 @@
     margin-top: 10px;
   }
 }
+
+/* Updated modal-overlay to align with soc.css style */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Updated modal-content for better styling */
+.modal-content {
+  background-color: white;
+  padding: 25px 30px; /* Increased padding for cleaner look */
+  border-radius: 12px; /* Slightly rounder corners */
+  max-width: 600px;
+  width: 100%; /* Adjust to full width if required */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+  max-height: 85%; /* Restricts height for better display */
+  overflow-y: auto; /* Allows scrolling for longer content */
+}
+
+/* Styling buttons for consistency */
+.action-button {
+  padding: 12px 25px; /* Larger padding for buttons */
+  font-size: 1rem;
+  border-radius: 8px; /* Rounded buttons for cleaner look */
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  margin: 0 5px; /* Add margin between buttons */
+}
+
+/* Specific button styles */
+.action-button.add-appointment-button {
+  background-color: #09ace0; /* Match the blue style from SOC */
+  color: white;
+}
+
+.action-button.add-appointment-button:hover {
+  background-color: #007bbf;
+}
+
+.action-button.cancel-button {
+  background-color: #ff4d4d; /* Match the cancel style */
+  color: white;
+}
+
+.action-button.cancel-button:hover {
+  background-color: #d43535;
+}
+
+/* Align buttons in the modal content */
+.patientMain-edit-actions,
+.modal-content .SOC-button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* General input and select styling in modal */
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* Close button styling similar to soc.css */
+.SOC-close-modal {
+  background-color: #ff4d4d;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.SOC-close-modal:hover {
+  background-color: #d43535;
+}
+
+
+

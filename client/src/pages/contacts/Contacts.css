@@ -338,3 +338,106 @@ body {
     font-size: 0.8rem;
   }
 }
+/* Modal overlay style to match consistency */
+.contacts-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal content style */
+.contacts-modal-content {
+  background-color: white;
+  padding: 25px 30px; /* Padding for the content */
+  border-radius: 12px; /* Rounded corners */
+  max-width: 600px; /* Maximum width for the modal */
+  width: 90%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  max-height: 85%;
+  overflow-y: auto;
+}
+
+/* Modal form style */
+.contacts-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* General input, select, and textarea styling */
+.contacts-modal-input,
+.contacts-modal-select,
+.contacts-modal-textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+  background-color: white;
+}
+
+/* Button styles for modal actions */
+.contacts-modal-submitButton {
+  background-color: #09ACE0; /* Blue color similar to action button */
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.contacts-modal-submitButton:hover {
+  background-color: #007bbf;
+}
+
+.contacts-modal-cancelButton {
+  background-color: #ff4d4d; /* Red color for cancel */
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.contacts-modal-cancelButton:hover {
+  background-color: #d43535;
+}
+
+/* Container to align buttons similar to the SOC/Patient modal */
+.contacts-modal-button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Additional adjustments for list or dropdown styling if necessary */
+.contacts-modal-ownerList {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: 150px;
+  overflow-y: auto;
+  margin-top: 5px;
+}
+
+.contacts-modal-ownerList li {
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.contacts-modal-ownerList li:hover {
+  background-color: #f0f4f8;
+}

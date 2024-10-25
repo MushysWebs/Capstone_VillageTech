@@ -5,7 +5,7 @@ const PatientTabs = () => {
   const location = useLocation();
 
   const tabs = [
-    { name: 'Clinical', path: '/patient/clinical' },
+    { name: 'Clinical', path: '/clinical' },
     { name: 'S.O.C.', path: '/SOC' },
     { name: 'Financial', path: '/Financial' },
     { name: 'Summaries', path: '/summaries' },

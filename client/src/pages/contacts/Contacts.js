@@ -1,19 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Edit2, X, Save, Clock, Calendar, Send, Camera} from 'lucide-react';
+import { Edit2, X, Save, Clock, Calendar, Send, Camera } from 'lucide-react';
+import AddAppointment from '../dashboard/calendarView/AddAppointment';
 import './Contacts.css';
-
-
-//https://sendgrid.com/en-us/pricing
-
-//set up free SMTP plan to use as our email sender
-
-//
-
-//
-
-//
-
 
 const Contacts = ({ globalSearchTerm }) => {
   const [selectedContact, setSelectedContact] = useState(null);
@@ -25,6 +14,8 @@ const Contacts = ({ globalSearchTerm }) => {
   const [editedContact, setEditedContact] = useState(null);
   const [error, setError] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null); // State for the selected patient for appointment
   const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
 
@@ -67,7 +58,7 @@ const Contacts = ({ globalSearchTerm }) => {
       setContacts(data);
     } catch (error) {
       console.error('Error fetching contacts:', error);
-      setError('Failed to fetch contacts');
+      setError('Failed to fetch contacts. Please try again later.');
     }
   };
 
@@ -82,22 +73,22 @@ const Contacts = ({ globalSearchTerm }) => {
       setPatients(data);
     } catch (error) {
       console.error('Error fetching patients:', error);
-      setError('Failed to fetch patients');
+      setError('Failed to fetch patients. Please refresh or try again later.');
     }
   };
 
   const fetchInvoices = async (patientIds) => {
     try {
       const { data, error } = await supabase
-        .from('financial')
+        .from('invoices')
         .select('*')
-        .in('pet_id', patientIds);
+        .in('patient_id', patientIds);
       
       if (error) throw error;
       setInvoices(data);
     } catch (error) {
       console.error('Error fetching invoices:', error);
-      setError('Failed to fetch invoices');
+      setError('Failed to fetch invoices. Please refresh or try again later.');
     }
   };
 
@@ -140,7 +131,7 @@ const Contacts = ({ globalSearchTerm }) => {
         setEditedContact(prev => ({ ...prev, profile_picture_url: publicUrl }));
       } catch (error) {
         console.error('Error uploading file:', error);
-        setError('Failed to upload profile picture: ' + error.message);
+        setError('Failed to upload profile picture. Please try again.');
       }
     }
   };
@@ -148,9 +139,10 @@ const Contacts = ({ globalSearchTerm }) => {
   const handleCancel = () => {
     setIsEditing(false);
     setEditedContact(null);
+    setError(null);
   };
 
-    const handleSave = async () => {
+  const handleSave = async () => {
     try {
       if (!editedContact || !editedContact.id) {
         throw new Error('No contact selected for editing');
@@ -168,17 +160,14 @@ const Contacts = ({ globalSearchTerm }) => {
 
       if (error) throw error;
 
-      // Update the contacts list
       setContacts(prevContacts =>
         prevContacts.map(contact =>
           contact.id === data.id ? data : contact
         )
       );
 
-      // Update the selected contact
       setSelectedContact(data);
 
-      // Update filtered contacts
       setFilteredContacts(prevFiltered =>
         prevFiltered.map(contact =>
           contact.id === data.id ? data : contact
@@ -190,22 +179,9 @@ const Contacts = ({ globalSearchTerm }) => {
       setError(null);
     } catch (error) {
       console.error('Error updating contact:', error);
-      setError('Failed to update contact: ' + error.message);
+      setError('Failed to update contact. Please try again.');
     }
   };
-
-  /* If currently editing, ask for confirmation before switching. Uncomment and add into return() if you want, but I'm not a fan.
-  const handleContactSelect = (contact) => {
-    if (isEditing) {
-      if (window.confirm("You have unsaved changes. Are you sure you want to switch contacts?")) {
-        setSelectedContact(contact);
-        setIsEditing(false);
-        setEditedContact(null);
-      }
-    } else {
-      setSelectedContact(contact);
-    }
-  }; */
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -215,6 +191,21 @@ const Contacts = ({ globalSearchTerm }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB'); 
+  };
+
+  const handleAddAppointmentClick = (patient) => {
+    setSelectedPatient(patient);
+    setShowAppointmentModal(true);
+  };
+
+  const handleCloseAppointmentModal = () => {
+    setShowAppointmentModal(false);
+    setSelectedPatient(null);
+  };
+
+  const handleAppointmentAdded = (newAppointment) => {
+    console.log('New appointment added:', newAppointment);
+    setShowAppointmentModal(false);
   };
 
   return (
@@ -306,7 +297,7 @@ const Contacts = ({ globalSearchTerm }) => {
                 <Clock size={18} />
                 Set Up Reminders
               </button>
-              <button className="action-button">
+              <button className="action-button" onClick={() => handleAddAppointmentClick(selectedPatient)}>
                 <Calendar size={18} />
                 Create Appointment
               </button>
@@ -347,9 +338,7 @@ const Contacts = ({ globalSearchTerm }) => {
                     <th>Number</th>
                     <th>Name</th>
                     <th>Patient</th>
-                    <th>Low Total</th>
-                    <th>High Total</th>
-                    <th>Deposit</th>
+                    <th>Amount</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Last Update</th>
@@ -357,18 +346,16 @@ const Contacts = ({ globalSearchTerm }) => {
                 </thead>
                 <tbody>
                   {invoices.map((invoice) => {
-                    const patient = patients.find(p => p.id === invoice.pet_id);
+                    const patient = patients.find(p => p.id === invoice.patient_id);
                     return (
-                      <tr key={invoice.financial_number}>
-                        <td>{invoice.financial_number}</td>
-                        <td>{invoice.financial_name}</td>
+                      <tr key={invoice.invoice_id}>
+                        <td>{invoice.invoice_id}</td>
+                        <td>{invoice.invoice_name}</td>
                         <td>{patient ? patient.name : 'Unknown'}</td>
-                        <td>${invoice.financial_lowtotal.toFixed(2)}</td>
-                        <td>${invoice.financial_hightotal.toFixed(2)}</td>
-                        <td>${invoice.financial_deposit.toFixed(2)}</td>
-                        <td>{formatDate(invoice.financial_date)}</td>
-                        <td>{invoice.financial_status || 'Created'}</td>
-                        <td>{formatDate(invoice.financial_lastupdate)} {invoice.financial_lastupdate ? 'Edwardo ling' : ''}</td>
+                        <td>${invoice.invoice_total.toFixed(2)}</td>
+                        <td>{formatDate(invoice.invoice_date)}</td>
+                        <td>{invoice.invoice_status || 'Pending'}</td>
+                        <td>{invoice.last_update ? formatDate(invoice.last_update) : 'N/A'}</td>
                       </tr>
                     );
                   })}
@@ -378,6 +365,16 @@ const Contacts = ({ globalSearchTerm }) => {
           </>
         )}
       </div>
+
+      {showAppointmentModal && (
+        <AddAppointment
+          onClose={handleCloseAppointmentModal}
+          onAppointmentAdded={handleAppointmentAdded}
+          patientId={selectedPatient?.id}
+          patientName={selectedPatient?.name}
+          ownerId={selectedContact?.id}
+        />
+      )}
     </div>
   );
 };

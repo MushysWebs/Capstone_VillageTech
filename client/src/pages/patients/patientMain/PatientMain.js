@@ -36,12 +36,11 @@ const PatientMain = ({ globalSearchTerm }) => {
     setFilteredPatients(filtered);
   }, [globalSearchTerm, patients]);
 
- 
   useEffect(() => {
     if (selectedPatient?.owner_id) {
       fetchOwner(selectedPatient.owner_id);
     }
-  }, [selectedPatient]); 
+  }, [selectedPatient]);
 
   const handleAddAppointment = () => {
     setIsAddAppointmentModalOpen(true);
@@ -67,7 +66,7 @@ const PatientMain = ({ globalSearchTerm }) => {
 
   const fetchOwner = async (ownerId) => {
     try {
-      console.log("Fetching owner with ID:", ownerId); 
+      console.log("Fetching owner with ID:", ownerId);
 
       const { data: ownerData, error } = await supabase
         .from("owners")
@@ -79,9 +78,9 @@ const PatientMain = ({ globalSearchTerm }) => {
         throw error;
       }
 
-      console.log("Fetched owner data:", ownerData); 
+      console.log("Fetched owner data:", ownerData);
 
-      setOwner(ownerData); 
+      setOwner(ownerData);
     } catch (error) {
       console.error("Error fetching owner:", error);
       setError("Failed to fetch owner data");
@@ -116,7 +115,9 @@ const PatientMain = ({ globalSearchTerm }) => {
       if (error) throw error;
 
       setPatients((prevPatients) =>
-        prevPatients.map((patient) => (patient.id === data.id ? data : patient))
+        prevPatients.map((patient) =>
+          patient.id === data.id ? data : patient
+        )
       );
 
       setSelectedPatient(data);
@@ -146,43 +147,57 @@ const PatientMain = ({ globalSearchTerm }) => {
         <div className="patientMain-tabs">
           <Link
             to="/clinical"
-            className={`tab-button ${location.pathname === "/clinical" ? "active" : ""}`}
+            className={`tab-button ${
+              location.pathname === "/clinical" ? "active" : ""
+            }`}
           >
             Clinical
           </Link>
           <Link
             to="/SOC"
-            className={`tab-button ${location.pathname === "/SOC" ? "active" : ""}`}
+            className={`tab-button ${
+              location.pathname === "/SOC" ? "active" : ""
+            }`}
           >
             S.O.C.
           </Link>
           <Link
             to="/Financial"
-            className={`tab-button ${location.pathname === "/Financial" ? "active" : ""}`}
+            className={`tab-button ${
+              location.pathname === "/Financial" ? "active" : ""
+            }`}
           >
             Financial
           </Link>
           <Link
             to="/summaries"
-            className={`tab-button ${location.pathname === "/summaries" ? "active" : ""}`}
+            className={`tab-button ${
+              location.pathname === "/summaries" ? "active" : ""
+            }`}
           >
             Summaries
           </Link>
           <Link
             to="/healthStatus"
-            className={`tab-button ${location.pathname === "/healthStatus" ? "active" : ""}`}
+            className={`tab-button ${
+              location.pathname === "/healthStatus" ? "active" : ""
+            }`}
           >
             Health Status
           </Link>
           <Link
             to="/medication"
-            className={`tab-button ${location.pathname === "/medication" ? "active" : ""}`}
+            className={`tab-button ${
+              location.pathname === "/medication" ? "active" : ""
+            }`}
           >
             Medication
           </Link>
           <Link
             to="/newPatient"
-            className={`tab-button ${location.pathname === "/newPatient" ? "active" : ""}`}
+            className={`tab-button ${
+              location.pathname === "/newPatient" ? "active" : ""
+            }`}
           >
             New Patient
           </Link>
@@ -198,8 +213,8 @@ const PatientMain = ({ globalSearchTerm }) => {
                 selectedPatient?.id === patient.id ? "active" : ""
               }`}
               onClick={() => {
-                setSelectedPatient(patient); 
-                fetchOwner(patient.owner_id); 
+                setSelectedPatient(patient);
+                fetchOwner(patient.owner_id);
                 console.log("Selected Patient in PatientMain:", patient);
               }}
             >
@@ -238,7 +253,7 @@ const PatientMain = ({ globalSearchTerm }) => {
                           type="text"
                           name="owner"
                           value={owner?.name || ""}
-                          readOnly 
+                          readOnly
                         />
                       </p>
                       <p>
@@ -534,15 +549,26 @@ const PatientMain = ({ globalSearchTerm }) => {
         </div>
       </div>
       {isAddAppointmentModalOpen && selectedPatient && (
-        <AddAppointment
-          onClose={handleCloseAppointmentModal}
-          patientId={selectedPatient.id}
-          patientName={selectedPatient.name}
-          ownerId={selectedPatient.owner_id}
-          onAppointmentAdded={(newAppointment) => {
-            setIsAddAppointmentModalOpen(false);
-          }}
-        />
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <AddAppointment
+              onClose={handleCloseAppointmentModal}
+              patientId={selectedPatient?.id || ""}
+              patientName={selectedPatient?.name || ""}
+              ownerId={selectedPatient?.owner_id || ""}
+              onAppointmentAdded={(newAppointment) => {
+                setIsAddAppointmentModalOpen(false);
+                // Additional logic here if needed, e.g., refreshing appointment list
+              }}
+            />
+            <button
+              onClick={handleCloseAppointmentModal}
+              className="SOC-close-modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
