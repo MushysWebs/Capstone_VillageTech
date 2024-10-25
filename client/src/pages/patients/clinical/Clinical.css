@@ -1,125 +1,109 @@
-.clinical-content {
+.clinical-main {
     display: flex;
-    flex-direction: column;
     padding: 20px;
     height: calc(100vh - 60px);
+    width: 97.5%;
+    margin-left: 22px;
+  }
+  
+  .clinical-page {
+    width: calc(100% - 270px);
+    margin-left: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
-    background-color: #f5f7fa;
-    width: 95%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.section-box {
+    padding-bottom: 50px;
+    padding-right: 28px;
+  }
+  
+  .patient-header {
+    margin-left: 0px;
+    margin-bottom: 20px;
+  }
+  
+  .section-box {
+    position: relative;
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin-bottom: 20px;
+    padding-bottom: 60px;  /* Added padding to make room for the button */
     border: 1px solid #e6e6e6;
-    transition: all 0.3s ease;
-    position: relative; /* Ensure the section-box has relative positioning for absolute positioning of children */
-}
-
-.section-box:hover {
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-.section-header {
+    margin-bottom: 20px;
+  }
+  
+  
+  
+  .section-header {
     font-size: 1.4rem;
     margin-bottom: 15px;
-    color: #09ACE0;
-    border-bottom: 2px solid #09ACE0;
+    color: #09ace0;
+    border-bottom: 2px solid #09ace0;
     padding-bottom: 10px;
-}
-
-.info-grid {
+  }
+  
+  .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
-}
-
-.info-item {
+  }
+  
+  .info-item {
     background-color: #f8fafc;
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #e6e6e6;
     transition: all 0.3s ease;
-}
-
-.info-item:hover {
+  }
+  
+  .info-item:hover {
     background-color: #e6f7ff;
-}
-
-.info-label {
+  }
+  
+  .info-label {
     font-weight: 600;
     color: #34495e;
     margin-bottom: 5px;
-}
-
-.info-value {
+  }
+  
+  .info-value {
     color: #2c3e50;
-}
-
-.save-button,
+  }
+  
+  .clinical-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  
+  
+  
+  
+  
+  .save-button,
 .edit-button {
-    background-color: #09ACE0 !important;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  background-color: #09ace0;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-left: 10px; /* Add spacing if needed between buttons */
 }
 
 .save-button:hover,
 .edit-button:hover {
-    background-color: #007bbf !important;
+  background-color: #007bbf;
 }
 
-.clinical-edit-actions {
-    position: absolute; /* Force position relative to the parent */
-    bottom: 70px; /* Adjust this to move the button up */
-    right: 20px; /* Align it to the right side */
-    z-index: 10; /* Ensure the button stays on top */
-}
-
-
-.vaccination-grid,
-.treatment-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-}
-
-.vaccination-item,
-.treatment-item {
-    background-color: #f8fafc;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #e6e6e6;
-    transition: all 0.3s ease;
-}
-
-.vaccination-item:hover,
-.treatment-item:hover {
-    background-color: #e6f7ff;
-}
-
-.vaccination-name,
-.treatment-name {
-    font-weight: 600;
-    color: #34495e;
-    margin-bottom: 5px;
-}
-
-.vaccination-date, 
-.treatment-date {
-    color: #2c3e50;
-    font-size: 0.9rem;
-}
-
-@media (max-width: 768px) {
+  
+  @media (max-width: 768px) {
     .info-grid {
-        grid-template-columns: 1fr;
+      grid-template-columns: 1fr;
     }
-}
+  }
+  
