@@ -9,7 +9,6 @@ const ReportingTabs = () => {
 
   const tabs = [
     { name: 'Financial Reports', path: '/reporting' },
-    { name: 'Employee Records', path: '/reporting/employees' },
     { name: 'End of Day Reports', path: '/reporting/history' },
   ];
 
