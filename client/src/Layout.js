@@ -204,8 +204,10 @@ const Layout = () => {
       <div className={`dashboard-container ${theme}`}>
         <aside className="sidebar nunito-light">
           <nav>
-            <ul>
+            <ul className='dashboard-button'>
               {renderSidebarLink("/dashboard", "fa-home", "Dashboard")}
+            </ul>
+            <ul>
               {renderSidebarLink("/contacts", "fa-address-book", "Contacts")}
               {renderSidebarLink("/patient", "fa-user", "Patients")}
               {renderSidebarLink('/payments', 'fa-dollar-sign', 'Payments')}
