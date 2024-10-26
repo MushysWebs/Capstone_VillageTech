@@ -91,15 +91,30 @@ const Clinical = () => {
   const handleSave = async () => {
     try {
       if (clinicalData?.id) {
+        // Update existing clinical record
         const { error } = await supabase
           .from("clinical_records")
           .update({ ...clinicalData, xray_file: xrayFile })
           .eq("id", clinicalData.id);
-
+  
+        if (error) throw error;
+      } else {
+        // Insert a new clinical record for the selected patient
+        const { error } = await supabase
+          .from("clinical_records")
+          .insert({
+            patient_id: selectedPatient.id,
+            abnormalities: clinicalData.abnormalities,
+            diet: clinicalData.diet,
+            xray_file: xrayFile,
+            created_at: new Date().toISOString(), // Adding created_at for the new record
+          });
+  
         if (error) throw error;
       }
-
+  
       if (selectedPatient?.id) {
+        // Update patient information if necessary
         const { error } = await supabase
           .from("patients")
           .update({
@@ -109,10 +124,10 @@ const Clinical = () => {
             gender: selectedPatient.gender,
           })
           .eq("id", selectedPatient.id);
-
+  
         if (error) throw error;
       }
-
+  
       setIsEditing(false);
       setError(null);
     } catch (error) {
@@ -120,6 +135,7 @@ const Clinical = () => {
       setError("Failed to save clinical data. Please try again.");
     }
   };
+  
 
   const handleEdit = () => {
     setIsEditing(true);
