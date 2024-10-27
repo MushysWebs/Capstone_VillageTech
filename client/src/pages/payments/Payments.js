@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { PDFDownloadLink } from "@react-pdf/renderer";
+import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import PatientSidebar from "../../components/patientSidebar/PatientSidebar";
 import Receipt from "./Receipt";
 import { usePatient } from "../../context/PatientContext";
@@ -15,7 +16,6 @@ const Payments = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [receiptUrl, setReceiptUrl] = useState("");
   const supabase = useSupabaseClient();
   const stripe = useStripe();
   const elements = useElements();
@@ -46,7 +46,6 @@ const Payments = () => {
   };
 
   useEffect(() => {
-    console.log("Stripe Publishable Key:", process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
     fetchInvoiceData();
   }, [selectedPatient, supabase]);
 
@@ -54,10 +53,6 @@ const Payments = () => {
     setSelectedInvoice(invoice);
     setSuccess(false);
     setPaymentMethod("");
-  };
-
-  const handlePaymentMethodChange = (method) => {
-    setPaymentMethod(method);
   };
 
   const markAsPaid = async () => {
@@ -90,8 +85,6 @@ const Payments = () => {
     const cardElement = elements.getElement(CardElement);
 
     try {
-      console.log("Creating payment intent...");
-
       const response = await fetch(
         `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/create_payment_intent`,
         {
@@ -109,8 +102,6 @@ const Payments = () => {
 
       const paymentIntentData = await response.json();
 
-      console.log("Payment intent response:", paymentIntentData);
-
       if (paymentIntentData.error) {
         setError(paymentIntentData.error.message);
         setLoading(false);
@@ -125,8 +116,6 @@ const Payments = () => {
         },
       });
 
-      console.log("Stripe payment result:", paymentResult);
-
       if (paymentResult.error) {
         setError(paymentResult.error.message);
         setLoading(false);
@@ -135,19 +124,8 @@ const Payments = () => {
         paymentResult.paymentIntent.status === "succeeded"
       ) {
         await markAsPaid();
-
-        // Delay receipt generation for first load
-        setTimeout(async () => {
-          const receiptFileUrl = generateReceiptPDFUrl();
-
-          await saveReceiptToDatabase(receiptFileUrl);
-
-          setReceiptUrl(receiptFileUrl);
-
-          setSuccess(true);
-
-          console.log("Receipt generated successfully");
-        }, 500); // Add a delay here to ensure all data is loaded
+        await generateAndSendReceipt();
+        setSuccess(true);
       } else {
         setError("Payment failed.");
       }
@@ -159,9 +137,35 @@ const Payments = () => {
     }
   };
 
-  const generateReceiptPDFUrl = () => {
-    return `https://example.com/receipt_${selectedInvoice?.invoice_id}.pdf`;
-  };
+ // Generate and Send Receipt (Upload PDF to Storage and Email Receipt)
+const generateAndSendReceipt = async () => {
+  try {
+    // Generate PDF blob
+    const pdfBlob = await pdf(
+      <Receipt invoice={selectedInvoice} patient={selectedPatient} />
+    ).toBlob();
+
+    // Upload to Supabase (ensure Authorization header is included)
+    const { data: pdfData, error: uploadError } = await supabase.storage
+      .from("receipts")
+      .upload(`receipts/receipt_${selectedInvoice.invoice_id}.pdf`, pdfBlob, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+      console.log("Uploaded file path:", pdfData.path);
+
+    if (uploadError) throw uploadError;
+
+    const pdfUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/receipts/receipts/receipt_${selectedInvoice.invoice_id}.pdf`;
+
+
+    await saveReceiptToDatabase(pdfUrl);
+    await sendEmailReceipt(pdfUrl);
+  } catch (err) {
+    console.error("Error generating and sending receipt:", err.message);
+  }
+};
+
 
   const saveReceiptToDatabase = async (pdfUrl) => {
     try {
@@ -172,14 +176,56 @@ const Payments = () => {
         receipt_pdf_url: pdfUrl,
       });
 
-      if (error) {
-        throw error;
-      }
-      console.log("Receipt saved to database", data);
+      if (error) throw error;
     } catch (err) {
       console.error("Error saving receipt to database:", err.message);
     }
   };
+
+  const sendEmailReceipt = async (pdfUrl) => {
+    try {
+      
+      const { data: ownerData, error: ownerError } = await supabase
+        .from("owners")
+        .select("email")
+        .eq("id", selectedPatient.owner_id)
+        .single();
+  
+      if (ownerError || !ownerData || !ownerData.email) {
+        console.error("Owner email not found");
+        return;
+      }
+      console.log("Constructed PDF URL:", pdfUrl);
+
+      const ownerEmail = ownerData.email;
+  
+      const response = await fetch(
+        `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/send-receipt`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            email: ownerEmail,
+            receiptData: { pdfUrl },
+          }),
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+  
+      console.log("Receipt email sent successfully to:", ownerEmail);
+    } catch (error) {
+      console.error("Error sending email receipt:", error);
+    }
+  };
+  
+  
+  
 
   return (
     <div className="payments-main">
@@ -228,10 +274,10 @@ const Payments = () => {
                   Payment Options for Invoice #{selectedInvoice.invoice_id}
                 </h2>
                 <div className="payment-options">
-                  <button onClick={() => handlePaymentMethodChange("cash")}>
+                  <button onClick={() => setPaymentMethod("cash")}>
                     Pay with Cash
                   </button>
-                  <button onClick={() => handlePaymentMethodChange("card")}>
+                  <button onClick={() => setPaymentMethod("card")}>
                     Pay with Card
                   </button>
                 </div>
@@ -260,8 +306,6 @@ const Payments = () => {
 
             {success && (
               <div className="payment-success">
-                {console.log("Invoice:", selectedInvoice)}
-                {console.log("Patient:", selectedPatient)}
                 <h2 className="success-message" style={{ color: "green" }}>
                   Payment Successful!
                 </h2>
@@ -270,10 +314,7 @@ const Payments = () => {
                 {selectedInvoice && selectedPatient ? (
                   <PDFDownloadLink
                     document={
-                      <Receipt
-                        invoice={selectedInvoice}
-                        patient={selectedPatient}
-                      />
+                      <Receipt invoice={selectedInvoice} patient={selectedPatient} />
                     }
                     fileName={`Receipt_Invoice_${selectedInvoice?.invoice_id}.pdf`}
                   >
@@ -296,6 +337,4 @@ const Payments = () => {
 export default Payments;
 
 
-//needs email receipts
-//needs to be able to generate receipt from paying with cash
-//vercel is bugged and pay button doesnt work
+
