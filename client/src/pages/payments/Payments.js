@@ -137,15 +137,12 @@ const Payments = () => {
     }
   };
 
- // Generate and Send Receipt (Upload PDF to Storage and Email Receipt)
 const generateAndSendReceipt = async () => {
   try {
-    // Generate PDF blob
     const pdfBlob = await pdf(
       <Receipt invoice={selectedInvoice} patient={selectedPatient} />
     ).toBlob();
 
-    // Upload to Supabase (ensure Authorization header is included)
     const { data: pdfData, error: uploadError } = await supabase.storage
       .from("receipts")
       .upload(`receipts/receipt_${selectedInvoice.invoice_id}.pdf`, pdfBlob, {
@@ -223,9 +220,6 @@ const generateAndSendReceipt = async () => {
       console.error("Error sending email receipt:", error);
     }
   };
-  
-  
-  
 
   return (
     <div className="payments-main">
