@@ -220,9 +220,6 @@ const generateAndSendReceipt = async () => {
       console.error("Error sending email receipt:", error);
     }
   };
-  
-  
-  
 
   return (
     <div className="payments-main">
