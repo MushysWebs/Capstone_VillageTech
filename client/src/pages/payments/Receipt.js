@@ -75,13 +75,12 @@ const styles = StyleSheet.create({
 const Receipt = ({ invoice, patient }) => {
   console.log("Rendering Receipt with data:", invoice, patient);
 
-  // Ensure invoice and patient data is fully loaded
+
   if (!invoice || !patient) {
     console.error("Missing invoice or patient data");
     return null;
   }
 
-  // Use appropriate fallback for missing data fields
   const ownerName = patient.owner_name || "Owner name not available";
   const ownerAddress = patient.owner_address || "Address not available";
 
