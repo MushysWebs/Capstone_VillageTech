@@ -16,19 +16,19 @@ const Financial = () => {
 
   const fetchEstimateData = async () => {
     if (selectedPatient) {
-      const { data, error } = await supabase
-        .from("estimates")
-        .select("*")
-        .eq("patient_id", selectedPatient.id)
-        .eq("is_active", true);
-
-      if (error) {
-        console.error("Error fetching estimate data:", error.message);
-      } else {
-        setEstimateData(data);
-      }
+        const { data, error } = await supabase
+            .from("estimates")
+            .select("*")
+            .eq("patient_id", selectedPatient.id)
+            .eq("is_active", true);
+        if (error) {
+            console.error("Error fetching estimate data:", error.message);
+        } else {
+            console.log("Fetched estimates:", data); // Log fetched estimates
+            setEstimateData(data); // Update state with fetched estimates
+        }
     }
-  };
+};
 
   const fetchInvoiceData = async () => {
     if (selectedPatient) {
@@ -46,9 +46,11 @@ const Financial = () => {
   };
 
   useEffect(() => {
+    console.log("Selected Patient:", selectedPatient);
     fetchEstimateData();
     fetchInvoiceData();
-  }, [selectedPatient]);
+}, [selectedPatient]);
+
 
   const openModal = () => {
     setEstimateToEdit(null);
@@ -60,6 +62,26 @@ const Financial = () => {
     setIsModalOpen(true);
   };
 
+  const handleAddEstimate = async (newEstimate) => {
+    try {
+        // Insert the new estimate into Supabase
+        const { data, error } = await supabase.from("estimates").insert([newEstimate]);
+
+        if (error) {
+            console.error("Error adding estimate:", error.message);
+        } else {
+            console.log("Estimate added successfully", data);
+
+            // Update local state with the newly added estimate
+            setEstimateData((prevData) => [...prevData, data[0]]); // Assuming data[0] is the newly added estimate
+        }
+    } catch (error) {
+        console.error("Error adding estimate:", error.message);
+    } finally {
+        closeModal(); // Close the modal after adding the estimate
+    }
+};
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -68,7 +90,7 @@ const Financial = () => {
     const { error: insertError } = await supabase.from("invoices").insert({
       invoice_name: estimate.estimate_name,
       patient_id: selectedPatient.id,
-      invoice_total: estimate.estimate_hightotal,
+      invoice_total: estimate.estimate_total,
       invoice_paid: 0,
       invoice_date: new Date().toISOString(),
       invoice_status: "Pending",
@@ -167,80 +189,80 @@ const Financial = () => {
         </header>
 
         <main>
-          <div className="estimate-section">
+        <div className="estimate-section">
             <div className="estimate-header-container">
               <button onClick={openModal}>+</button>
               <h2 className="financial-h2">Estimates</h2>
             </div>
 
             <div className="table-container">
-              <table className="estimate-table">
+              <table className="invoices-table">
                 <thead>
                   <tr>
                     <th>Number</th>
                     <th>Name</th>
                     <th>Patient</th>
-                    <th>Low Total</th>
-                    <th>High Total</th>
-                    <th>Deposit</th>
-                    <th>Date</th>
+                    <th>Amount</th>
                     <th>Status</th>
-                    <th>Convert to Invoice</th>
-                    <th>Cancel</th>
-                    <th>Last Update</th>
+                    <th>Date</th>
                     <th>Edit</th>
+                    <th>Update Status</th>
+                    <th>Cancel</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {estimateData.map((item) => (
-                    <tr key={item.estimate_id}>
-                      <td>{item.estimate_id}</td>
-                      <td>{item.estimate_name}</td>
-                      <td>{selectedPatient.name}</td>
-                      <td>{formatCurrency(item.estimate_lowtotal)}</td>
-                      <td>{formatCurrency(item.estimate_hightotal)}</td>
-                      <td>{formatCurrency(item.estimate_deposit)}</td>
-                      <td>
-                        {new Date(item.estimate_date).toLocaleDateString()}
-                      </td>
-                      <td>
-                        <button
-                          className={getStatusClass(item.estimate_status)}
-                        >
-                          {item.estimate_status}
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          className="convert-button"
-                          onClick={() => convertEstimateToInvoice(item)}
-                        >
-                          Convert to Invoice
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          className="financial-cancel-button"
-                          onClick={() => cancelEstimate(item)}
-                        >
-                          Cancel
-                        </button>
-                      </td>
-                      <td>{new Date(item.last_update).toLocaleString()}</td>
-                      <td>
-                        <button
-                          className="financial-edit-button"
-                          onClick={() => handleEditClick(item)}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {invoiceData
+                    .filter((invoice) => invoice.invoice_status === "Estimate")
+                    .map((item) => (
+                      <tr key={item.invoice_id}>
+                        <td>{item.invoice_id}</td>
+                        <td>{item.invoice_name}</td>
+                        <td>{selectedPatient.name}</td>
+                        <td>{formatCurrency(item.invoice_total)}</td>
+                        <td>
+                          <button
+                            className={getStatusClass(item.invoice_status)}
+                          >
+                            {item.invoice_status}
+                          </button>
+                        </td>
+                        <td>
+                          {new Date(item.invoice_date).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <button
+                            className="financial-edit-button"
+                            onClick={() => handleEditClick(item)}
+                          >
+                            Edit
+                          </button>
+                        </td>
+
+                        <td>
+                          <button
+                            className="financial-complete"
+                            onClick={() =>
+                              updateInvoiceStatus(item, "Pending")
+                            }
+                          >
+                            Pending
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className="financial-cancel-button"
+                            onClick={() => cancelInvoice(item)}
+                          >
+                            Cancel
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
           </div>
+
           <div className="estimate-section">
             <h2 className="financial-h2">Pending Invoices</h2>
             <div className="table-container">
@@ -393,10 +415,12 @@ const Financial = () => {
         </main>
 
         <AddEstimateModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          estimateToEdit={estimateToEdit}
-        />
+    selectedPatientId={selectedPatient?.id}
+    isOpen={isModalOpen}
+    onClose={closeModal}
+    onAddEstimate={handleAddEstimate} // Pass the function here
+    estimateToEdit={estimateToEdit}
+/>
       </div>
     </div>
   );
