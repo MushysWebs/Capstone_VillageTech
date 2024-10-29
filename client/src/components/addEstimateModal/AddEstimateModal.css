@@ -80,15 +80,22 @@
   }
   
   .close-button {
-    background: none;
+    background-color: #FF4D4D;
+    color: white;
     border: none;
-    color: #09ACE0;
+    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    margin-right: 10px;
+  }
+  .estimate-modal-button {
+    display: flex;
   }
 
   .close-button:hover {
-    color: #e74c3c;
+    background-color: #e04938;
+    color: white;
   }
   
   .dark .modal-content {

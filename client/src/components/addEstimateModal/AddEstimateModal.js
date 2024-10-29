@@ -165,12 +165,15 @@ const AddEstimateModal = ({ selectedPatientId, isOpen, onClose, onAddEstimate, e
                             readOnly
                         />
                     </div>
+                    <div className='estimate-modal-button'>
                     <button type="submit" className="submit-button">
                         {estimateToEdit ? 'Save Changes' : 'Add Estimate'}
                     </button>
                     <button type="button" className="close-button" onClick={onClose}>
                         Cancel
                     </button>
+                    </div>
+                    
                 </form>
             </div>
         </div>
