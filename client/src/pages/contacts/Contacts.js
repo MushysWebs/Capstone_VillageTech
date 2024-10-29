@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { Edit2, X, Save, Clock, Calendar, Send, Camera, Trash2 } from 'lucide-react';
 import AddAppointment from '../dashboard/calendarView/AddAppointment';
+import CreateContactModal from './CreateContactModal';
 import './Contacts.css';
 
 const Contacts = ({ globalSearchTerm }) => {
@@ -17,6 +18,7 @@ const Contacts = ({ globalSearchTerm }) => {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const invoicesPerPage = 10;
   const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
@@ -52,6 +54,26 @@ const Contacts = ({ globalSearchTerm }) => {
   }, [globalSearchTerm, contacts]);
 
   const sortedPatients = patients.sort((a, b) => a.id - b.id);
+
+  const handleCreateContact = async (formData) => {
+    try {
+      const { data, error } = await supabase
+        .from('owners')
+        .insert([formData])
+        .select()
+        .single();
+  
+      if (error) throw error;
+  
+      setContacts(prev => [...prev, data]);
+      setFilteredContacts(prev => [...prev, data]);
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      throw error;
+    }
+  };
 
   const handleDeleteContact = async () => {
     if (!selectedContact) return;
@@ -264,6 +286,11 @@ const Contacts = ({ globalSearchTerm }) => {
             </div>
           ))}
         </div>
+        <div className="create-contact-wrapper">
+          <button className="create-contact-button" onClick={() => setShowCreateModal(true)}>
+            + New Contact
+          </button>
+        </div>
       </div>
 
       <div className="contacts-main">
@@ -435,16 +462,23 @@ const Contacts = ({ globalSearchTerm }) => {
       </div>
 
       {showAppointmentModal && (
-        <AddAppointment
-          onClose={handleCloseAppointmentModal}
-          onAppointmentAdded={handleAppointmentAdded}
-          patientId={selectedPatient?.id}
-          patientName={selectedPatient?.name}
-          ownerId={selectedContact?.id}
-        />
-      )}
-    </div>
-  );
+      <AddAppointment
+        onClose={handleCloseAppointmentModal}
+        onAppointmentAdded={handleAppointmentAdded}
+        patientId={selectedPatient?.id}
+        patientName={selectedPatient?.name}
+        ownerId={selectedContact?.id}
+      />
+    )}
+     {showCreateModal && (
+      <CreateContactModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreateContact={handleCreateContact}
+      />
+    )}
+  </div>
+);
 };
 
 export default Contacts;
