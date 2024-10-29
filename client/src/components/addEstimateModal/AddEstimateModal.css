@@ -10,6 +10,14 @@
     align-items: center;
     z-index: 1000;
   }
+
+  .read-only-estimate {
+    background-color: #f0f0f0;  /* Light grey background */
+    color: #666;                /* Dimmed text color */
+    border: 1px solid #ddd;     /* Light border */
+    cursor: not-allowed;        /* Change cursor to indicate non-editable */
+}
+
   
   .modal-content {
     background-color: white;
