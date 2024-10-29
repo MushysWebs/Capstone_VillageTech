@@ -18,13 +18,16 @@
     border-radius: 12px;
     padding: 0;
     overflow: hidden;
+    position: relative;
   }
   
   .modal-header {
     display: flex;
     align-items: center;
     padding: 25px;
+    padding-right: 60px;
     border-bottom: 1px solid #e0e6ed;
+    position: relative; 
   }
   
   .profile-upload-container {
@@ -157,8 +160,9 @@
   
   .modal-close-button {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 50%;
+    right: 25px; 
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
@@ -168,8 +172,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    z-index: 1;
   }
+  
   
   .modal-close-button:hover {
     background-color: rgba(0, 0, 0, 0.05);
