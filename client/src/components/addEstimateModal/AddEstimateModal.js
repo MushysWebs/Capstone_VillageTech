@@ -2,45 +2,45 @@ import React, { useState, useEffect } from 'react';
 import './AddEstimateModal.css';
 import { supabase } from '../routes/supabaseClient';
 
-const AddEstimateModal = ({ isOpen, onClose, onAddEstimate, estimateToEdit }) => {
+const AddEstimateModal = ({ selectedPatientId, isOpen, onClose, onAddEstimate, estimateToEdit }) => {
+    const [patientId, setPatientId] = useState(selectedPatientId);
     const [formData, setFormData] = useState({
-        financial_number: '',
-        financial_name: '',
-        financial_patient: '',
-        financial_lowtotal: '',
-        financial_hightotal: '',
-        financial_deposit: '',
-        financial_date: '',
-        financial_status: 'Estimate', // Default status for new estimates
-        financial_lastupdate: new Date().toISOString()
+        invoice_id: '',          // Adding invoice_id to the formData
+        invoice_name: '',
+        invoice_total: '0',
+        invoice_paid: '0',
+        invoice_date: '',
+        invoice_status: 'Estimate', // Default status set to "Estimate"
     });
+    const [error, setError] = useState('');
 
-    const [error, setError] = useState(null);
+    useEffect(() => {
+        setPatientId(selectedPatientId);
+        setFormData((prevData) => ({
+            ...prevData,
+            invoice_status: 'Estimate',
+        }));
+    }, [selectedPatientId, isOpen]);
 
     useEffect(() => {
         if (estimateToEdit) {
             setFormData({
-                financial_number: estimateToEdit.financial_number || '',
-                financial_name: estimateToEdit.financial_name || '',
-                financial_patient: estimateToEdit.financial_patient || '',
-                financial_lowtotal: estimateToEdit.financial_lowtotal || '',
-                financial_hightotal: estimateToEdit.financial_hightotal || '',
-                financial_deposit: estimateToEdit.financial_deposit || '',
-                financial_date: estimateToEdit.financial_date || '',
-                financial_status: estimateToEdit.financial_status || 'Estimate', // Keep status if editing
-                financial_lastupdate: new Date().toISOString(),
+                invoice_id: estimateToEdit.invoice_id,  // Set invoice_id if editing
+                invoice_name: estimateToEdit.invoice_name,
+                invoice_total: estimateToEdit.invoice_total,
+                invoice_paid: estimateToEdit.invoice_paid,
+                invoice_date: estimateToEdit.invoice_date,
+                invoice_status: estimateToEdit.invoice_status,
             });
+            setPatientId(estimateToEdit.patient_id);
         } else {
             setFormData({
-                financial_number: '',
-                financial_name: '',
-                financial_patient: '',
-                financial_lowtotal: '',
-                financial_hightotal: '',
-                financial_deposit: '',
-                financial_date: '',
-                financial_status: 'Estimate', // Default status for new estimates
-                financial_lastupdate: new Date().toISOString()
+                invoice_id: '',  // Clear invoice_id for new estimates
+                invoice_name: '',
+                invoice_total: '',
+                invoice_paid: '',
+                invoice_date: '',
+                invoice_status: 'Estimate',
             });
         }
     }, [estimateToEdit]);
@@ -52,37 +52,45 @@ const AddEstimateModal = ({ isOpen, onClose, onAddEstimate, estimateToEdit }) =>
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!formData.financial_date) {
-            const today = new Date().toISOString().split('T')[0];
-            formData.financial_date = today;
+        setError('');
+    
+        if (!formData.invoice_total || isNaN(Number(formData.invoice_total))) {
+            setError('Invoice total must be a valid number.');
+            return;
         }
-
-        try {
-            let response;
-            if (estimateToEdit) {
-                response = await supabase
-                    .from('financial')
-                    .update(formData)
-                    .eq('financial_number', formData.financial_number);
-            } else {
-                response = await supabase
-                    .from('financial')
-                    .insert([formData]);
-            }
-
-            if (response.error) {
-                console.error('Error saving financial data:', response.error);
-                throw response.error;
-            }
-
-            onAddEstimate(formData); // Update the parent component's state
-            onClose(); // Close the modal
-        } catch (error) {
-            console.error('Error saving estimate:', error);
-            setError(`An error occurred while saving the estimate: ${error.message}`);
+    
+        // Construct the data to send to Supabase
+        const invoiceData = {
+            invoice_name: formData.invoice_name,
+            patient_id: patientId,
+            invoice_total: Number(formData.invoice_total),
+            invoice_paid: Number(formData.invoice_paid) || 0,
+            invoice_date: formData.invoice_date,
+            invoice_status: formData.invoice_status,
+            last_update: new Date().toISOString(),
+        };
+    
+        // If editing, include invoice_id
+        if (formData.invoice_id) {
+            invoiceData.invoice_id = formData.invoice_id; // Include only if editing
         }
+    
+        // Call onAddEstimate and wait for it to finish
+        await onAddEstimate(invoiceData); // Ensure this returns a promise if you're using async/await
+    
+        // Reset form data after submission
+        setFormData({
+            invoice_id: '', // Reset for new estimate
+            invoice_name: '',
+            invoice_total: '0',
+            invoice_paid: '0',
+            invoice_date: '',
+            invoice_status: 'Estimate', // Reset status to default
+        });
+        setPatientId(selectedPatientId); // Reset patientId if needed
+        onClose(); // Close the modal
     };
+    
 
     if (!isOpen) return null;
 
@@ -90,101 +98,82 @@ const AddEstimateModal = ({ isOpen, onClose, onAddEstimate, estimateToEdit }) =>
         <div className="modal-overlay">
             <div className="modal-content">
                 <h2>{estimateToEdit ? 'Edit Estimate' : 'Add Estimate'}</h2>
+                {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
+                    {/* Display Invoice ID if editing an existing invoice */}
+                    {formData.invoice_id && (
+                        <div className="form-group">
+                            <label>Invoice ID</label>
+                            <input
+                                className="read-only-estimate"
+                                type="text"
+                                name="invoice_id"
+                                value={formData.invoice_id}
+                                readOnly
+                            />
+                        </div>
+                    )}
                     <div className="form-group">
-                        <label>Financial Number</label>
+                        <label>Invoice Name*</label>
                         <input
                             type="text"
-                            name="financial_number"
-                            value={formData.financial_number}
-                            onChange={handleChange}
-                            required
-                            readOnly={!!estimateToEdit}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Name</label>
-                        <input
-                            type="text"
-                            name="financial_name"
-                            value={formData.financial_name}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Patient</label>
-                        <input
-                            type="text"
-                            name="financial_patient"
-                            value={formData.financial_patient}
+                            name="invoice_name"
+                            value={formData.invoice_name}
                             onChange={handleChange}
                             required
                         />
                     </div>
                     <div className="form-group">
-                        <label>Low Total</label>
+                        <label>Patient ID*</label>
+                        <input
+                            className="read-only-estimate"
+                            type="text"
+                            name="patient_id"
+                            value={patientId}
+                            readOnly
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Invoice Total*</label>
                         <input
                             type="number"
                             step="0.01"
-                            name="financial_lowtotal"
-                            value={formData.financial_lowtotal}
+                            name="invoice_total"
+                            value={formData.invoice_total}
                             onChange={handleChange}
                             required
                         />
                     </div>
                     <div className="form-group">
-                        <label>High Total</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="financial_hightotal"
-                            value={formData.financial_hightotal}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Deposit</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="financial_deposit"
-                            value={formData.financial_deposit}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Date</label>
+                        <label>Date*</label>
                         <input
                             type="date"
-                            name="financial_date"
-                            value={formData.financial_date}
+                            name="invoice_date"
+                            value={formData.invoice_date}
                             onChange={handleChange}
                             required
                         />
                     </div>
-                    <div className="form-group">
-                        <label>Status</label>
-                        <select
-                            name="financial_status"
-                            value={formData.financial_status}
-                            onChange={handleChange}
-                        >
-                            <option value="Estimate">Estimate</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Canceled</option>
-                        </select>
+                    <div className="form-group" >
+                        <label>Status*</label>
+                        <input
+                            className="read-only-estimate"
+                            type="text"
+                            name="invoice_status"
+                            value={formData.invoice_status}
+                            readOnly
+                        />
                     </div>
-                    {error && <p className="error-message">{error}</p>}
+                    <div className='estimate-modal-button'>
                     <button type="submit" className="submit-button">
                         {estimateToEdit ? 'Save Changes' : 'Add Estimate'}
                     </button>
                     <button type="button" className="close-button" onClick={onClose}>
                         Cancel
                     </button>
+                    </div>
+                    
                 </form>
             </div>
         </div>

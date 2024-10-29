@@ -13,15 +13,23 @@ body {
 }
 
 .contacts-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 300px;
+  height: calc(100vh - 60px); 
   background-color: rgba(255, 255, 255, 0.9);
   border-right: 1px solid #e0e6ed;
-  overflow-y: auto;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .contacts-list {
+  flex: 1;
+  overflow-y: auto;
   padding: 1rem;
+  padding-bottom: 80px; 
+  height: 100%;
 }
 
 .contact-item {
@@ -31,10 +39,10 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  user-select: none;  /* Prevents text selection */
-  -webkit-user-select: none;  /* For Safari */
-  -moz-user-select: none;  /* For Firefox */
-  -ms-user-select: none;  /* For IE10+/Edge */
+  user-select: none; 
+  -webkit-user-select: none; 
+  -moz-user-select: none; 
+  -ms-user-select: none;  
 }
 
 .contact-item:hover {
@@ -303,6 +311,71 @@ body {
   background-color: #eef2f7;
 }
 
+.invoices-table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.5rem;
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  background-color: #09ACE0;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination-button:hover {
+  background-color: #0789b4;
+}
+
+.pagination-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.delete-contact-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.delete-contact-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.delete-contact-button:hover {
+  background-color: #c0392b;
+}
+
 @media (max-width: 768px) {
   .contacts-page {
     flex-direction: column;
@@ -337,107 +410,68 @@ body {
   .invoices-table {
     font-size: 0.8rem;
   }
+
+  .invoices-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+  }
+  
 }
-/* Modal overlay style to match consistency */
-.contacts-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+
+
+.create-contact-wrapper {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  z-index: 10;
+}
+
+.create-contact-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
-}
-
-/* Modal content style */
-.contacts-modal-content {
-  background-color: white;
-  padding: 25px 30px; /* Padding for the content */
-  border-radius: 12px; /* Rounded corners */
-  max-width: 600px; /* Maximum width for the modal */
-  width: 90%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-  max-height: 85%;
-  overflow-y: auto;
-}
-
-/* Modal form style */
-.contacts-modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* General input, select, and textarea styling */
-.contacts-modal-input,
-.contacts-modal-select,
-.contacts-modal-textarea {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 15px;
-  background-color: white;
-}
-
-/* Button styles for modal actions */
-.contacts-modal-submitButton {
-  background-color: #09ACE0; /* Blue color similar to action button */
+  padding: 12px 24px;
+  background-color: #09ACE0;
   color: white;
-  padding: 12px 25px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  margin-bottom: 20px;
 }
 
-.contacts-modal-submitButton:hover {
-  background-color: #007bbf;
+.create-contact-button:hover {
+  background-color: #0789b4;
+  transform: translateY(-2px);
+  box-shadow: 0 1px 2px rgba(9, 172, 224, 0.4);
 }
 
-.contacts-modal-cancelButton {
-  background-color: #ff4d4d; /* Red color for cancel */
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.create-contact-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(9, 172, 224, 0.3);
 }
 
-.contacts-modal-cancelButton:hover {
-  background-color: #d43535;
-}
 
-/* Container to align buttons similar to the SOC/Patient modal */
-.contacts-modal-button-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
+@media (max-width: 768px) {
+  .contacts-sidebar {
+    height: auto;
+    min-height: 200px;
+  }
 
-/* Additional adjustments for list or dropdown styling if necessary */
-.contacts-modal-ownerList {
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-height: 150px;
-  overflow-y: auto;
-  margin-top: 5px;
-}
+  .create-contact-wrapper {
+    position: relative;
+    margin-top: 10px;
+  }
 
-.contacts-modal-ownerList li {
-  padding: 10px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.contacts-modal-ownerList li:hover {
-  background-color: #f0f4f8;
+  .contacts-list {
+    padding-bottom: 1rem;
+  }
 }

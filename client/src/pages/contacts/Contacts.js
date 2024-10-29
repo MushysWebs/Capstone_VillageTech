@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Edit2, X, Save, Clock, Calendar, Send, Camera } from 'lucide-react';
+import { Edit2, X, Save, Clock, Calendar, Send, Camera, Trash2 } from 'lucide-react';
 import AddAppointment from '../dashboard/calendarView/AddAppointment';
+import CreateContactModal from './CreateContactModal';
 import './Contacts.css';
 
 const Contacts = ({ globalSearchTerm }) => {
@@ -15,9 +16,16 @@ const Contacts = ({ globalSearchTerm }) => {
   const [error, setError] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(null); // State for the selected patient for appointment
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const invoicesPerPage = 10;
   const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
+  const indexOfLastInvoice = currentPage * invoicesPerPage;
+  const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
+  const currentInvoices = invoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
+  const totalPages = Math.ceil(invoices.length / invoicesPerPage);
 
   useEffect(() => {
     fetchContacts();
@@ -46,6 +54,57 @@ const Contacts = ({ globalSearchTerm }) => {
   }, [globalSearchTerm, contacts]);
 
   const sortedPatients = patients.sort((a, b) => a.id - b.id);
+
+  const handleCreateContact = async (formData) => {
+    try {
+      const { data, error } = await supabase
+        .from('owners')
+        .insert([formData])
+        .select()
+        .single();
+  
+      if (error) throw error;
+  
+      setContacts(prev => [...prev, data]);
+      setFilteredContacts(prev => [...prev, data]);
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteContact = async () => {
+    if (!selectedContact) return;
+  
+    if (window.confirm('Are you sure you want to delete this contact? Their patients and invoices will be preserved in the system.')) {
+      try {
+        const { error: contactError } = await supabase
+          .from('owners')
+          .delete()
+          .eq('id', selectedContact.id);
+  
+        if (contactError) throw contactError;
+  
+        setContacts(contacts.filter(contact => contact.id !== selectedContact.id));
+        setFilteredContacts(filteredContacts.filter(contact => contact.id !== selectedContact.id));
+        setSelectedContact(null);
+        setPatients([]);
+        setInvoices([]);
+        
+        // success message via error state
+        setError('Contact successfully deleted. Their patients and invoices have been preserved.');
+        
+        // clear error message after 3 seconds
+        setTimeout(() => setError(null), 3000);
+  
+      } catch (error) {
+        console.error('Error deleting contact:', error);
+        setError('Failed to delete contact. Please try again.');
+      }
+    }
+  };
 
   const fetchContacts = async () => {
     try {
@@ -227,10 +286,15 @@ const Contacts = ({ globalSearchTerm }) => {
             </div>
           ))}
         </div>
+        <div className="create-contact-wrapper">
+          <button className="create-contact-button" onClick={() => setShowCreateModal(true)}>
+            + New Contact
+          </button>
+        </div>
       </div>
 
       <div className="contacts-main">
-        {error && <div className="error-message">{error}</div>}
+         {error && <div className="error-message">{error}</div>}
         {selectedContact && (
           <>
             <div className={`contact-header ${isEditing ? 'editable' : ''}`}>
@@ -332,51 +396,89 @@ const Contacts = ({ globalSearchTerm }) => {
 
             <div className="invoices-section">
               <h3>INVOICES</h3>
-              <table className="invoices-table">
-                <thead>
-                  <tr>
-                    <th>Number</th>
-                    <th>Name</th>
-                    <th>Patient</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Last Update</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoices.map((invoice) => {
-                    const patient = patients.find(p => p.id === invoice.patient_id);
-                    return (
-                      <tr key={invoice.invoice_id}>
-                        <td>{invoice.invoice_id}</td>
-                        <td>{invoice.invoice_name}</td>
-                        <td>{patient ? patient.name : 'Unknown'}</td>
-                        <td>${invoice.invoice_total.toFixed(2)}</td>
-                        <td>{formatDate(invoice.invoice_date)}</td>
-                        <td>{invoice.invoice_status || 'Pending'}</td>
-                        <td>{invoice.last_update ? formatDate(invoice.last_update) : 'N/A'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="invoices-table-container">
+                <table className="invoices-table">
+                  <thead>
+                    <tr>
+                      <th>Number</th>
+                      <th>Name</th>
+                      <th>Patient</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Last Update</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentInvoices.map((invoice) => {
+                      const patient = patients.find(p => p.id === invoice.patient_id);
+                      return (
+                        <tr key={invoice.invoice_id}>
+                          <td>{invoice.invoice_id}</td>
+                          <td>{invoice.invoice_name}</td>
+                          <td>{patient ? patient.name : 'Unknown'}</td>
+                          <td>${invoice.invoice_total.toFixed(2)}</td>
+                          <td>{formatDate(invoice.invoice_date)}</td>
+                          <td>{invoice.invoice_status || 'Pending'}</td>
+                          <td>{invoice.last_update ? formatDate(invoice.last_update) : 'N/A'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              
+              {invoices.length > invoicesPerPage && (
+                <div className="pagination">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="pagination-button"
+                  >
+                    Previous
+                  </button>
+                  <span className="pagination-info">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="pagination-button"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="delete-contact-container">
+              <button className="delete-contact-button" onClick={handleDeleteContact}>
+                <Trash2 size={18} />
+                Delete Contact
+              </button>
             </div>
           </>
         )}
       </div>
 
       {showAppointmentModal && (
-        <AddAppointment
-          onClose={handleCloseAppointmentModal}
-          onAppointmentAdded={handleAppointmentAdded}
-          patientId={selectedPatient?.id}
-          patientName={selectedPatient?.name}
-          ownerId={selectedContact?.id}
-        />
-      )}
-    </div>
-  );
+      <AddAppointment
+        onClose={handleCloseAppointmentModal}
+        onAppointmentAdded={handleAppointmentAdded}
+        patientId={selectedPatient?.id}
+        patientName={selectedPatient?.name}
+        ownerId={selectedContact?.id}
+      />
+    )}
+     {showCreateModal && (
+      <CreateContactModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreateContact={handleCreateContact}
+      />
+    )}
+  </div>
+);
 };
 
 export default Contacts;
