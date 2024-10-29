@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./NewPatient.css";
 import { supabase } from "../../../components/routes/supabaseClient";
-import PatientTabs from '../../../components/PatientTabs'
+import PatientTabs from "../../../components/PatientTabs";
 
 const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
   const [owners, setOwners] = useState([]);
@@ -167,6 +167,14 @@ const NewPatient = () => {
   const [errors, setErrors] = useState({});
   const [age, setAge] = useState(null);
 
+  const requiredFields = [
+    "patientName",
+    "weight",
+    "dateOfBirth",
+    "species",
+    "gender",
+  ];
+
   const handleOwnerSelect = (owner) => {
     setSelectedOwner(owner);
     setOwnerSelectionState("selected");
@@ -190,15 +198,15 @@ const NewPatient = () => {
 
   const validateInput = (name, value) => {
     let error = "";
-
-    if (name === "weight") {
-      if (value !== "" && isNaN(value)) {
-        error = "Must be a number";
-      }
-    } else if (value.trim() === "") {
+  
+    if (name === "gender" && value === "") {
+      error = "Please select a gender"; 
+    } else if (requiredFields.includes(name) && value.trim() === "") {
       error = "This field is required";
+    } else if (name === "weight" && isNaN(value)) {
+      error = "Must be a number";
     }
-
+  
     return error;
   };
 
@@ -371,10 +379,10 @@ const NewPatient = () => {
 
   return (
     <div className="new-patient-page">
-      <header className="patient-header">
+      <header className="patientMain-header">
         <PatientTabs />
       </header>
-
+  
       <div className="new-patient-header">
         {ownerSelectionState === "selected" ? (
           <div className="selected-owner-header">
@@ -390,7 +398,7 @@ const NewPatient = () => {
           <h1>New Patient</h1>
         )}
       </div>
-
+  
       {ownerSelectionState === "selecting" && (
         <div className="owner-selection-container">
           <OwnerSelection
@@ -399,14 +407,14 @@ const NewPatient = () => {
           />
         </div>
       )}
-
+  
       {ownerSelectionState === "creating" && (
         <NewOwnerForm
           onCreateOwner={handleOwnerCreated}
           onCancel={handleCancelNewOwner}
         />
       )}
-
+  
       {ownerSelectionState === "selected" && (
         <form
           className="new-patient-grid new-patient-form"
@@ -416,7 +424,7 @@ const NewPatient = () => {
             <h2>Pet Details</h2>
             {[
               {
-                label: "Patient Name",
+                label: "Patient Name *",
                 name: "patientName",
                 type: "text",
               },
@@ -426,17 +434,17 @@ const NewPatient = () => {
                 type: "text",
               },
               {
-                label: "Weight in KG",
+                label: "Weight in KG *",
                 name: "weight",
                 type: "text",
               },
               {
-                label: "Date of Birth",
+                label: "Date of Birth *",
                 name: "dateOfBirth",
                 type: "date",
               },
               {
-                label: "Species",
+                label: "Species *",
                 name: "species",
                 type: "text",
               },
@@ -453,7 +461,7 @@ const NewPatient = () => {
             ].map(({ label, name, type }) => (
               <div key={name} className="input-wrapper">
                 <label>
-                  {label}{" "}
+                  {label}
                   {errors[name] && (
                     <span className="error-message-inline">{errors[name]}</span>
                   )}
@@ -467,14 +475,15 @@ const NewPatient = () => {
                 />
               </div>
             ))}
-
-            <label>Gender</label>
+  
+            <label>Sex *</label>
             <select
               name="gender"
               value={patientDetails.gender}
               onChange={handleInputChange}
               className={errors.gender ? "input-error" : ""}
             >
+              <option value="">Select Gender</option> 
               <option value="Male/Neutered">Male/Neutered</option>
               <option value="Male/Unneutered">Male/Unneutered</option>
               <option value="Female/Spayed">Female/Spayed</option>
@@ -484,7 +493,7 @@ const NewPatient = () => {
               <span className="error-message-inline">{errors.gender}</span>
             )}
           </div>
-
+  
           <div className="additional-info-section">
             <h2>Additional Information</h2>
             {[
@@ -518,7 +527,7 @@ const NewPatient = () => {
                 )}
               </div>
             ))}
-
+  
             <div className="notes-subsection">
               <h3>Animal Notes</h3>
               <textarea
@@ -536,7 +545,7 @@ const NewPatient = () => {
                 </span>
               )}
             </div>
-
+  
             <div className="tags-subsection">
               <h3>Tags</h3>
               {[
@@ -565,7 +574,7 @@ const NewPatient = () => {
               ))}
             </div>
           </div>
-
+  
           <div className="clinical-details-section">
             <h2>Clinical Details</h2>
             {[
@@ -588,7 +597,7 @@ const NewPatient = () => {
             ].map(({ label, name }) => (
               <div key={name} className="input-wrapper">
                 <label>
-                  {label}{" "}
+                  {label}
                   {errors[name] && (
                     <span className="error-message-inline">{errors[name]}</span>
                   )}
@@ -602,7 +611,7 @@ const NewPatient = () => {
                 />
               </div>
             ))}
-
+  
             <label>Upload Image</label>
             <input type="file" name="image" onChange={handleImageChange} />
             {imagePreview && (
