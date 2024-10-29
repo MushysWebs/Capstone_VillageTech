@@ -68,7 +68,7 @@ const PatientSidebar = () => {
       if (patientData && patientData.owner_id) {
         const { data: ownerData, error: ownerError } = await supabase
           .from("owners")
-          .select("first_name, last_name, phone_number")
+          .select("first_name, last_name, email, phone_number")
           .eq("id", patientData.owner_id)
           .single();
 
@@ -76,6 +76,7 @@ const PatientSidebar = () => {
 
         setOwner({
           name: `${ownerData.first_name} ${ownerData.last_name}`,
+          email: ownerData.email,
           phone: ownerData.phone_number,
         });
       }
@@ -147,6 +148,7 @@ const PatientSidebar = () => {
       <div className="sidebar-owner">
         <h3>Owner</h3>
         <p className="owner-name">{owner?.name || "N/A"}</p>
+        <p className="owner-email"> {owner?.email || "N/A"}</p>
         <p>{owner?.phone || "N/A"}</p>
       </div>
 
