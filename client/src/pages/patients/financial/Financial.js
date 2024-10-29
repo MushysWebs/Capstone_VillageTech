@@ -78,7 +78,7 @@ const Financial = () => {
     } catch (error) {
         console.error("Error adding estimate:", error.message);
     } finally {
-        closeModal(); // Close the modal after adding the estimate
+        closeModal(); 
     }
 };
 
