@@ -62,25 +62,51 @@ const Financial = () => {
     setIsModalOpen(true);
   };
 
+
   const handleAddEstimate = async (newEstimate) => {
     try {
-        // Insert the new estimate into Supabase
-        const { data, error } = await supabase.from("estimates").insert([newEstimate]);
+        if (newEstimate.invoice_id) {
+            // Update existing invoice if invoice_id is present
+            const { data, error } = await supabase
+                .from("invoices")
+                .update({
+                    invoice_name: newEstimate.invoice_name,
+                    invoice_total: newEstimate.invoice_total,
+                    invoice_paid: newEstimate.invoice_paid,
+                    invoice_date: newEstimate.invoice_date,
+                    invoice_status: newEstimate.invoice_status,
+                    last_update: newEstimate.last_update,
+                })
+                .eq("invoice_id", newEstimate.invoice_id);
 
-        if (error) {
-            console.error("Error adding estimate:", error.message);
+            if (error) {
+                console.error("Error updating invoice:", error.message);
+            } else {
+                fetchInvoiceData(); // Refetch data after successful update
+            }
         } else {
-            console.log("Estimate added successfully", data);
+            // Insert new invoice if no invoice_id is present
+            const { data, error } = await supabase
+                .from("invoices")
+                .insert([newEstimate]);
 
-            // Update local state with the newly added estimate
-            setEstimateData((prevData) => [...prevData, data[0]]); // Assuming data[0] is the newly added estimate
+            if (error) {
+                console.error("Error adding new invoice:", error.message);
+            } else {
+                fetchInvoiceData(); // Refetch data after successful addition
+            }
         }
     } catch (error) {
-        console.error("Error adding estimate:", error.message);
+        console.error("Error saving estimate:", error.message);
     } finally {
-        closeModal(); 
+        closeModal();
     }
 };
+
+
+
+
+
 
   const closeModal = () => {
     setIsModalOpen(false);
