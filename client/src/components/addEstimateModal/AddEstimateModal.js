@@ -59,6 +59,7 @@ const AddEstimateModal = ({ selectedPatientId, isOpen, onClose, onAddEstimate, e
             return;
         }
     
+        // Construct the data to send to Supabase
         const invoiceData = {
             invoice_name: formData.invoice_name,
             patient_id: patientId,
@@ -69,9 +70,27 @@ const AddEstimateModal = ({ selectedPatientId, isOpen, onClose, onAddEstimate, e
             last_update: new Date().toISOString(),
         };
     
-        onAddEstimate(invoiceData);
-        onClose();
+        // If editing, include invoice_id
+        if (formData.invoice_id) {
+            invoiceData.invoice_id = formData.invoice_id; // Include only if editing
+        }
+    
+        // Call onAddEstimate and wait for it to finish
+        await onAddEstimate(invoiceData); // Ensure this returns a promise if you're using async/await
+    
+        // Reset form data after submission
+        setFormData({
+            invoice_id: '', // Reset for new estimate
+            invoice_name: '',
+            invoice_total: '0',
+            invoice_paid: '0',
+            invoice_date: '',
+            invoice_status: 'Estimate', // Reset status to default
+        });
+        setPatientId(selectedPatientId); // Reset patientId if needed
+        onClose(); // Close the modal
     };
+    
 
     if (!isOpen) return null;
 
