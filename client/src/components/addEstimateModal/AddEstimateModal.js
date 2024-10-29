@@ -60,7 +60,6 @@ const AddEstimateModal = ({ selectedPatientId, isOpen, onClose, onAddEstimate, e
         }
     
         const invoiceData = {
-            invoice_id: formData.invoice_id || undefined,  // Include invoice_id if it exists
             invoice_name: formData.invoice_name,
             patient_id: patientId,
             invoice_total: Number(formData.invoice_total),
