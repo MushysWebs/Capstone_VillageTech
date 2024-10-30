@@ -14,6 +14,7 @@ const MessagingPage = () => {
   const session = useSession();
   const messagesEndRef = useRef(null);
   const location = useLocation();
+  const channelRef = useRef(null);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -31,48 +32,50 @@ const MessagingPage = () => {
     }
   }, [staff, location.state]);
 
+  // set up real-time channel
+  useEffect(() => {
+    if (currentUserStaff) {
+      // create a channel for the current user
+      const channel = supabase.channel(`chat:${currentUserStaff.user_id}`, {
+        config: {
+          broadcast: { self: true }
+        }
+      });
+
+      // listen for new messages
+      channel
+        .on('broadcast', { event: 'new-message' }, ({ payload }) => {
+          console.log('Received message:', payload);
+          if (
+            (payload.sender_id === selectedStaff?.user_id && payload.recipient_id === currentUserStaff.user_id) ||
+            (payload.sender_id === currentUserStaff.user_id && payload.recipient_id === selectedStaff?.user_id)
+          ) {
+            setMessages(prevMessages => {
+              const messageExists = prevMessages.some(msg => msg.id === payload.id);
+              if (!messageExists) {
+                return [...prevMessages, payload];
+              }
+              return prevMessages;
+            });
+          }
+        })
+        .subscribe();
+
+      channelRef.current = channel;
+
+      // cleanup
+      return () => {
+        if (channelRef.current) {
+          supabase.removeChannel(channelRef.current);
+        }
+      };
+    }
+  }, [currentUserStaff, selectedStaff]);
+
+  // fetch initial messages when selecting a staff member
   useEffect(() => {
     if (selectedStaff && currentUserStaff) {
       fetchMessages();
-      // real-time subscription
-      const subscription = supabase
-      .channel('messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `or(recipient_id.eq.${currentUserStaff.user_id},sender_id.eq.${currentUserStaff.user_id})`,
-        },
-        (payload) => {
-            // add the message if its from/to the selected staff member
-            if (
-              (payload.new.sender_id === selectedStaff.user_id && payload.new.recipient_id === currentUserStaff.user_id) ||
-              (payload.new.sender_id === currentUserStaff.user_id && payload.new.recipient_id === selectedStaff.user_id)
-            ) {
-              setMessages(prevMessages => {
-                // check if message already exists to prevent duplicates
-                const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
-                if (!messageExists) {
-                  return [...prevMessages, payload.new];
-                }
-                return prevMessages;
-              });
-
-              // mark as read if we're the recipient
-              if (payload.new.recipient_id === currentUserStaff.user_id) {
-                markMessageAsRead(payload.new.id);
-              }
-            }
-          }
-        )
-        .subscribe();
-
-      // cleanup subscription
-      return () => {
-        subscription.unsubscribe();
-      };
     }
   }, [selectedStaff, currentUserStaff]);
 
@@ -124,7 +127,6 @@ const MessagingPage = () => {
         .from('staff')
         .select('*');
       if (error) throw error;
-      console.log('Fetched staff:', data);
       setStaff(data || []);
     } catch (error) {
       console.error('Error fetching staff:', error.message);
@@ -156,21 +158,38 @@ const MessagingPage = () => {
     if (!newMessage.trim() || !selectedStaff || !currentUserStaff) return;
 
     try {
-      const messageData = {
-        content: newMessage,
-        sender_id: currentUserStaff.user_id,
-        recipient_id: selectedStaff.user_id,
-        read: false
-      };
-
+      // insert message into database
       const { data, error } = await supabase
         .from('messages')
-        .insert([messageData])
+        .insert([
+          { 
+            content: newMessage, 
+            sender_id: currentUserStaff.user_id, 
+            recipient_id: selectedStaff.user_id,
+            read: false
+          }
+        ])
         .select();
 
       if (error) throw error;
 
-      setMessages(prevMessages => [...prevMessages, data[0]]);
+      // broadcast the new message to both sender and recipient channels
+      if (channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'new-message',
+          payload: data[0]
+        });
+      }
+
+      // also broadcast to recipient's channel
+      const recipientChannel = supabase.channel(`chat:${selectedStaff.user_id}`);
+      await recipientChannel.send({
+        type: 'broadcast',
+        event: 'new-message',
+        payload: data[0]
+      });
+
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -236,30 +255,30 @@ const MessagingPage = () => {
 
   return (
     <div className="messaging-page">
-    <div className="mcontacts-list">
-      <h2>Chat</h2>
-      {error && <p className="error-message">{error}</p>}
-      {staff.length === 0 && !error && <p>No staff members found.</p>}
-      {staff.map(s => (
-        <div
-          key={s.id}
-          className={`mcontact-item ${selectedStaff?.id === s.id ? 'active' : ''}`}
-          onClick={() => setSelectedStaff(s)}
-        >
-          <div className="mcontact-avatar">{s.full_name.charAt(0)}</div>
-          <div className="mcontact-info">
-            <div className="mcontact-name">{s.full_name}</div>
-            <div className="mcontact-role">{s.role}</div>
+      <div className="mcontacts-list">
+        <h2>Chat</h2>
+        {error && <p className="error-message">{error}</p>}
+        {staff.length === 0 && !error && <p>No staff members found.</p>}
+        {staff.map(s => (
+          <div
+            key={s.id}
+            className={`mcontact-item ${selectedStaff?.id === s.id ? 'active' : ''}`}
+            onClick={() => setSelectedStaff(s)}
+          >
+            <div className="mcontact-avatar">{s.full_name.charAt(0)}</div>
+            <div className="mcontact-info">
+              <div className="mcontact-name">{s.full_name}</div>
+              <div className="mcontact-role">{s.role}</div>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-    <div className="chat-area">
-      {selectedStaff ? (
-        <>
-          <div className="chat-header">
-            <h2>{selectedStaff.full_name}</h2>
-          </div>
+        ))}
+      </div>
+      <div className="chat-area">
+        {selectedStaff ? (
+          <>
+            <div className="chat-header">
+              <h2>{selectedStaff.full_name}</h2>
+            </div>
             <div className="messages-container">
               {Object.entries(groupMessagesByDate(messages)).map(([date, dateMessages]) => (
                 <div key={date}>
