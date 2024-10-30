@@ -36,23 +36,31 @@ const MessagingPage = () => {
       fetchMessages();
       // real-time subscription
       const subscription = supabase
-        .channel('messages')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `recipient_id=eq.${currentUserStaff.user_id}`,
-          },
-          (payload) => {
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `or(recipient_id.eq.${currentUserStaff.user_id},sender_id.eq.${currentUserStaff.user_id})`,
+        },
+        (payload) => {
             // add the message if its from/to the selected staff member
             if (
-              payload.new.sender_id === selectedStaff.user_id ||
-              payload.new.recipient_id === selectedStaff.user_id
+              (payload.new.sender_id === selectedStaff.user_id && payload.new.recipient_id === currentUserStaff.user_id) ||
+              (payload.new.sender_id === currentUserStaff.user_id && payload.new.recipient_id === selectedStaff.user_id)
             ) {
-              setMessages(prevMessages => [...prevMessages, payload.new]);
-              // mark the message as read immediately if on the chat
+              setMessages(prevMessages => {
+                // check if message already exists to prevent duplicates
+                const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
+                if (!messageExists) {
+                  return [...prevMessages, payload.new];
+                }
+                return prevMessages;
+              });
+
+              // mark as read if we're the recipient
               if (payload.new.recipient_id === currentUserStaff.user_id) {
                 markMessageAsRead(payload.new.id);
               }
@@ -148,20 +156,21 @@ const MessagingPage = () => {
     if (!newMessage.trim() || !selectedStaff || !currentUserStaff) return;
 
     try {
+      const messageData = {
+        content: newMessage,
+        sender_id: currentUserStaff.user_id,
+        recipient_id: selectedStaff.user_id,
+        read: false
+      };
+
       const { data, error } = await supabase
         .from('messages')
-        .insert([
-          { 
-            content: newMessage, 
-            sender_id: currentUserStaff.user_id, 
-            recipient_id: selectedStaff.user_id,
-            read: false
-          }
-        ])
+        .insert([messageData])
         .select();
 
       if (error) throw error;
 
+      setMessages(prevMessages => [...prevMessages, data[0]]);
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
