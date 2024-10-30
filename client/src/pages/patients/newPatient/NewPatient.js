@@ -288,7 +288,7 @@ const NewPatient = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Perform a final validation check on all required fields
+    
     let validationErrors = {};
     requiredFields.forEach((field) => {
       if (!patientDetails[field] || patientDetails[field].trim() === "") {
@@ -296,7 +296,7 @@ const NewPatient = () => {
       }
     });
   
-    // If there are any validation errors, update the state and alert the user
+    
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       alert("Please fill out all required fields before submitting");
@@ -309,7 +309,7 @@ const NewPatient = () => {
       return;
     }
   
-    // Proceed with image upload and patient data insertion if there are no errors
+    
     try {
       let imageUrl = null;
   
@@ -349,7 +349,7 @@ const NewPatient = () => {
         return;
       }
   
-      // Clear the form fields after successful submission
+      
       setPatientDetails({
         patientName: "",
         microchipNumber: "",
