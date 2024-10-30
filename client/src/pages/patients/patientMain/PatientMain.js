@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { usePatient } from "../../../context/PatientContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { Edit2, X, Save, Calendar, Camera } from "lucide-react";
+import { Edit2, X, Save, Calendar, Camera, Trash2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import "./PatientMain.css";
 import AddAppointment from "../../dashboard/calendarView/AddAppointment";
@@ -166,6 +166,25 @@ const PatientMain = ({ globalSearchTerm }) => {
     } catch (error) {
       console.error("Error updating patient:", error);
       setError("Failed to update patient: " + error.message);
+    }
+  };
+
+  const handleDeletePatient = async () => {
+    if (window.confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
+      try {
+        const { error } = await supabase
+          .from("patients")
+          .delete()
+          .eq("id", selectedPatient.id);
+  
+        if (error) throw error;
+  
+        setPatients(patients.filter(patient => patient.id !== selectedPatient.id));
+        setSelectedPatient(null);
+      } catch (error) {
+        console.error("Error deleting patient:", error);
+        setError("Failed to delete patient: " + error.message);
+      }
     }
   };
 
@@ -579,18 +598,27 @@ const PatientMain = ({ globalSearchTerm }) => {
                 </div>
               </div>
               <div className="patientMain-notes">
-                  <h3>Animal Notes</h3>
-                  {isEditing ? (
-                    <textarea
-                      name="notes"
-                      value={editedPatient?.notes || ""}
-                      onChange={handleInputChange}
-                      className="notes-textarea"
-                    />
-                  ) : (
-                    <p>{selectedPatient.notes || "No notes available"}</p>
-                  )}
-                </div>
+                <h3>Animal Notes</h3>
+                {isEditing ? (
+                  <textarea
+                    name="notes"
+                    value={editedPatient?.notes || ""}
+                    onChange={handleInputChange}
+                    className="notes-textarea"
+                  />
+                ) : (
+                  <p>{selectedPatient.notes || "No notes available"}</p>
+                )}
+              </div>
+              <div className="delete-patient-container">
+                <button 
+                  className="delete-patient-button" 
+                  onClick={handleDeletePatient}
+                >
+                  <Trash2 size={18} />
+                  Delete Patient
+                </button>
+              </div>
             </div>
           )}
         </div>

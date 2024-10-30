@@ -349,17 +349,17 @@ const Contacts = ({ globalSearchTerm }) => {
               </div>
               {isEditing ? (
                 <>
-                  <button className="action-button cancel-button" onClick={handleCancel}>
+                  <button className="c-action-button c-cancel-button" onClick={handleCancel}>
                     <X size={18} />
                     Cancel
                   </button>
-                  <button className="action-button save-button" onClick={handleSave}>
+                  <button className="c-action-button c-save-button" onClick={handleSave}>
                     <Save size={18} />
                     Save
                   </button>
                 </>
               ) : (
-                <button className="action-button edit-button" onClick={handleEdit}>
+                <button className="c-action-button c-edit-button" onClick={handleEdit}>
                   <Edit2 size={18} />
                   Edit
                 </button>
@@ -367,15 +367,15 @@ const Contacts = ({ globalSearchTerm }) => {
             </div>
   
             <div className="contact-actions">
-              <button className="action-button">
+              <button className="c-action-button">
                 <Clock size={18} />
                 Set Up Reminders
               </button>
-              <button className="action-button" onClick={() => handleAddAppointmentClick(selectedPatient)}>
+              <button className="c-action-button" onClick={() => handleAddAppointmentClick(selectedPatient)}>
                 <Calendar size={18} />
                 Create Appointment
               </button>
-              <button className="action-button">
+              <button className="c-action-button">
                 <Send size={18} />
                 Send Payment Request
               </button>

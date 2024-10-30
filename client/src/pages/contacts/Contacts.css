@@ -98,23 +98,23 @@ body {
   border: 2px solid #09CB8B;
 }
 
-.edit-button {
+.c-edit-button {
   position: absolute;
   top: 1rem;
   right: 1rem;
 }
 
-.action-button.save-button {
+.c-action-button.c-save-button {
   position: absolute;
   bottom: 1rem;
   right: 1rem;
   background-color: #09CB8B;
 }
 
-.action-button.save-button:hover {
+.c-action-button.c-save-button:hover {
   background-color: #08b47d;
 }
-.cancel-button {
+.c-cancel-button {
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -218,7 +218,7 @@ body {
   color: white;
 }
 
-.action-button {
+.c-action-button {
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
@@ -231,11 +231,11 @@ body {
   transition: all 0.3s ease;
 }
 
-.action-button:hover {
+.c-action-button:hover {
   background-color: #2980b9;
 }
 
-.action-button svg {
+.c-action-button svg {
   margin-right: 0.5rem;
 }
 
