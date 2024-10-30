@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePatient } from "../../../context/PatientContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { Edit2, X, Save, Calendar } from "lucide-react";
+import { Edit2, X, Save, Calendar, Camera } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import "./PatientMain.css";
 import AddAppointment from "../../dashboard/calendarView/AddAppointment";
@@ -17,6 +17,8 @@ const PatientMain = ({ globalSearchTerm }) => {
   const [editedPatient, setEditedPatient] = useState(null);
   const [owner, setOwner] = useState(null);
   const [error, setError] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
 
   useEffect(() => {
@@ -87,6 +89,41 @@ const PatientMain = ({ globalSearchTerm }) => {
     }
   };
 
+  const handleProfilePictureClick = () => {
+    if (isEditing) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${file.name}`;
+        const filePath = `patient/patient_pictures/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('patient')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl }, error: urlError } = supabase.storage
+          .from('patient')
+          .getPublicUrl(filePath);
+
+        if (urlError) throw urlError;
+
+        setProfilePicture(publicUrl);
+        setEditedPatient(prev => ({ ...prev, image_url: publicUrl }));
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setError('Failed to upload profile picture. Please try again.');
+      }
+    }
+  };
+
   const handleEdit = () => {
     setIsEditing(true);
     setEditedPatient({ ...selectedPatient });
@@ -107,6 +144,7 @@ const PatientMain = ({ globalSearchTerm }) => {
         .from("patients")
         .update({
           ...editedPatient,
+          image_url: profilePicture || editedPatient.image_url
         })
         .eq("id", editedPatient.id)
         .select()
@@ -114,22 +152,23 @@ const PatientMain = ({ globalSearchTerm }) => {
 
       if (error) throw error;
 
-      setPatients((prevPatients) =>
-        prevPatients.map((patient) =>
+      setPatients(prevPatients =>
+        prevPatients.map(patient =>
           patient.id === data.id ? data : patient
         )
       );
 
       setSelectedPatient(data);
-
       setIsEditing(false);
       setEditedPatient(null);
+      setProfilePicture(null);
       setError(null);
     } catch (error) {
       console.error("Error updating patient:", error);
       setError("Failed to update patient: " + error.message);
     }
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -233,152 +272,161 @@ const PatientMain = ({ globalSearchTerm }) => {
           {selectedPatient && (
             <div className="patientMain-details">
               <div className="patientMain-details-header">
-                <img
-                  src={selectedPatient.image_url || "/api/placeholder/80/80"}
-                  alt={selectedPatient.name}
-                  className="patientMain-avatar-large"
-                />
-                <div className="patientMain-header-info">
-                  {isEditing ? (
-                    <>
-                      <input
-                        type="text"
-                        name="name"
-                        value={editedPatient.name || ""}
-                        onChange={handleInputChange}
-                      />
-                      <p>
-                        <span>Owner:</span>
-                        <input
-                          type="text"
-                          name="owner"
-                          value={owner?.name || ""}
-                          readOnly
-                        />
-                      </p>
-                      <p>
-                        <span>Species:</span>
-                        <input
-                          type="text"
-                          name="species"
-                          value={editedPatient.species || ""}
-                          onChange={handleInputChange}
-                        />
-                      </p>
-                      <p>
-                        <span>Breed:</span>
-                        <input
-                          type="text"
-                          name="breed"
-                          value={editedPatient.breed || ""}
-                          onChange={handleInputChange}
-                        />
-                      </p>
-                      <p>
-                        <span>Age:</span>
-                        <input
-                          type="number"
-                          name="age"
-                          value={editedPatient.age || ""}
-                          onChange={handleInputChange}
-                        />
-                      </p>
-                      <p>
-                        <span>Weight (kg):</span>
-                        <input
-                          type="number"
-                          name="weight"
-                          value={editedPatient.weight || ""}
-                          onChange={handleInputChange}
-                        />
-                      </p>
-                      <p>
-                        <span>Gender:</span>
-                        <select
-                          name="gender"
-                          value={editedPatient.gender || ""}
-                          onChange={handleInputChange}
-                        >
-                          <option value="Male/Neutered">Male/Neutered</option>
-                          <option value="Male/Unneutered">
-                            Male/Unneutered
-                          </option>
-                          <option value="Female/Spayed">Female/Spayed</option>
-                          <option value="Female/Unspayed">
-                            Female/Unspayed
-                          </option>
-                        </select>
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <h2>{selectedPatient.name}</h2>
-                      <p>
-                        <strong>Owner:</strong>{" "}
-                        {owner
-                          ? `${owner.first_name} ${owner.last_name}`
-                          : "N/A"}
-                      </p>
-                      <p>
-                        <strong>Species:</strong> {selectedPatient.species}
-                      </p>
-                      <p>
-                        <strong>Breed:</strong> {selectedPatient.breed}
-                      </p>
-                      <p>
-                        <strong>Age:</strong> {selectedPatient.age} years
-                      </p>
-                      <p>
-                        <strong>Weight:</strong> {selectedPatient.weight} Kg
-                      </p>
-                      <p>
-                        <strong>Gender:</strong> {selectedPatient.gender}
-                      </p>
-                      <p>
-                        <strong>Date of Birth:</strong>{" "}
-                        {formatDate(selectedPatient.date_of_birth)}
-                      </p>
-                    </>
-                  )}
-                </div>
-                <div className="patientMain-action-buttons">
-                  <button
-                    className="action-button add-appointment-button"
-                    onClick={handleAddAppointment}
-                  >
-                    <Calendar size={18} />
-                    Add Appointment
-                  </button>
-                  {!isEditing && (
-                    <button
-                      className="action-button edit-button"
-                      onClick={handleEdit}
-                    >
-                      <Edit2 size={18} />
-                      Edit
-                    </button>
-                  )}
-                </div>
-              </div>
+  <div className="profile-picture-container" onClick={handleProfilePictureClick}>
+    <img
+      src={profilePicture || selectedPatient.image_url || "/api/placeholder/300/300"}
+      alt={selectedPatient.name}
+      className="patientMain-avatar-large"
+    />
+    {isEditing && (
+      <div className="profile-picture-overlay">
+        <Camera size={24} />
+        <span>Change Photo</span>
+      </div>
+    )}
+    <input 
+      type="file"
+      ref={fileInputRef}
+      onChange={handleFileChange}
+      style={{ display: 'none' }}
+      accept="image/*"
+    />
+  </div>
 
-              {isEditing && (
-                <div className="patientMain-edit-actions">
-                  <button
-                    className="action-button cancel-button"
-                    onClick={handleCancel}
-                  >
-                    <X size={18} />
-                    Cancel
-                  </button>
-                  <button
-                    className="action-button save-button"
-                    onClick={handleSave}
-                  >
-                    <Save size={18} />
-                    Save
-                  </button>
-                </div>
-              )}
+  <div className="patientMain-header-info">
+    {isEditing ? (
+      <input
+        type="text"
+        name="name"
+        value={editedPatient.name || ""}
+        onChange={handleInputChange}
+        className="patient-name-input"
+      />
+    ) : (
+      <h2>{selectedPatient.name}</h2>
+    )}
+    
+    <div className="patient-details-grid">
+      <div className="detail-item">
+        <strong>Owner:</strong>
+        {isEditing ? (
+          <input
+            type="text"
+            name="owner"
+            value={owner ? `${owner.first_name} ${owner.last_name}` : ""}
+            readOnly
+          />
+        ) : (
+          <span>{owner ? `${owner.first_name} ${owner.last_name}` : "N/A"}</span>
+        )}
+      </div>
+
+      <div className="detail-item">
+        <strong>Species:</strong>
+        {isEditing ? (
+          <input
+            type="text"
+            name="species"
+            value={editedPatient.species || ""}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{selectedPatient.species}</span>
+        )}
+      </div>
+
+      <div className="detail-item">
+        <strong>Breed:</strong>
+        {isEditing ? (
+          <input
+            type="text"
+            name="breed"
+            value={editedPatient.breed || ""}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{selectedPatient.breed}</span>
+        )}
+      </div>
+
+      <div className="detail-item">
+        <strong>Age:</strong>
+        {isEditing ? (
+          <input
+            type="number"
+            name="age"
+            value={editedPatient.age || ""}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{selectedPatient.age} years</span>
+        )}
+      </div>
+
+      <div className="detail-item">
+        <strong>Weight:</strong>
+        {isEditing ? (
+          <input
+            type="number"
+            name="weight"
+            value={editedPatient.weight || ""}
+            onChange={handleInputChange}
+          />
+        ) : (
+          <span>{selectedPatient.weight} Kg</span>
+        )}
+      </div>
+
+      <div className="detail-item">
+        <strong>Gender:</strong>
+        {isEditing ? (
+          <select
+            name="gender"
+            value={editedPatient.gender || ""}
+            onChange={handleInputChange}
+          >
+            <option value="Male/Neutered">Male/Neutered</option>
+            <option value="Male/Unneutered">Male/Unneutered</option>
+            <option value="Female/Spayed">Female/Spayed</option>
+            <option value="Female/Unspayed">Female/Unspayed</option>
+          </select>
+        ) : (
+          <span>{selectedPatient.gender}</span>
+        )}
+      </div>
+
+      <div className="detail-item">
+        <strong>Date of Birth:</strong>
+        <span>{formatDate(selectedPatient.date_of_birth)}</span>
+      </div>
+    </div>
+  </div>
+  <div className="patientMain-action-buttons">
+    {isEditing ? (
+      <>
+        <button className="add-appointment-button" onClick={handleSave}>
+          <Save size={18} />
+          Save
+        </button>
+        <button className="patient-cancel-button" onClick={handleCancel}>
+          <X size={18} />
+          Cancel
+        </button>
+      </>
+    ) : (
+      <>
+        <button className="add-appointment-button" onClick={handleAddAppointment}>
+          <Calendar size={18} />
+          Add Appointment
+        </button>
+        <button className="patient-edit-button" onClick={handleEdit}>
+          <Edit2 size={18} />
+          Edit
+        </button>
+      </>
+    )}
+  </div>
+</div>
 
               <div className="patientMain-info-section">
                 <div className="patientMain-additional-info">
@@ -529,8 +577,8 @@ const PatientMain = ({ globalSearchTerm }) => {
                     </>
                   )}
                 </div>
-
-                <div className="patientMain-notes">
+              </div>
+              <div className="patientMain-notes">
                   <h3>Animal Notes</h3>
                   {isEditing ? (
                     <textarea
@@ -543,7 +591,6 @@ const PatientMain = ({ globalSearchTerm }) => {
                     <p>{selectedPatient.notes || "No notes available"}</p>
                   )}
                 </div>
-              </div>
             </div>
           )}
         </div>
