@@ -23,14 +23,64 @@ import ReportHistory from "./pages/reporting/reportHistory/ReportHistory";
 
 const Layout = () => {
   const [theme, setTheme] = useState("light");
-  const [showNotifications, setShowNotifications] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [globalSearchTerm, setGlobalSearchTerm] = useState("");
-  const [unreadMessages, setUnreadMessages] = useState([]);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [currentUserStaff, setCurrentUserStaff] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const supabase = useSupabaseClient();
   const session = useSession();
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchCurrentUserStaff();
+    }
+  }, [session]);
+
+  const fetchCurrentUserStaff = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('staff')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error) throw error;
+      setCurrentUserStaff(data);
+    } catch (error) {
+      console.error('Error fetching current user staff:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentUserStaff) return;
+
+    const channel = supabase.channel(`chat:${currentUserStaff.user_id}`, {
+      config: {
+        broadcast: { self: true }
+      }
+    });
+
+    channel
+      .on('broadcast', { event: 'new-message' }, ({ payload }) => {
+        //increment counter if message is received when not on the messages page
+        if (payload.recipient_id === currentUserStaff.user_id && location.pathname !== '/messages') {
+          setUnreadMessageCount(prev => prev + 1);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserStaff, location.pathname]);
+
+  useEffect(() => {
+    if (location.pathname === '/messages') {
+      setUnreadMessageCount(0);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -169,8 +219,15 @@ const Layout = () => {
                 }`}
                 draggable="false"
               >
-                <i className="fas fa-envelope" draggable="false"></i>{" "}
-                <span draggable="false">Messages</span>
+                <div className="message-button-container">
+                  <i className="fas fa-envelope" draggable="false"></i>
+                  {unreadMessageCount > 0 && (
+                    <span className="message-notification-badge" draggable="false">
+                      {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                    </span>
+                  )}
+                  <span draggable="false">Messages</span>
+                </div>
               </Link>
               <Link
                 to="/admin"
