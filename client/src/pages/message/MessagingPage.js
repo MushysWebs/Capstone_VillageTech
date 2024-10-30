@@ -34,6 +34,37 @@ const MessagingPage = () => {
   useEffect(() => {
     if (selectedStaff && currentUserStaff) {
       fetchMessages();
+      // real-time subscription
+      const subscription = supabase
+        .channel('messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `recipient_id=eq.${currentUserStaff.user_id}`,
+          },
+          (payload) => {
+            // add the message if its from/to the selected staff member
+            if (
+              payload.new.sender_id === selectedStaff.user_id ||
+              payload.new.recipient_id === selectedStaff.user_id
+            ) {
+              setMessages(prevMessages => [...prevMessages, payload.new]);
+              // mark the message as read immediately if on the chat
+              if (payload.new.recipient_id === currentUserStaff.user_id) {
+                markMessageAsRead(payload.new.id);
+              }
+            }
+          }
+        )
+        .subscribe();
+
+      // cleanup subscription
+      return () => {
+        subscription.unsubscribe();
+      };
     }
   }, [selectedStaff, currentUserStaff]);
 
@@ -132,10 +163,30 @@ const MessagingPage = () => {
       if (error) throw error;
 
       setNewMessage('');
-      setMessages(prevMessages => [...prevMessages, data[0]]);
     } catch (error) {
       console.error('Error sending message:', error);
       setError(error.message || 'Failed to send message');
+    }
+  };
+
+  const markMessageAsRead = async (messageId) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      setMessages(prevMessages =>
+        prevMessages.map(msg =>
+          msg.id === messageId
+            ? { ...msg, read: true }
+            : msg
+        )
+      );
+    } catch (error) {
+      console.error('Error marking message as read:', error);
     }
   };
 
@@ -155,8 +206,6 @@ const MessagingPage = () => {
         .in('id', unreadMessages.map(msg => msg.id));
 
       if (error) throw error;
-
-      console.log('Messages marked as read:', unreadMessages.map(msg => msg.id));
 
       setMessages(prevMessages => 
         prevMessages.map(msg => 
