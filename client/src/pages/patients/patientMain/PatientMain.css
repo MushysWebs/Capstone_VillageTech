@@ -1,14 +1,15 @@
 .patient-main {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 60px);
-  padding: 20px 40px;
+  height: calc(100% - 20px);
+  padding: 20px 40px 60px 40px;
+  overflow: hidden;
 }
 
 .patientMain-tabs {
   display: flex;
   gap: 10px;
-  padding-bottom: 10px;
+
 }
 
 .tab-button {
@@ -34,7 +35,7 @@
   display: flex;
   flex: 1;
   margin-left: 10px;
-  margin-bottom: 60px;
+  height: calc(100% - 20px);
 }
 
 .patientMain-list {
@@ -46,7 +47,7 @@
   border-radius: 12px;
   padding: 10px;
   flex-shrink: 0;
-  margin-bottom: 5px;
+  max-height: calc(100vh - 100px);
 }
 
 .patientMain-main {
@@ -54,6 +55,7 @@
   padding-left: 20px;
   display: flex;
   justify-content: center;
+  max-height: calc(100vh - 80px);
 }
 
 .patientMain-details {
@@ -65,6 +67,8 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto; 
+  max-height: 100%;
 }
 
 .patientMain-details-header {
@@ -266,9 +270,7 @@
 
 .patientMain-info-section {
   display: flex;
-  flex-wrap: wrap;
   gap: 2rem;
-  margin-top: 2rem;
 }
 
 .patientMain-additional-info,
@@ -277,6 +279,7 @@
 .patientMain-notes {
   flex: 1;
   min-width: 250px;
+  padding-bottom: -10px ;
 }
 
 .patientMain-additional-info h3,
@@ -374,12 +377,14 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   width: 100%;
+  column-gap: 100px;
 }
 
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: .5rem;
+  white-space: nowrap;
 }
 
 .detail-item strong,
