@@ -272,14 +272,14 @@ const PatientMain = ({ globalSearchTerm }) => {
           {selectedPatient && (
             <div className="patientMain-details">
               <div className="patientMain-details-header">
-  <div className="profile-picture-container" onClick={handleProfilePictureClick}>
+  <div className="p-profile-picture-container" onClick={handleProfilePictureClick}>
     <img
       src={profilePicture || selectedPatient.image_url || "/api/placeholder/300/300"}
       alt={selectedPatient.name}
       className="patientMain-avatar-large"
     />
     {isEditing && (
-      <div className="profile-picture-overlay">
+      <div className="p-profile-picture-overlay">
         <Camera size={24} />
         <span>Change Photo</span>
       </div>

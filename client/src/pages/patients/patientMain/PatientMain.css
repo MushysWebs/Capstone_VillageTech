@@ -324,17 +324,17 @@
   font-weight: bold;
 }
 
-.profile-picture-container {
+.p-profile-picture-container {
+  position: relative;
   width: 250px;
   height: 250px;
-  margin: 0;
+  overflow: hidden;
+  cursor: pointer;
+  margin-right: 2rem;
+  flex-shrink: 0;
 }
 
-.profile-picture-container:hover {
-  transform: translateY(-2px);
-}
-
-.profile-picture-overlay {
+.p-profile-picture-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -350,16 +350,16 @@
   color: white;
 }
 
-.profile-picture-overlay svg {
+.p-profile-picture-overlay svg {
   margin-bottom: 8px;
 }
 
-.profile-picture-overlay span {
+.p-profile-picture-overlay span {
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.profile-picture-container:hover .profile-picture-overlay {
+.p-profile-picture-container:hover .profile-picture-overlay {
   opacity: 1;
 }
 
@@ -392,11 +392,10 @@
 .detail-item select {
   flex: 1;
   padding: 0.04rem 0.01rem;
-  border: 1px solid transparent;
+  border: 1px solid rgba(150, 150, 150, 0.616);
   border-radius: 4px;
   font-size: inherit;
   font-family: inherit;
-  background: transparent;
   color: inherit;
   width: auto;
   margin: 0;
