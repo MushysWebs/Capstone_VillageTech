@@ -1,10 +1,9 @@
 .SOC-main {
   display: flex;
-  padding: 20px;
-  height: calc(100vh - 60px);
-  width: 95%;
-  margin: 0 auto;
-  overflow-y: hidden;
+    padding: 20px;
+    height: calc(100vh - 60px);
+    width: 97.5%;
+    margin-left: 22px;
 }
 
 .SOC-patient-sidebar {
