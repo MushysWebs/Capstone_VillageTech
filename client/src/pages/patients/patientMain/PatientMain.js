@@ -20,7 +20,11 @@ const PatientMain = ({ globalSearchTerm }) => {
   const [profilePicture, setProfilePicture] = useState(null);
   const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
-
+  const defaultProfilePicUrl = supabase
+  .storage
+  .from('contacts')
+  .getPublicUrl('profile_pictures/defaultPPic.png').data.publicUrl;
+  
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -277,8 +281,7 @@ const PatientMain = ({ globalSearchTerm }) => {
               }}
             >
               <img
-                src={patient.image_url || "/api/placeholder/80/80"}
-                alt={patient.name}
+                src={patient.image_url || defaultProfilePicUrl}
                 className="patientMain-avatar"
               />
               <span className="patientMain-name">{patient.name}</span>
