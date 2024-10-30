@@ -287,29 +287,42 @@ const NewPatient = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Perform a final validation check on all required fields
+    let validationErrors = {};
+    requiredFields.forEach((field) => {
+      if (!patientDetails[field] || patientDetails[field].trim() === "") {
+        validationErrors[field] = "This field is required";
+      }
+    });
+  
+    // If there are any validation errors, update the state and alert the user
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      alert("Please fill out all required fields before submitting");
+      return;
+    }
+  
     const hasErrors = Object.values(errors).some((error) => error);
     if (hasErrors) {
       alert("Please correct the errors before submitting");
       return;
     }
-
+  
+    // Proceed with image upload and patient data insertion if there are no errors
     try {
       let imageUrl = null;
-
+  
       if (otherDetails.image) {
         imageUrl = await handleImageUpload(otherDetails.image);
       }
-
+  
       const patientDataToInsert = {
         owner_id: selectedOwner.id,
         name: patientDetails.patientName,
         microchip_number: patientDetails.microchipNumber || null,
-        weight:
-          patientDetails.weight !== ""
-            ? parseFloat(patientDetails.weight)
-            : null,
-        age: patientDetails.age !== "" ? parseInt(patientDetails.age) : null,
+        weight: patientDetails.weight !== "" ? parseFloat(patientDetails.weight) : null,
+        age: age !== "" ? parseInt(age) : null,
         date_of_birth: patientDetails.dateOfBirth || null,
         gender: patientDetails.gender,
         species: patientDetails.species,
@@ -324,30 +337,23 @@ const NewPatient = () => {
         reminder_tag: tags.reminder,
         image_url: imageUrl,
       };
-
+  
       const { data: patientData, error: patientError } = await supabase
         .from("patients")
         .insert([patientDataToInsert])
         .select();
-
+  
       if (patientError) {
-        console.error(
-          "Error inserting patient:",
-          patientError.details || patientError.message || patientError
-        );
-        alert(
-          `Error adding new patient: ${
-            patientError.details || patientError.message
-          }`
-        );
+        console.error("Error inserting patient:", patientError.details || patientError.message || patientError);
+        alert(`Error adding new patient: ${patientError.details || patientError.message}`);
         return;
       }
-
+  
+      // Clear the form fields after successful submission
       setPatientDetails({
         patientName: "",
         microchipNumber: "",
         weight: "",
-        age: "",
         dateOfBirth: "",
         gender: "",
         species: "",
@@ -376,7 +382,7 @@ const NewPatient = () => {
       alert(`Failed to create new patient: ${error.message}`);
     }
   };
-
+  
   return (
     <div className="new-patient-page">
       <header className="patientMain-header">
