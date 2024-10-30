@@ -12,6 +12,7 @@ const MessagingPage = () => {
   const [currentUserStaff, setCurrentUserStaff] = useState(null);
   const supabase = useSupabaseClient();
   const session = useSession();
+  const messagesContainerRef = useRef(null); 
   const messagesEndRef = useRef(null);
   const location = useLocation();
   const channelRef = useRef(null);
@@ -248,10 +249,23 @@ const MessagingPage = () => {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const { scrollHeight, clientHeight } = messagesContainerRef.current;
+      messagesContainerRef.current.scrollTo({
+        top: scrollHeight - clientHeight,
+        behavior: 'smooth'
+      });
+    }
   };
 
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, selectedStaff]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages]);
 
   return (
     <div className="messaging-page">
@@ -279,7 +293,7 @@ const MessagingPage = () => {
             <div className="chat-header">
               <h2>{selectedStaff.full_name}</h2>
             </div>
-            <div className="messages-container">
+            <div className="messages-container" ref={messagesContainerRef}>
               {Object.entries(groupMessagesByDate(messages)).map(([date, dateMessages]) => (
                 <div key={date}>
                   <div className="date-separator">{formatDate(date)}</div>
