@@ -10,6 +10,7 @@ const MessagingPage = () => {
   const [newMessage, setNewMessage] = useState('');
   const [error, setError] = useState(null);
   const [currentUserStaff, setCurrentUserStaff] = useState(null);
+  const [lastMessages, setLastMessages] = useState({});
   const supabase = useSupabaseClient();
   const session = useSession();
   const messagesContainerRef = useRef(null); 
@@ -25,6 +26,61 @@ const MessagingPage = () => {
   }, [session]);
 
   useEffect(() => {
+    if (currentUserStaff) {
+      fetchAllLastMessages();
+    }
+  }, [currentUserStaff]);
+
+  const fetchAllLastMessages = async () => {
+    if (!currentUserStaff) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`sender_id.eq.${currentUserStaff.user_id},recipient_id.eq.${currentUserStaff.user_id}`)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const messageMap = {};
+      data.forEach(message => {
+        const otherUserId = message.sender_id === currentUserStaff.user_id 
+          ? message.recipient_id 
+          : message.sender_id;
+        
+        if (!messageMap[otherUserId]) {
+          messageMap[otherUserId] = message;
+        }
+      });
+
+      setLastMessages(messageMap);
+    } catch (error) {
+      console.error('Error fetching last messages:', error);
+    }
+  };
+
+  const sortedStaff = [...staff].sort((a, b) => {
+    const lastMessageA = lastMessages[a.user_id];
+    const lastMessageB = lastMessages[b.user_id];
+    
+    if (!lastMessageA && !lastMessageB) return 0;
+    if (!lastMessageA) return 1;
+    if (!lastMessageB) return -1;
+    
+    return new Date(lastMessageB.created_at) - new Date(lastMessageA.created_at);
+  });
+
+  useEffect(() => {
+    if (location.state?.selectedStaffId) {
+      const selectedStaff = staff.find(s => s.user_id === location.state.selectedStaffId);
+      if (selectedStaff) {
+        setSelectedStaff(selectedStaff);
+      }
+    }
+  }, [staff, location.state]);
+
+  useEffect(() => {
     if (location.state?.selectedStaffId) {
       const selectedStaff = staff.find(s => s.user_id === location.state.selectedStaffId);
       if (selectedStaff) {
@@ -36,14 +92,12 @@ const MessagingPage = () => {
   // set up real-time channel
   useEffect(() => {
     if (currentUserStaff) {
-      // create a channel for the current user
       const channel = supabase.channel(`chat:${currentUserStaff.user_id}`, {
         config: {
           broadcast: { self: true }
         }
       });
 
-      // listen for new messages
       channel
         .on('broadcast', { event: 'new-message' }, ({ payload }) => {
           console.log('Received message:', payload);
@@ -54,6 +108,11 @@ const MessagingPage = () => {
             setMessages(prevMessages => {
               const messageExists = prevMessages.some(msg => msg.id === payload.id);
               if (!messageExists) {
+                // update last messages when a new message is received
+                setLastMessages(prev => ({
+                  ...prev,
+                  [selectedStaff.user_id]: payload
+                }));
                 return [...prevMessages, payload];
               }
               return prevMessages;
@@ -64,7 +123,6 @@ const MessagingPage = () => {
 
       channelRef.current = channel;
 
-      // cleanup
       return () => {
         if (channelRef.current) {
           supabase.removeChannel(channelRef.current);
@@ -73,7 +131,6 @@ const MessagingPage = () => {
     }
   }, [currentUserStaff, selectedStaff]);
 
-  // fetch initial messages when selecting a staff member
   useEffect(() => {
     if (selectedStaff && currentUserStaff) {
       fetchMessages();
@@ -108,6 +165,39 @@ const MessagingPage = () => {
       hour: '2-digit', 
       minute: '2-digit'
     }).toUpperCase();
+  };
+
+  const formatLastMessageTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (days === 1) {
+      return 'Yesterday';
+    } else if (days < 7) {
+      return date.toLocaleDateString([], { weekday: 'short' });
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
+  const getLastMessagePreview = (staffMember) => {
+    const lastMessage = lastMessages[staffMember.user_id];
+    if (!lastMessage) return null;
+
+    const isSender = lastMessage.sender_id === currentUserStaff?.user_id;
+    const preview = lastMessage.content.length > 30 
+      ? `${lastMessage.content.substring(0, 30)}...` 
+      : lastMessage.content;
+
+    return {
+      content: preview,
+      timestamp: formatLastMessageTime(lastMessage.created_at),
+      isSender
+    };
   };
 
   const groupMessagesByDate = (messages) => {
@@ -159,7 +249,6 @@ const MessagingPage = () => {
     if (!newMessage.trim() || !selectedStaff || !currentUserStaff) return;
 
     try {
-      // insert message into database
       const { data, error } = await supabase
         .from('messages')
         .insert([
@@ -174,7 +263,6 @@ const MessagingPage = () => {
 
       if (error) throw error;
 
-      // broadcast the new message to both sender and recipient channels
       if (channelRef.current) {
         channelRef.current.send({
           type: 'broadcast',
@@ -183,7 +271,6 @@ const MessagingPage = () => {
         });
       }
 
-      // also broadcast to recipient's channel
       const recipientChannel = supabase.channel(`chat:${selectedStaff.user_id}`);
       await recipientChannel.send({
         type: 'broadcast',
@@ -267,26 +354,45 @@ const MessagingPage = () => {
     return () => clearTimeout(timeoutId);
   }, [messages]);
 
-  return (
-    <div className="messaging-page">
-      <div className="mcontacts-list">
-        <h2>Chat</h2>
-        {error && <p className="error-message">{error}</p>}
-        {staff.length === 0 && !error && <p>No staff members found.</p>}
-        {staff.map(s => (
-          <div
-            key={s.id}
-            className={`mcontact-item ${selectedStaff?.id === s.id ? 'active' : ''}`}
-            onClick={() => setSelectedStaff(s)}
-          >
-            <div className="mcontact-avatar">{s.full_name.charAt(0)}</div>
-            <div className="mcontact-info">
-              <div className="mcontact-name">{s.full_name}</div>
-              <div className="mcontact-role">{s.role}</div>
-            </div>
-          </div>
-        ))}
-      </div>
+return (
+      <div className="messaging-page">
+        <div className="mcontacts-list">
+          <h2>Chat</h2>
+          {error && <p className="error-message">{error}</p>}
+          {sortedStaff.length === 0 && !error && <p>No staff members found.</p>}
+          {sortedStaff.map(s => {
+            const lastMessage = getLastMessagePreview(s);
+            return (
+              <div
+                key={s.id}
+                className={`mcontact-item ${selectedStaff?.id === s.id ? 'active' : ''}`}
+                onClick={() => setSelectedStaff(s)}
+              >
+                <img 
+                  src={s.photo_url || "/floweronly.svg"} 
+                  alt={s.full_name}
+                  className="mcontact-avatar"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/floweronly.svg";
+                  }}
+                />
+                <div className="mcontact-info">
+                  <div className="mcontact-name">{s.full_name}</div>
+                  <div className="mcontact-role">{s.role}</div>
+                  {lastMessage && (
+                    <div className="mcontact-preview">
+                      <span className={`preview-text ${!lastMessage.read ? 'unread' : ''}`}>
+                        {lastMessage.isSender && 'You: '}{lastMessage.content}
+                      </span>
+                      <span className="preview-time">{lastMessage.timestamp}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       <div className="chat-area">
         {selectedStaff ? (
           <>

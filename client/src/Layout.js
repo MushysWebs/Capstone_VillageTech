@@ -37,62 +37,6 @@ const Layout = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      checkUnreadMessages();
-      const subscription = supabase
-        .channel("public:messages")
-        .on("INSERT", (payload) => {
-          if (payload.new.recipient_id === session.user.id) {
-            setUnreadMessages((prev) => [...prev, payload.new]);
-          }
-        })
-        .on("UPDATE", (payload) => {
-          if (
-            payload.new.recipient_id === session.user.id &&
-            payload.new.read
-          ) {
-            setUnreadMessages((prev) =>
-              prev.filter((msg) => msg.id !== payload.new.id)
-            );
-          }
-        })
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(subscription);
-      };
-    }
-  }, [session, supabase]);
-
-  const checkUnreadMessages = async () => {
-    if (!session?.user?.id) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*, sender:staff!sender_id(full_name)")
-        .eq("recipient_id", session.user.id)
-        .eq("read", false)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setUnreadMessages(data || []);
-    } catch (error) {
-      console.error("Error checking unread messages:", error);
-      setUnreadMessages([]);
-    }
-  };
-  const handleNotificationClick = () => {
-    setShowNotifications(!showNotifications);
-    if (!showNotifications) {
-      checkUnreadMessages();
-    }
-  };
-  const handleMessageClick = (senderId) => {
-    navigate("/messages", { state: { selectedStaffId: senderId } });
-    setShowNotifications(false);
-  };
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {
@@ -257,18 +201,6 @@ const Layout = () => {
               <button className="header-button blue-button" draggable="false">
                 <span draggable="false">Save</span>
               </button>
-              <button
-                className="notification-button"
-                onClick={handleNotificationClick}
-                draggable="false"
-              >
-                <i className="fas fa-bell" draggable="false"></i>
-                {unreadMessages.length > 0 && (
-                  <span className="notification-badge" draggable="false">
-                    {unreadMessages.length}
-                  </span>
-                )}
-              </button>
               <button className="user-button" draggable="false">
                 <i className="fas fa-user" draggable="false"></i>
               </button>
@@ -287,32 +219,6 @@ const Layout = () => {
           </header>
           {renderMainContent()}
         </main>
-        {showNotifications && (
-          <aside className="notifications-panel">
-            <h2>Notifications</h2>
-            {unreadMessages.length === 0 ? (
-              <p>No new notifications</p>
-            ) : (
-              unreadMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className="notification"
-                  onClick={() => handleMessageClick(message.sender_id)}
-                  draggable="false"
-                >
-                  <h3 draggable="false">
-                    New message from {message.sender.full_name}
-                  </h3>
-                  <p draggable="false">{message.content.substring(0, 50)}...</p>
-                  <p draggable="false">
-                    <i className="far fa-clock" draggable="false"></i>{" "}
-                    {formatDate(message.created_at)}
-                  </p>
-                </div>
-              ))
-            )}
-          </aside>
-        )}
       </div>
     </AuthGuard>
   );
