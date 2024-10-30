@@ -290,11 +290,7 @@ const Contacts = ({ globalSearchTerm }) => {
               <img 
                 src={contact.profile_picture_url || defaultOPicUrl} 
                 alt={`${contact.first_name} ${contact.last_name}`} 
-                className="contact-avatar" 
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = defaultOPicUrl;
-                }}
+                className="contactlist-avatar" 
               />
               <span className="contact-name">{`${contact.first_name} ${contact.last_name}`}</span>
             </div>
@@ -317,10 +313,6 @@ const Contacts = ({ globalSearchTerm }) => {
                   src={selectedContact.profile_picture_url || defaultProfilePicUrl}
                   alt={`${selectedContact.first_name} ${selectedContact.last_name}`}
                   className="contact-avatar"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = defaultProfilePicUrl;
-                  }}
                 />
                 {isEditing && (
                   <div className="profile-picture-overlay">
