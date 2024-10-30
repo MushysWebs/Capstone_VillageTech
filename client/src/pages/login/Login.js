@@ -62,12 +62,12 @@ const Login = () => {
         <h2 className="welcome-text">Welcome back!</h2>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="employeeId" className="input-label">Employee ID</label>
+            <label htmlFor="employeeId" className="input-label">Employee Email</label>
             <input
               id="employeeId"
               className="input nunito-light"
               type="text"
-              placeholder="ID"
+              placeholder="Email"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
             />
