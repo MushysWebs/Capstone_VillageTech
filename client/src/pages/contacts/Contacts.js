@@ -267,6 +267,16 @@ const Contacts = ({ globalSearchTerm }) => {
     setShowAppointmentModal(false);
   };
 
+  const defaultOPicUrl = supabase
+  .storage
+  .from('contacts')
+  .getPublicUrl('profile_pictures/defaultOPic.png').data.publicUrl;
+
+  const defaultProfilePicUrl = supabase
+  .storage
+  .from('contacts')
+  .getPublicUrl('profile_pictures/defaultPPic.png').data.publicUrl;
+
   return (
     <div className="contacts-page">
       <div className="contacts-sidebar">
@@ -278,9 +288,13 @@ const Contacts = ({ globalSearchTerm }) => {
               onClick={() => setSelectedContact(contact)}
             >
               <img 
-                src={contact.profile_picture_url || `/api/placeholder/80/80`} 
+                src={contact.profile_picture_url || defaultOPicUrl} 
                 alt={`${contact.first_name} ${contact.last_name}`} 
                 className="contact-avatar" 
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = defaultOPicUrl;
+                }}
               />
               <span className="contact-name">{`${contact.first_name} ${contact.last_name}`}</span>
             </div>
@@ -292,17 +306,21 @@ const Contacts = ({ globalSearchTerm }) => {
           </button>
         </div>
       </div>
-
+  
       <div className="contacts-main">
-         {error && <div className="error-message">{error}</div>}
+        {error && <div className="error-message">{error}</div>}
         {selectedContact && (
           <>
             <div className={`contact-header ${isEditing ? 'editable' : ''}`}>
               <div className="profile-picture-container" onClick={handleProfilePictureClick}>
-                <img 
-                  src={profilePicture || selectedContact.profile_picture_url || `/api/placeholder/80/80`} 
-                  alt={`${selectedContact.first_name} ${selectedContact.last_name}`} 
-                  className="contact-header-avatar" 
+                <img
+                  src={selectedContact.profile_picture_url || defaultProfilePicUrl}
+                  alt={`${selectedContact.first_name} ${selectedContact.last_name}`}
+                  className="contact-avatar"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = defaultProfilePicUrl;
+                  }}
                 />
                 {isEditing && (
                   <div className="profile-picture-overlay">
@@ -355,7 +373,7 @@ const Contacts = ({ globalSearchTerm }) => {
                 </button>
               )}
             </div>
-
+  
             <div className="contact-actions">
               <button className="action-button">
                 <Clock size={18} />
@@ -370,18 +388,19 @@ const Contacts = ({ globalSearchTerm }) => {
                 Send Payment Request
               </button>
             </div>
-
+  
             <div className="pets-section">
               <h3>PETS</h3>
               <div className="pets-grid">
                 {sortedPatients.map(patient => (
                   <div key={patient.id} className="pet-card">
-                    <img 
-                      src={patient.image_url || `/api/placeholder/60/60`} 
-                      alt={patient.name} 
+                    <img
+                      src={patient.image_url || defaultProfilePicUrl}
+                      alt={patient.name}
+                      className="patient-image"
                       onError={(e) => {
-                        e.target.onerror = null; 
-                        e.target.src = `/api/placeholder/60/60`;
+                        e.target.onerror = null;
+                        e.target.src = defaultProfilePicUrl;
                       }}
                     />
                     <h4>{patient.name} <Edit2 size={14} /></h4>
@@ -393,7 +412,7 @@ const Contacts = ({ globalSearchTerm }) => {
                 ))}
               </div>
             </div>
-
+  
             <div className="invoices-section">
               <h3>INVOICES</h3>
               <div className="invoices-table-container">
@@ -450,7 +469,7 @@ const Contacts = ({ globalSearchTerm }) => {
                 </div>
               )}
             </div>
-
+  
             <div className="delete-contact-container">
               <button className="delete-contact-button" onClick={handleDeleteContact}>
                 <Trash2 size={18} />
@@ -460,25 +479,26 @@ const Contacts = ({ globalSearchTerm }) => {
           </>
         )}
       </div>
-
+  
       {showAppointmentModal && (
-      <AddAppointment
-        onClose={handleCloseAppointmentModal}
-        onAppointmentAdded={handleAppointmentAdded}
-        patientId={selectedPatient?.id}
-        patientName={selectedPatient?.name}
-        ownerId={selectedContact?.id}
-      />
-    )}
-     {showCreateModal && (
-      <CreateContactModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onCreateContact={handleCreateContact}
-      />
-    )}
-  </div>
-);
+        <AddAppointment
+          onClose={handleCloseAppointmentModal}
+          onAppointmentAdded={handleAppointmentAdded}
+          patientId={selectedPatient?.id}
+          patientName={selectedPatient?.name}
+          ownerId={selectedContact?.id}
+        />
+      )}
+      {showCreateModal && (
+        <CreateContactModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onCreateContact={handleCreateContact}
+        />
+      )}
+    </div>
+  );
+  
 };
 
 export default Contacts;
