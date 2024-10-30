@@ -1,4 +1,4 @@
-.health-main {
+.health-status-main {
   display: flex;
   padding: 20px;
   height: calc(100vh - 60px);
@@ -6,7 +6,7 @@
   margin-left: 22px;
 }
 
-.health-status-page {
+.health-status-content {
   width: calc(100% - 270px);
   margin-left: 20px;
   margin-bottom: 10px;
@@ -17,12 +17,12 @@
   padding-right: 28px;
 }
 
-.patient-header {
+.health-status-header {
   margin-left: 0px;
-  margin-bottom:20px;
+  margin-bottom: 20px;
 }
 
-.section-box {
+.health-status-section-box {
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -31,21 +31,19 @@
   margin-bottom: 20px;
 }
 
-.section-header {
+.health-status-section-header {
   font-size: 1.4rem;
   margin-bottom: 15px;
   color: #09ace0;
-  border-bottom: 2px solid #09ace0;
-  padding-bottom: 10px;
 }
 
-.info-grid {
+.health-status-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
 }
 
-.info-item {
+.health-status-info-item {
   background-color: #f8fafc;
   padding: 15px;
   border-radius: 8px;
@@ -53,27 +51,27 @@
   transition: all 0.3s ease;
 }
 
-.info-item:hover {
+.health-status-info-item:hover {
   background-color: #e6f7ff;
 }
 
-.info-label {
+.health-status-info-label {
   font-weight: 600;
   color: #34495e;
   margin-bottom: 5px;
 }
 
-.info-value {
+.health-status-info-value {
   color: #2c3e50;
 }
 
-.health-notes-grid {
+.health-status-notes-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.health-textarea {
+.health-status-textarea {
   width: 100%;
   padding: 15px;
   border-radius: 8px;
@@ -85,44 +83,95 @@
   transition: all 0.3s ease;
 }
 
-.health-textarea:focus {
+.health-status-textarea:focus {
   outline: none;
   border-color: #09ace0;
   box-shadow: 0 0 0 2px rgba(9, 172, 224, 0.2);
 }
 
-.vaccination-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.vaccination-item {
-  background-color: #f8fafc;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #e6e6e6;
+.health-status-action-button {
+  background-color: #09ace0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   transition: all 0.3s ease;
 }
 
-.vaccination-item:hover {
-  background-color: #e6f7ff;
+.health-status-action-button:hover {
+  background-color: #2980b9;
 }
 
-.vaccination-name {
+.health-status-vaccination-header-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.health-status-header-with-border {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #09ace0;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.health-status-add-vaccine-button {
+  margin-right: 10px;
+  padding: 0.1rem 0.5rem;
+  background-color: #09ace0;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.health-status-add-vaccine-button:hover {
+  background-color: #2980b9;
+}
+
+.health-status-table-container {
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.health-status-vaccinations-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.health-status-vaccinations-table th,
+.health-status-vaccinations-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.health-status-vaccinations-table th {
+  background-color: #f5f5f5;
+  color: #09ace0;
   font-weight: 600;
-  color: #34495e;
-  margin-bottom: 5px;
 }
 
-.vaccination-date,
-.vaccination-next-due {
+.health-status-vaccinations-table td {
   color: #2c3e50;
-  font-size: 0.9rem;
+}
+
+.health-status-no-vaccinations {
+  text-align: center;
+  padding: 15px;
+  color: #757575;
+  font-style: italic;
 }
 
 @media (max-width: 768px) {
-  .health-notes-grid {
+  .health-status-notes-grid {
     grid-template-columns: 1fr;
   }
 }
