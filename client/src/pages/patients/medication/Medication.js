@@ -196,7 +196,7 @@ const MedicationHistory = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-medication"
                     />
-                    <button onClick={() => setMedicationModalOpen(true)}>Add Medication</button>
+                    <button className="medication-buttons" onClick={() => setMedicationModalOpen(true)}>Add Medication</button>
                     {loading ? (
                         <p className="loading-message">Loading medications...</p>
                     ) : (
@@ -220,7 +220,7 @@ const MedicationHistory = () => {
                         <AlertCircle size={24} style={{ marginRight: "10px" }} />
                         Allergies
                     </h2>
-                    <button onClick={() => setAllergyModalOpen(true)}>Add Allergy</button>
+                    <button className="medication-buttons" onClick={() => setAllergyModalOpen(true)}>Add Allergy</button>
                     {loading ? (
                         <p className="loading-message">Loading allergies...</p>
                     ) : (
@@ -236,7 +236,7 @@ const MedicationHistory = () => {
                         <Activity size={24} style={{ marginRight: "10px" }} />
                         Vitals
                     </h2>
-                    <button onClick={() => setVitalModalOpen(true)}>Add Vital</button>
+                    <button className="medication-buttons" onClick={() => setVitalModalOpen(true)}>Add Vital</button>
                     {loading ? (
                         <p className="loading-message">Loading vitals...</p>
                     ) : (
@@ -254,7 +254,7 @@ const MedicationHistory = () => {
                         <FileText size={24} style={{ marginRight: "10px" }} />
                         Notes
                     </h2>
-                    <button onClick={() => setNoteModalOpen(true)}>Add Note</button>
+                    <button className="medication-buttons" onClick={() => setNoteModalOpen(true)}>Add Note</button>
                     {loading ? (
                         <p className="loading-message">Loading notes...</p>
                     ) : (

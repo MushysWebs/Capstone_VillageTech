@@ -81,6 +81,22 @@
   color: #7f8c8d;
   font-style: italic;
 }
+.medication-buttons {
+  background-color: #09ace0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.medication-buttons:hover {
+  background-color: #2980b9;
+}
 
 @media (max-width: 768px) {
   .medication-table {
