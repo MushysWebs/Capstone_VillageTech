@@ -23,19 +23,51 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+  
+    if (name === 'first_name' || name === 'last_name') {
+      const namePattern = /^[a-zA-Z\s-]+$/;
+      if (!namePattern.test(value)) {
+        setError(`${name === 'first_name' ? 'First' : 'Last'} name can only contain letters, spaces, and hyphens.`);
+        return;
+      } else {
+        setError(null);
+      }
+    }
+  
+    if (name === 'phone' || name === 'secondary_phone') {
+      // Remove any non-numeric characters
+      const cleaned = value.replace(/\D/g, '');
+  
+      // Format the number as ###-###-####
+      const formatted = cleaned
+        .slice(0, 10) // Limit to 10 digits
+        .replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  
+      setFormData(prevData => ({ ...prevData, [name]: formatted }));
+  
+      // Validate formatted phone number
+      if (cleaned.length === 10) {
+        setError(null);
+      } else {
+        setError('Phone number must be in the format ###-###-####.');
+      }
+      return;
+    }
+  
+    // Set other fields without validation changes
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Final validation check
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
     try {
-      // Sign up the user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -43,11 +75,11 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
 
       if (signUpError) {
         console.error('User signup error:', signUpError);
-        throw signUpError;
+        setError(`An error occurred: ${signUpError.message}`);
+        return;
       }
 
       if (authData && authData.user) {
-        // Prepare staff data
         const staffData = {
           user_id: authData.user.id,
           first_name: formData.first_name,
@@ -63,22 +95,22 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
           notes: formData.notes
         };
 
-        // Insert staff data
         const { data: insertData, error: insertError } = await supabase
           .from('staff')
           .insert([staffData]);
 
         if (insertError) {
           console.error('Staff data insertion error:', insertError);
-          throw insertError;
+          setError(`An error occurred: ${insertError.message}`);
+          return;
         }
 
         console.log('Staff data inserted successfully:', insertData);
         onAddStaff(staffData);
-        onClose()
+        onClose();
         await supabase.auth.signOut();
       } else {
-        throw new Error('User creation succeeded but user data is missing');
+        setError('User creation succeeded but user data is missing.');
       }
     } catch (error) {
       console.error('Error adding staff:', error);
@@ -153,9 +185,13 @@ const AddStaffModal = ({ isOpen, onClose, onAddStaff }) => {
             <label>Notes</label>
             <textarea name="notes" value={formData.notes} onChange={handleChange}></textarea>
           </div>
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="submit-button">Add Staff</button>
-          <button type="button" className="close-button" onClick={onClose}>Cancel</button>
+          <div className='error-submit-cancel'>
+            {error && <p className="error-message">{error}</p>}
+            <div className='button-container'>
+              <button type="submit" className="submit-button">Add Staff</button>
+              <button type="button" className="close-button" onClick={onClose}>Cancel</button>
+            </div>
+          </div>
         </form>
       </div>
     </div>

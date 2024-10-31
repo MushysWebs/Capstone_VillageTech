@@ -81,6 +81,24 @@
     color: #e74c3c;
   }
   
+  .error-submit-cancel {
+    display: grid;
+    row-gap: 10px;
+    margin-top: 20px;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    text-align: center;
+    margin: 0;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+}
+
   .dark .modal-content {
     background-color: #363D3F;
     color: white;
