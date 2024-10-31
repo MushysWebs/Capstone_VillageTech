@@ -174,14 +174,31 @@ const PatientMain = ({ globalSearchTerm }) => {
   };
 
   const handleDeletePatient = async () => {
-    if (window.confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete this patient? This will also delete all their appointments and clinical records. This action cannot be undone.')) {
       try {
-        const { error } = await supabase
+        // delete all appointments associated with this patient
+        const { error: appointmentsError } = await supabase
+          .from("appointments")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (appointmentsError) throw appointmentsError;
+  
+        // delete all clinical records associated with this patient
+        const { error: clinicalRecordsError } = await supabase
+          .from("clinical_records")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (clinicalRecordsError) throw clinicalRecordsError;
+  
+        // then delete the patient
+        const { error: patientError } = await supabase
           .from("patients")
           .delete()
           .eq("id", selectedPatient.id);
   
-        if (error) throw error;
+        if (patientError) throw patientError;
   
         setPatients(patients.filter(patient => patient.id !== selectedPatient.id));
         setSelectedPatient(null);
