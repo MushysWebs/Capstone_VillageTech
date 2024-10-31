@@ -63,6 +63,10 @@ const Payments = () => {
           .eq("invoice_id", selectedInvoice.invoice_id);
 
         if (error) throw error;
+
+        await generateAndSendReceipt();
+
+        setSuccess(true);
         fetchInvoiceData();
       } catch (err) {
         console.error("Error marking invoice as paid:", err.message);
@@ -311,8 +315,11 @@ const Payments = () => {
                           )}`}
                     </button>
                     {error && <div className="error-message">{error}</div>}
-                    <img src="/holygrail.png" alt="Accepted Cards" className="accepted-cards-image" />
-
+                    <img
+                      src="/holygrail.png"
+                      alt="Accepted Cards"
+                      className="accepted-cards-image"
+                    />
                   </form>
                 )}
 
