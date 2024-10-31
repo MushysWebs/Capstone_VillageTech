@@ -1,104 +1,150 @@
-html, body {
-    min-height: 100vh; /* Ensure the html and body take full height */
-    margin: 0; /* Remove default margin */
-    overflow: hidden; /* Prevent body scrolling, let the container handle it */
+html,
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow: hidden;
 }
 
 .financial-reports-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 .container {
-    display: flex;
-    flex-direction: column; /* Stack children vertically */
-    height: 100vh; /* Full height of the viewport */
-    overflow-y: auto; /* Allow the container to scroll */
-    padding: 20px; /* Add some padding around the container */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  padding: 20px;
+  flex: 1;
 }
 
-.financial-report-card {
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 500px;
-    margin: 2%;
+.top-section {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 20px;
 }
 
 .total-sales-card {
-    padding: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin: 2%;
-    border-radius: 10px !important;
-    flex-shrink: 0; /* Prevent it from shrinking */
+  margin-left: 20px;
+}
+
+.financial-report-card {
+  width: 500px;
+}
+
+.total-sales-card,
+.financial-report-card {
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  min-width: 200px;
+  flex-shrink: 0;
 }
 
 .card-container {
-    display: flex;
-    flex-wrap: wrap; /* Ensures cards wrap to the next row if the screen is too narrow */
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.users-title {
-    color: #757575;
-}
-
-.users-count {
-    font-weight: bold;
-}
-
-.last-30-days {
-    color: #757575;
-    font-size: 14px;
-}
-
-.percentage-box {
-    background-color: #e5f8e5;
-    padding: 8px 16px;
-    border-radius: 12px;
-}
-
-.percentage-text {
-    color: green;
-}
-
-.time-period-selector-button {
-    background-color: #09ace0;
-    border: none;
-    border-radius: 3px;
-    font-size: 15px;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 10px;
-    margin-right: 2%;
-}
-
-.time-period-selector-button:hover {
-    background-color: #2980b9;
-}
-
-.financial-reports {
-    flex: 1; /* Allow this section to grow and take available space */
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .reporting-section {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin: 2%;
-    flex-shrink: 0; /* Prevent it from shrinking and allow the container to handle overflow */
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-left: 20px;
+  overflow: hidden;
+  flex: 1;
 }
 
 .table-container {
-    overflow-y: auto; /* If the table content exceeds, this will allow scrolling */
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.table-wrapper {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-scroll {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.appointments-table,
+.receipts-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appointments-table th,
+.receipts-table th,
+.appointments-table td,
+.receipts-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.appointments-table th,
+.receipts-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.time-period-selector-button {
+  background-color: #09ace0;
+  border: none;
+  border-radius: 3px;
+  font-size: 15px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 10px;
+  margin-right: 2%;
+}
+
+.time-period-selector-button:hover {
+  background-color: #2980b9;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.users-title {
+  color: #757575;
+}
+
+.users-count {
+  font-weight: bold;
+}
+
+.last-30-days {
+  color: #757575;
+  font-size: 14px;
+}
+
+.percentage-box {
+  background-color: #e5f8e5;
+  padding: 8px 16px;
+  border-radius: 12px;
+}
+
+.percentage-text {
+  color: green;
+}
+
+.financial-reports {
+  flex: 1;
 }

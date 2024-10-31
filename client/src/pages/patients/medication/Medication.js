@@ -4,10 +4,10 @@ import { usePatient } from "../../../context/PatientContext";
 import PatientTabs from "../../../components/PatientTabs";
 import { Search, AlertCircle, Activity, FileText } from "lucide-react";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
-import AddMedicationModal from "../../../components/addMedicationModal/AddMedicationModal"; 
-import AddAllergyModal from "../../../components/addAllergyModal/AddAllergyModal"; // New Modal for adding allergies
-import AddVitalModal from "../../../components/addVitalModal/AddVitalModal"; // New Modal for adding vitals
-import AddNoteModal from "../../../components/addNoteModal/AddNoteModal"; // New Modal for adding notes
+import AddMedicationModal from "../../../components/addMedicationModal/AddMedicationModal";
+import AddAllergyModal from "../../../components/addAllergyModal/AddAllergyModal";
+import AddVitalModal from "../../../components/addVitalModal/AddVitalModal";
+import AddNoteModal from "../../../components/addNoteModal/AddNoteModal";
 import "./Medication.css";
 
 const MedicationHistory = () => {
@@ -35,22 +35,10 @@ const MedicationHistory = () => {
         setLoading(true);
         try {
             const [medData, allergyData, vitalData, noteData] = await Promise.all([
-                supabase
-                    .from("medications")
-                    .select("*")
-                    .eq("patient_id", selectedPatient.id),
-                supabase
-                    .from("patient_allergies")
-                    .select("*")
-                    .eq("patient_id", selectedPatient.id),
-                supabase
-                    .from("patient_vitals")
-                    .select("*")
-                    .eq("patient_id", selectedPatient.id),
-                supabase
-                    .from("patient_notes")
-                    .select("*")
-                    .eq("patient_id", selectedPatient.id)
+                supabase.from("medications").select("*").eq("patient_id", selectedPatient.id),
+                supabase.from("patient_allergies").select("*").eq("patient_id", selectedPatient.id),
+                supabase.from("patient_vitals").select("*").eq("patient_id", selectedPatient.id),
+                supabase.from("patient_notes").select("*").eq("patient_id", selectedPatient.id)
             ]);
 
             if (medData.error || allergyData.error || vitalData.error || noteData.error) {
@@ -72,18 +60,14 @@ const MedicationHistory = () => {
         try {
             const { data, error } = await supabase
                 .from("medications")
-                .insert([
-                    {
-                        patient_id: selectedPatient.id,
-                        type: "Medication",
-                        ...newMedication,
-                    },
-                ]);
+                .insert([{ patient_id: selectedPatient.id, type: "Medication", ...newMedication }]);
 
             if (error) throw error;
 
-            if (data && Array.isArray(data) && data.length > 0) {
-                setMedications((prev) => [...prev, { ...newMedication, id: data[0].id }]); // Update state immediately
+            if (data && data.length > 0) {
+                setMedications((prev) => [...prev, { ...newMedication, id: data[0].id }]);
+            } else {
+                await fetchPatientData(); // Fallback to re-fetching
             }
             setMedicationModalOpen(false);
         } catch (error) {
@@ -99,8 +83,10 @@ const MedicationHistory = () => {
 
             if (error) throw error;
 
-            if (data && Array.isArray(data) && data.length > 0) {
-                setAllergies((prev) => [...prev, { ...newAllergy, id: data[0].id }]); // Update state immediately
+            if (data && data.length > 0) {
+                setAllergies((prev) => [...prev, { ...newAllergy, id: data[0].id }]);
+            } else {
+                await fetchPatientData(); // Fallback to re-fetching
             }
             setAllergyModalOpen(false);
         } catch (error) {
@@ -116,8 +102,10 @@ const MedicationHistory = () => {
 
             if (error) throw error;
 
-            if (data && Array.isArray(data) && data.length > 0) {
-                setVitals((prev) => [...prev, { ...newVital, id: data[0].id }]); // Update state immediately
+            if (data && data.length > 0) {
+                setVitals((prev) => [...prev, { ...newVital, id: data[0].id }]);
+            } else {
+                await fetchPatientData(); // Fallback to re-fetching
             }
             setVitalModalOpen(false);
         } catch (error) {
@@ -133,8 +121,10 @@ const MedicationHistory = () => {
 
             if (error) throw error;
 
-            if (data && Array.isArray(data) && data.length > 0) {
-                setNotes((prev) => [...prev, { ...newNote, id: data[0].id }]); // Update state immediately
+            if (data && data.length > 0) {
+                setNotes((prev) => [...prev, { ...newNote, id: data[0].id }]);
+            } else {
+                await fetchPatientData(); // Fallback to re-fetching
             }
             setNoteModalOpen(false);
         } catch (error) {
@@ -196,12 +186,12 @@ const MedicationHistory = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-medication"
                     />
-                    <button onClick={() => setMedicationModalOpen(true)}>Add Medication</button>
+                    <button className="medication-buttons" onClick={() => setMedicationModalOpen(true)}>Add Medication</button>
                     {loading ? (
                         <p className="loading-message">Loading medications...</p>
                     ) : (
                         renderTable(filteredMedications, [
-                            { key: "name", label: "Name" },
+                            { key: "name", label: "Medication" },
                             { key: "dosage", label: "Dosage" },
                             { key: "frequency", label: "Frequency" },
                             { key: "date_prescribed", label: "Date Prescribed" },
@@ -220,7 +210,7 @@ const MedicationHistory = () => {
                         <AlertCircle size={24} style={{ marginRight: "10px" }} />
                         Allergies
                     </h2>
-                    <button onClick={() => setAllergyModalOpen(true)}>Add Allergy</button>
+                    <button className="medication-buttons" onClick={() => setAllergyModalOpen(true)}>Add Allergy</button>
                     {loading ? (
                         <p className="loading-message">Loading allergies...</p>
                     ) : (
@@ -236,7 +226,7 @@ const MedicationHistory = () => {
                         <Activity size={24} style={{ marginRight: "10px" }} />
                         Vitals
                     </h2>
-                    <button onClick={() => setVitalModalOpen(true)}>Add Vital</button>
+                    <button className="medication-buttons" onClick={() => setVitalModalOpen(true)}>Add Vital</button>
                     {loading ? (
                         <p className="loading-message">Loading vitals...</p>
                     ) : (
@@ -254,7 +244,7 @@ const MedicationHistory = () => {
                         <FileText size={24} style={{ marginRight: "10px" }} />
                         Notes
                     </h2>
-                    <button onClick={() => setNoteModalOpen(true)}>Add Note</button>
+                    <button className="medication-buttons" onClick={() => setNoteModalOpen(true)}>Add Note</button>
                     {loading ? (
                         <p className="loading-message">Loading notes...</p>
                     ) : (
