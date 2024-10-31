@@ -53,12 +53,46 @@
 }
 
 .payment-options button {
-  margin: 10px;
+  margin: 10px 10px 20px 10px;
   padding: 10px 20px;
   border: 1px solid #e0e0e0;
   border-radius: 5px;
   cursor: pointer;
 }
+
+.payment-pay-button {
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  margin: 20px 0px 20px 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+.payment-pay-button:hover {
+  background-color: #09ace0;
+  color: white;
+}
+
+.accepted-cards-image {
+  margin-top: 15px;
+  width: 100%;
+  max-width: 290px; 
+  display: block;
+}
+
+
+.card-input-wrapper {
+  border: 1px solid #d0d0d0;
+  border-radius: 4px; 
+  padding: 10px;
+  background-color: #ffffff;
+}
+
+
+.card-input-wrapper:focus-within {
+  border-color: #0a84ff; 
+  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2); 
+}
+
 
 .payment-options button:hover {
   background-color: #09ace0;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -137,32 +136,30 @@ const Payments = () => {
     }
   };
 
-const generateAndSendReceipt = async () => {
-  try {
-    const pdfBlob = await pdf(
-      <Receipt invoice={selectedInvoice} patient={selectedPatient} />
-    ).toBlob();
+  const generateAndSendReceipt = async () => {
+    try {
+      const pdfBlob = await pdf(
+        <Receipt invoice={selectedInvoice} patient={selectedPatient} />
+      ).toBlob();
 
-    const { data: pdfData, error: uploadError } = await supabase.storage
-      .from("receipts")
-      .upload(`receipts/receipt_${selectedInvoice.invoice_id}.pdf`, pdfBlob, {
-        contentType: "application/pdf",
-        upsert: true,
-      });
+      const { data: pdfData, error: uploadError } = await supabase.storage
+        .from("receipts")
+        .upload(`receipts/receipt_${selectedInvoice.invoice_id}.pdf`, pdfBlob, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
       console.log("Uploaded file path:", pdfData.path);
 
-    if (uploadError) throw uploadError;
+      if (uploadError) throw uploadError;
 
-    const pdfUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/receipts/receipts/receipt_${selectedInvoice.invoice_id}.pdf`;
+      const pdfUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/receipts/receipts/receipt_${selectedInvoice.invoice_id}.pdf`;
 
-
-    await saveReceiptToDatabase(pdfUrl);
-    await sendEmailReceipt(pdfUrl);
-  } catch (err) {
-    console.error("Error generating and sending receipt:", err.message);
-  }
-};
-
+      await saveReceiptToDatabase(pdfUrl);
+      await sendEmailReceipt(pdfUrl);
+    } catch (err) {
+      console.error("Error generating and sending receipt:", err.message);
+    }
+  };
 
   const saveReceiptToDatabase = async (pdfUrl) => {
     try {
@@ -181,13 +178,12 @@ const generateAndSendReceipt = async () => {
 
   const sendEmailReceipt = async (pdfUrl) => {
     try {
-      
       const { data: ownerData, error: ownerError } = await supabase
         .from("owners")
         .select("email")
         .eq("id", selectedPatient.owner_id)
         .single();
-  
+
       if (ownerError || !ownerData || !ownerData.email) {
         console.error("Owner email not found");
         return;
@@ -195,7 +191,7 @@ const generateAndSendReceipt = async () => {
       console.log("Constructed PDF URL:", pdfUrl);
 
       const ownerEmail = ownerData.email;
-  
+
       const response = await fetch(
         `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/send-receipt`,
         {
@@ -210,11 +206,11 @@ const generateAndSendReceipt = async () => {
           }),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to send email");
       }
-  
+
       console.log("Receipt email sent successfully to:", ownerEmail);
     } catch (error) {
       console.error("Error sending email receipt:", error);
@@ -277,9 +273,37 @@ const generateAndSendReceipt = async () => {
                 </div>
 
                 {paymentMethod === "card" && (
-                  <form onSubmit={handleSubmit}>
-                    <CardElement options={{ hidePostalCode: true }} />
-                    <button type="submit" disabled={!stripe || loading}>
+                  <form onSubmit={handleSubmit} autocomplete="off">
+                    <div className="card-input-wrapper">
+                      <CardElement
+                        options={{
+                          hidePostalCode: true,
+                          style: {
+                            base: {
+                              color: "#333",
+                              fontSize: "16px",
+                              iconColor: "#0a84ff",
+                              "::placeholder": {
+                                color: "#a0a0a0",
+                              },
+                            },
+                            invalid: {
+                              color: "#e63946",
+                              iconColor: "#e63946",
+                            },
+                            complete: {
+                              color: "#2d6a4f",
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+
+                    <button
+                      className="payment-pay-button"
+                      type="submit"
+                      disabled={!stripe || loading}
+                    >
                       {loading
                         ? "Processing..."
                         : `Pay ${formatCurrency(
@@ -287,6 +311,8 @@ const generateAndSendReceipt = async () => {
                           )}`}
                     </button>
                     {error && <div className="error-message">{error}</div>}
+                    <img src="/holygrail.png" alt="Accepted Cards" className="accepted-cards-image" />
+
                   </form>
                 )}
 
@@ -308,7 +334,10 @@ const generateAndSendReceipt = async () => {
                 {selectedInvoice && selectedPatient ? (
                   <PDFDownloadLink
                     document={
-                      <Receipt invoice={selectedInvoice} patient={selectedPatient} />
+                      <Receipt
+                        invoice={selectedInvoice}
+                        patient={selectedPatient}
+                      />
                     }
                     fileName={`Receipt_Invoice_${selectedInvoice?.invoice_id}.pdf`}
                   >
@@ -329,6 +358,3 @@ const generateAndSendReceipt = async () => {
 };
 
 export default Payments;
-
-
-
