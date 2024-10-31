@@ -46,69 +46,70 @@ const FinancialReports = () => {
   return (
     <div className="financial-reports-container">
       <ReportingTabs />
-    <div className="container">
-      <TotalSalesCard totalSales={totalSales} />
-
-      <div className="card-container">
-        <FinancialReportCard
-          data={data1}
-          title="Appointments Today"
-          count="34"
-          percentage="+25%"
-        />
-
-        <FinancialReportCard
-          data={data2}
-          title="Appointments Tomorrow"
-          count="5"
-          percentage="+15%"
-        />
-      </div>
-
-      <div className="reporting-section">
-        <div className="time-period-selector">
-          <button className="time-period-selector-button">Daily</button>
-          <button className="time-period-selector-button">Weekly</button>
-          <button className="time-period-selector-button">Monthly</button>
-        </div>
+      <div className="container">
         
-        <h2 className="financial-h2">Reports</h2>
-        <select value={selectedReport} onChange={handleReportChange}>
-          <option value="appointmentsToday">Appointments Today</option>
-          <option value="appointmentsTomorrow">Appointments Tomorrow</option>
-          {/* Add more options here */}
-        </select>
-
-        <div className="table-container">
-          <table className="invoices-table">
-            <thead>
-              <tr>
-                <th>Number</th>
-                <th>Name</th>
-                <th>Patient</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.map((item, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{item.name}</td>
-                  <td>dummy data</td>
-                  <td>dummy data</td>
-                  <td>dummy data</td>
-                  <td>dummy data</td>
+        <div className="top-section">
+          <TotalSalesCard totalSales={totalSales} />
+          
+          <FinancialReportCard
+            data={data1}
+            title="Appointments Today"
+            count="34"
+            percentage="+25%"
+          />
+  
+          <FinancialReportCard
+            data={data2}
+            title="Appointments Tomorrow"
+            count="5"
+            percentage="+15%"
+          />
+        </div>
+  
+        <div className="reporting-section">
+          <div className="time-period-selector">
+            <button className="time-period-selector-button">Daily</button>
+            <button className="time-period-selector-button">Weekly</button>
+            <button className="time-period-selector-button">Monthly</button>
+          </div>
+          
+          <h2 className="financial-h2">Reports</h2>
+          <select value={selectedReport} onChange={handleReportChange}>
+            <option value="appointmentsToday">Appointments Today</option>
+            <option value="appointmentsTomorrow">Appointments Tomorrow</option>
+            {/* Add more options here */}
+          </select>
+  
+          <div className="table-container">
+            <table className="invoices-table">
+              <thead>
+                <tr>
+                  <th>Number</th>
+                  <th>Name</th>
+                  <th>Patient</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {reportData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{item.name}</td>
+                    <td>dummy data</td>
+                    <td>dummy data</td>
+                    <td>dummy data</td>
+                    <td>dummy data</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-    </div>
-  );
+  ); 
 };
 
 export default FinancialReports;
