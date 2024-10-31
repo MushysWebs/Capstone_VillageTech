@@ -184,17 +184,41 @@ const NewPatient = () => {
     setOtherDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
-
-      setOtherDetails((prevDetails) => ({ ...prevDetails, image: file }));
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+  
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${file.name}`;
+        const filePath = `patient/patient_pictures/${fileName}`;
+  
+        const { error: uploadError } = await supabase.storage
+          .from('patient')
+          .upload(filePath, file);
+  
+        if (uploadError) throw uploadError;
+  
+        const { data: { publicUrl }, error: urlError } = supabase.storage
+          .from('patient')
+          .getPublicUrl(filePath);
+  
+        if (urlError) throw urlError;
+  
+        setOtherDetails(prevDetails => ({ 
+          ...prevDetails, 
+          image: publicUrl 
+        }));
+  
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('Failed to upload profile picture. Please try again.');
+      }
     }
   };
 
@@ -285,7 +309,7 @@ const NewPatient = () => {
         demeanor: patientDetails.demeanor,
         general_tag: tags.general,
         reminder_tag: tags.reminder,
-        image_url: imageUrl,
+        image_url: otherDetails.image || null,
       };
   
       const { data: patientData, error: patientError } = await supabase
