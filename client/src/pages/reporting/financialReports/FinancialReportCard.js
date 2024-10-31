@@ -16,7 +16,7 @@ const FinancialReportCard = ({ data, title, count, percentage }) => {
             {count}
           </Typography>
           <Typography variant="body2" className="last-30-days">
-            Last 30 days
+            Last 7 days
           </Typography>
         </Box>
         <Box className="percentage-box">

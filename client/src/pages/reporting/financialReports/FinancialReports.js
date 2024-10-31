@@ -11,6 +11,27 @@ const FinancialReports = () => {
   const [totalSalesToday, setTotalSalesToday] = useState(0);
   const supabase = useSupabaseClient();
 
+  const data1 = [
+    { name: "Day 1", users: 10 },
+    { name: "Day 2", users: 12 },
+    { name: "Day 3", users: 9 },
+    { name: "Day 4", users: 11 },
+    { name: "Day 5", users: 15 },
+    { name: "Day 6", users: 17 },
+    { name: "Day 7", users: 18 },
+    { name: "Day 8", users: 20 },
+  ];
+  const data2 = [
+    { name: "Day 1", users: 1 },
+    { name: "Day 2", users: 6 },
+    { name: "Day 3", users: 7 },
+    { name: "Day 4", users: 8 },
+    { name: "Day 5", users: 7 },
+    { name: "Day 6", users: 10 },
+    { name: "Day 7", users: 6 },
+    { name: "Day 9", users: 14 },
+  ];
+
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split("T")[0];
@@ -78,13 +99,13 @@ const FinancialReports = () => {
         <div className="top-section">
           <TotalSalesCard totalSales={totalSalesToday} />
           <FinancialReportCard
-            data={appointments}
+            data={data1}
             title="Appointments Today"
             count={appointments.length}
             percentage="+25%"
           />
           <FinancialReportCard
-            data={appointments}
+            data={data2}
             title="Appointments Tomorrow"
             count="5"
             percentage="+15%"
