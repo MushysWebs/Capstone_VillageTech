@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useNavigate } from "react-router-dom";
+import { usePatient } from "../../context/PatientContext";
 import { Edit2, X, Save, Clock, Calendar, Send, Camera, Trash2 } from 'lucide-react';
 import AddAppointment from '../dashboard/calendarView/AddAppointment';
 import CreateContactModal from './CreateContactModal';
@@ -16,9 +18,11 @@ const Contacts = ({ globalSearchTerm }) => {
   const [error, setError] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [selectedPatient, setSelectedPatientState] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const navigate = useNavigate();
+  const { setSelectedPatient } = usePatient();
   const invoicesPerPage = 10;
   const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
@@ -30,6 +34,11 @@ const Contacts = ({ globalSearchTerm }) => {
   useEffect(() => {
     fetchContacts();
   }, []);
+
+  const handlePetClick = (patient) => {
+    setSelectedPatient(patient);
+    navigate('/patient');
+  };
 
   useEffect(() => {
     if (selectedContact) {
@@ -253,13 +262,13 @@ const Contacts = ({ globalSearchTerm }) => {
   };
 
   const handleAddAppointmentClick = (patient) => {
-    setSelectedPatient(patient);
+    setSelectedPatientState(patient);
     setShowAppointmentModal(true);
   };
 
   const handleCloseAppointmentModal = () => {
     setShowAppointmentModal(false);
-    setSelectedPatient(null);
+    setSelectedPatientState(null);
   };
 
   const handleAppointmentAdded = (newAppointment) => {
@@ -367,43 +376,48 @@ const Contacts = ({ globalSearchTerm }) => {
             </div>
   
             <div className="contact-actions">
-              <button className="c-action-button">
-                <Clock size={18} />
-                Set Up Reminders
-              </button>
-              <button className="c-action-button" onClick={() => handleAddAppointmentClick(selectedPatient)}>
-                <Calendar size={18} />
-                Create Appointment
-              </button>
-              <button className="c-action-button">
-                <Send size={18} />
-                Send Payment Request
-              </button>
-            </div>
+            {/*NO CURRENT IMPLEMENTATION <button className="c-action-button">
+              <Clock size={18} />
+              Set Up Reminders
+            </button> */}
+            <button className="c-action-button" onClick={() => handleAddAppointmentClick(selectedPatient)}>
+              <Calendar size={18} />
+              Create Appointment
+            </button>
+            {/*NO CURRENT IMPLEMENTATION <button className="c-action-button">
+              <Send size={18} />
+              Send Payment Request
+            </button> */}
+          </div>
   
-            <div className="pets-section">
-              <h3>PETS</h3>
-              <div className="pets-grid">
-                {sortedPatients.map(patient => (
-                  <div key={patient.id} className="pet-card">
-                    <img
-                      src={patient.image_url || defaultProfilePicUrl}
-                      alt={patient.name}
-                      className="patient-image"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = defaultProfilePicUrl;
-                      }}
-                    />
-                    <h4>{patient.name} <Edit2 size={14} /></h4>
-                    <p>Patient ID: {patient.id}</p>
-                    <p>Date of Birth: {patient.date_of_birth}</p>
-                    <p>{patient.species} - {patient.breed}</p>
-                    <p>Weight: {patient.weight} kg</p>
-                  </div>
-                ))}
-              </div>
+          <div className="pets-section">
+            <h3>PETS</h3>
+            <div className="pets-grid">
+              {sortedPatients.map(patient => (
+                <div 
+                  key={patient.id} 
+                  className="pet-card"
+                  onClick={() => handlePetClick(patient)}
+                  style={{ cursor: 'pointer' }} 
+                >
+                  <img
+                    src={patient.image_url || defaultProfilePicUrl}
+                    alt={patient.name}
+                    className="patient-image"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = defaultProfilePicUrl;
+                    }}
+                  />
+                  <h4>{patient.name} <Edit2 size={14} /></h4>
+                  <p>Patient ID: {patient.id}</p>
+                  <p>Date of Birth: {patient.date_of_birth}</p>
+                  <p>{patient.species} - {patient.breed}</p>
+                  <p>Weight: {patient.weight} kg</p>
+                </div>
+              ))}
             </div>
+          </div>
   
             <div className="invoices-section">
               <h3>INVOICES</h3>

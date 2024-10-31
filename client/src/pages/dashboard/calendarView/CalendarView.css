@@ -107,7 +107,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 200px); 
+  max-height: 60vh;
 }
 
 .calendarView__scrollWrapper {
@@ -220,7 +220,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   z-index: 1;
-  min-height: 60px;
   cursor: pointer;
   box-sizing: border-box;
 }
