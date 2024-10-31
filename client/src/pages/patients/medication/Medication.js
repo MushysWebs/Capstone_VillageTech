@@ -29,7 +29,7 @@ const MedicationHistory = () => {
         if (selectedPatient) {
             fetchPatientData();
         }
-    }, [selectedPatient]);
+    }, [selectedPatient, isMedicationModalOpen, isAllergyModalOpen, isVitalModalOpen, isNoteModalOpen]);
 
     const fetchPatientData = async () => {
         setLoading(true);
@@ -79,17 +79,22 @@ const MedicationHistory = () => {
                         ...newMedication,
                     },
                 ]);
-
+    
             if (error) throw error;
-
+    
             if (data && Array.isArray(data) && data.length > 0) {
                 setMedications((prev) => [...prev, { ...newMedication, id: data[0].id }]); // Update state immediately
+                setMedicationModalOpen(false); // Close the modal
+                await fetchPatientData();      // Refresh the table data
+            } else {
+                console.error("No data returned from the insert operation.");
             }
-            setMedicationModalOpen(false);
         } catch (error) {
             console.error("Error adding medication:", error);
         }
     };
+    
+    
 
     const handleAddAllergy = async (newAllergy) => {
         try {
@@ -113,13 +118,16 @@ const MedicationHistory = () => {
             const { data, error } = await supabase
                 .from("patient_vitals")
                 .insert([{ patient_id: selectedPatient.id, ...newVital }]);
-
+    
             if (error) throw error;
-
-            if (data && Array.isArray(data) && data.length > 0) {
-                setVitals((prev) => [...prev, { ...newVital, id: data[0].id }]); // Update state immediately
+    
+            if (data && data.length > 0) {
+                setVitals((prev) => [...prev, { ...newVital, id: data[0].id }]);
+                setVitalModalOpen(false);     // Close the modal
+                await fetchPatientData();     // Refresh the table data
+            } else {
+                console.error("No data returned from the insert operation.");
             }
-            setVitalModalOpen(false);
         } catch (error) {
             console.error("Error adding vital:", error);
         }
@@ -130,13 +138,16 @@ const MedicationHistory = () => {
             const { data, error } = await supabase
                 .from("patient_notes")
                 .insert([{ patient_id: selectedPatient.id, ...newNote }]);
-
+    
             if (error) throw error;
-
-            if (data && Array.isArray(data) && data.length > 0) {
-                setNotes((prev) => [...prev, { ...newNote, id: data[0].id }]); // Update state immediately
+    
+            if (data && data.length > 0) {
+                setNotes((prev) => [...prev, { ...newNote, id: data[0].id }]);
+                setNoteModalOpen(false);      // Close the modal
+                await fetchPatientData();     // Refresh the table data
+            } else {
+                console.error("No data returned from the insert operation.");
             }
-            setNoteModalOpen(false);
         } catch (error) {
             console.error("Error adding note:", error);
         }
@@ -201,7 +212,7 @@ const MedicationHistory = () => {
                         <p className="loading-message">Loading medications...</p>
                     ) : (
                         renderTable(filteredMedications, [
-                            { key: "name", label: "Name" },
+                            { key: "name", label: "Medication" },
                             { key: "dosage", label: "Dosage" },
                             { key: "frequency", label: "Frequency" },
                             { key: "date_prescribed", label: "Date Prescribed" },
