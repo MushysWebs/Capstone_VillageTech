@@ -26,14 +26,17 @@ const PatientSidebar = () => {
       const { data, error } = await supabase
         .from("appointments")
         .select("*")
-        .eq("patient_id", patientId);
-
+        .eq("patient_id", patientId)
+        .order("start_time", { ascending: false }) 
+        .limit(1); 
+  
       if (error) throw error;
       setAppointments(data);
     } catch (error) {
       console.error("Error fetching appointments:", error.message);
     }
   };
+  
 
   const fetchSocEvents = (patientId) => {
     const dummySocEvents = [{ event: "Vaccination", nextDue: "2024-12-10" }];
