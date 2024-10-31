@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { usePatient } from "../../../context/PatientContext";
 import "./NewPatient.css";
 import { supabase } from "../../../components/routes/supabaseClient";
 import PatientTabs from "../../../components/PatientTabs";
@@ -65,6 +66,8 @@ const NewPatient = () => {
   const [ownerSelectionState, setOwnerSelectionState] = useState("selecting");
   const [selectedOwner, setSelectedOwner] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const navigate = useNavigate();
+  const { setSelectedPatient } = usePatient();
   const [patientDetails, setPatientDetails] = useState({
     patientName: "",
     microchipNumber: "",
@@ -227,42 +230,9 @@ const NewPatient = () => {
     setTags((prevTags) => ({ ...prevTags, [name]: value }));
   };
 
-  const handleImageUpload = async (file) => {
-    const fileName = `${Date.now()}_${file.name}`;
-    const { data, error } = await supabase.storage
-      .from("patient/patient_pictures")
-      .upload(fileName, file);
-
-    if (error) {
-      console.error("Error uploading image:", error.message);
-      return null;
-    }
-
-    const { publicURL, error: urlError } = supabase.storage
-      .from("patient/patient_pictures")
-      .getPublicUrl(fileName);
-
-    if (urlError) {
-      console.error("Error getting public URL:", urlError.message);
-      return null;
-    }
-
-    return publicURL;
-  };
-
-  const handleOwnerCreated = (newOwner) => {
-    setSelectedOwner(newOwner);
-    setOwnerSelectionState("selected");
-  };
-
-  const handleCancelNewOwner = () => {
-    setOwnerSelectionState("selecting");
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    
     let validationErrors = {};
     requiredFields.forEach((field) => {
       if (!patientDetails[field] || patientDetails[field].trim() === "") {
@@ -270,7 +240,6 @@ const NewPatient = () => {
       }
     });
   
-    
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       alert("Please fill out all required fields before submitting");
@@ -283,14 +252,7 @@ const NewPatient = () => {
       return;
     }
   
-    
     try {
-      let imageUrl = null;
-  
-      if (otherDetails.image) {
-        imageUrl = await handleImageUpload(otherDetails.image);
-      }
-  
       const patientDataToInsert = {
         owner_id: selectedOwner.id,
         name: patientDetails.patientName,
@@ -323,7 +285,10 @@ const NewPatient = () => {
         return;
       }
   
-      
+      // show success notification
+      alert(`Successfully created new patient: ${patientDetails.patientName}`);
+      setSelectedPatient(patientData[0]);
+  
       setPatientDetails({
         patientName: "",
         microchipNumber: "",
@@ -351,6 +316,9 @@ const NewPatient = () => {
       });
       setAnimalNotes("");
       setImagePreview(null);
+  
+      // navigate to PatientMain
+      navigate('/patient');
     } catch (error) {
       console.error("Error creating new patient:", error.message || error);
       alert(`Failed to create new patient: ${error.message}`);
@@ -388,7 +356,7 @@ const NewPatient = () => {
         </div>
       )}
   
-     {showCreateModal && (
+      {showCreateModal && (
         <CreateContactModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
@@ -464,7 +432,7 @@ const NewPatient = () => {
               onChange={handleInputChange}
               className={errors.gender ? "input-error" : ""}
             >
-              <option value="">Select Gender</option> 
+              <option value="">Select Gender</option>
               <option value="Male/Neutered">Male/Neutered</option>
               <option value="Male/Unneutered">Male/Unneutered</option>
               <option value="Female/Spayed">Female/Spayed</option>
