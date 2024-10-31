@@ -13,6 +13,9 @@ import AddAppointment from './AddAppointment';
 import ClockInOut from '../../../components/clockInOut/ClockInOut';
 import './CalendarView.css';
 
+const HOUR_WIDTH = 140;
+const TIME_SLOT_PADDING = 10; 
+
 const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
@@ -32,7 +35,7 @@ const CalendarView = ({ searchTerm, firstName }) => {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-      const scrollPosition = (hours * 120) + ((minutes / 60) * 120) - (scrollWrapperRef.current.clientWidth / 2);
+      const scrollPosition = (hours * HOUR_WIDTH) + ((minutes / 60) * HOUR_WIDTH) - (scrollWrapperRef.current.clientWidth / 2);
       scrollWrapperRef.current.scrollLeft = Math.max(0, scrollPosition);
     }
   };
@@ -101,19 +104,24 @@ const CalendarView = ({ searchTerm, firstName }) => {
   };
 
   const renderTimeSlots = () => {
-    // create fixed 24-hour time slots
     const slots = [];
     for (let i = 0; i < 24; i++) {
       const displayHour = i.toString().padStart(2, '0');
       slots.push(
-        <div key={i} className="calendarView__timeSlot">
-          {`${(displayHour)}:00`}
+        <div 
+          key={i} 
+          className="calendarView__timeSlot"
+          style={{ 
+            width: `${HOUR_WIDTH}px`,
+            boxSizing: 'border-box'
+          }}
+        >
+          {`${displayHour}:00`}
         </div>
       );
     }
     return slots;
   };
-  
 
   const renderAppointments = () => {
     const dayAppointments = appointments.filter(app => isSameDay(app.start, currentDate));
@@ -140,18 +148,20 @@ const CalendarView = ({ searchTerm, firstName }) => {
     
     return overlappingGroups.flatMap(group => {
       const isOverlapping = group.length > 1;
+      
       return group.map((app, index) => {
         const start = new Date(app.start);
         const end = new Date(app.end);
-  
-        const startHour = start.getHours();
-        const startMinute = start.getMinutes();
-        const endHour = end.getHours();
-        const endMinute = end.getMinutes();
-  
-        // calculate position directly from hours (120px per hour)
-        const left = (startHour * 142) + (startMinute / 60 * 120);
-        const width = ((endHour - startHour) * 120) + ((endMinute - startMinute) / 60 * 120);
+        
+        // position and width based on time
+        const startMinutes = (start.getHours() * 60) + start.getMinutes();
+        const endMinutes = (end.getHours() * 60) + end.getMinutes();
+        const durationMinutes = endMinutes - startMinutes;
+        
+        // left position align with time slots
+        const left = (startMinutes / 60) * HOUR_WIDTH;
+        // width based on duration
+        const width = (durationMinutes / 60) * HOUR_WIDTH - 2; // -2px for borders
         
         let top = '0%';
         let height = '100%';
@@ -161,11 +171,10 @@ const CalendarView = ({ searchTerm, firstName }) => {
           top = `${index * rowHeight}%`;
           height = `${rowHeight}%`;
         }
-  
-        // format display time in 24-hour format
-        const displayStart = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
-        const displayEnd = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
-  
+        
+        const displayStart = format(start, 'HH:mm');
+        const displayEnd = format(end, 'HH:mm');
+
         return (
           <div
             key={app.id}
@@ -175,7 +184,8 @@ const CalendarView = ({ searchTerm, firstName }) => {
               width: `${width}px`,
               top,
               height,
-              maxHeight: '120px'
+              maxHeight: '120px',
+              boxSizing: 'border-box'
             }}
           >
             <div className="calendarView__appointmentTime">
@@ -193,9 +203,8 @@ const CalendarView = ({ searchTerm, firstName }) => {
   const renderCurrentTimeLine = () => {
     const now = new Date();
     if (isSameDay(now, currentDate)) {
-      const hour = now.getHours();
-      const minute = now.getMinutes();
-      const left = (hour * 142) + (minute / 60 * 120);
+      const minutes = (now.getHours() * 60) + now.getMinutes();
+      const left = (minutes / 60) * HOUR_WIDTH;
       return <div className="calendarView__currentTimeLine" style={{ left: `${left}px` }} />;
     }
     return null;
