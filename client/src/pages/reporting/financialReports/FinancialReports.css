@@ -1,7 +1,7 @@
 html, body {
-    min-height: 100vh; /* Ensure the html and body take full height */
-    margin: 0; /* Remove default margin */
-    overflow: hidden; /* Prevent body scrolling, let the container handle it */
+    min-height: 100vh;
+    margin: 0;
+    overflow: hidden; 
 }
 
 .financial-reports-container {
@@ -12,32 +12,71 @@ html, body {
 
 .container {
     display: flex;
-    flex-direction: column; /* Stack children vertically */
-    height: 100vh; /* Full height of the viewport */
-    overflow-y: auto; /* Allow the container to scroll */
-    padding: 20px; /* Add some padding around the container */
+    flex-direction: column;
+    height: 100%; 
+    overflow: hidden;
+    padding: 20px;
 }
 
-.financial-report-card {
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 500px;
-    margin: 2%;
+.top-section {
+    display: flex;
+    align-items: center;
+    gap: 40px; 
+    margin-bottom: 20px; 
 }
 
 .total-sales-card {
+    margin-left: 20px;
+    
+}
+
+.financial-report-card {
+    width: 400px;
+}
+
+.total-sales-card,
+.financial-report-card {
     padding: 16px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin: 2%;
-    border-radius: 10px !important;
-    flex-shrink: 0; /* Prevent it from shrinking */
+    border-radius: 10px;
+    min-width: 200px;
+    flex-shrink: 0;
 }
 
 .card-container {
     display: flex;
-    flex-wrap: wrap; /* Ensures cards wrap to the next row if the screen is too narrow */
+    flex-wrap: wrap; 
+}
+
+.reporting-section {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin: 20px;
+    overflow-y: auto; 
+    flex: 1; 
+    height: calc(100vh - 350px); 
+}
+
+.table-container {
+    overflow-y: auto; 
+}
+
+.time-period-selector-button {
+    background-color: #09ace0;
+    border: none;
+    border-radius: 3px;
+    font-size: 15px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 10px;
+    margin-right: 2%;
+}
+
+.time-period-selector-button:hover {
+    background-color: #2980b9;
 }
 
 .header {
@@ -70,35 +109,6 @@ html, body {
     color: green;
 }
 
-.time-period-selector-button {
-    background-color: #09ace0;
-    border: none;
-    border-radius: 3px;
-    font-size: 15px;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 10px;
-    margin-right: 2%;
-}
-
-.time-period-selector-button:hover {
-    background-color: #2980b9;
-}
-
 .financial-reports {
-    flex: 1; /* Allow this section to grow and take available space */
-}
-
-.reporting-section {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin: 2%;
-    flex-shrink: 0; /* Prevent it from shrinking and allow the container to handle overflow */
-}
-
-.table-container {
-    overflow-y: auto; /* If the table content exceeds, this will allow scrolling */
+    flex: 1;
 }
