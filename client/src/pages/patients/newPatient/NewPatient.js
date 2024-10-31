@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "./NewPatient.css";
 import { supabase } from "../../../components/routes/supabaseClient";
 import PatientTabs from "../../../components/PatientTabs";
+import CreateContactModal from "../../contacts/CreateContactModal";
 
 const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
   const [owners, setOwners] = useState([]);
@@ -60,80 +61,10 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
   );
 };
 
-const NewOwnerForm = ({ onCreateOwner, onCancel }) => {
-  const [newOwner, setNewOwner] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone_number: "",
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewOwner((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { data, error } = await supabase
-      .from("owners")
-      .insert([newOwner])
-      .select();
-
-    if (error) {
-      console.error("Error creating new owner:", error);
-      alert("Failed to create new owner");
-    } else {
-      onCreateOwner(data[0]);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="new-owner-form">
-      <h2>Create New Owner</h2>
-      <input
-        type="text"
-        name="first_name"
-        value={newOwner.first_name}
-        onChange={handleInputChange}
-        placeholder="First Name"
-        required
-      />
-      <input
-        type="text"
-        name="last_name"
-        value={newOwner.last_name}
-        onChange={handleInputChange}
-        placeholder="Last Name"
-        required
-      />
-      <input
-        type="email"
-        name="email"
-        value={newOwner.email}
-        onChange={handleInputChange}
-        placeholder="Email"
-        required
-      />
-      <input
-        type="tel"
-        name="phone_number"
-        value={newOwner.phone_number}
-        onChange={handleInputChange}
-        placeholder="Phone Number"
-        required
-      />
-      <button type="submit">Create Owner</button>
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
-    </form>
-  );
-};
-
 const NewPatient = () => {
   const [ownerSelectionState, setOwnerSelectionState] = useState("selecting");
   const [selectedOwner, setSelectedOwner] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [patientDetails, setPatientDetails] = useState({
     patientName: "",
     microchipNumber: "",
@@ -178,6 +109,29 @@ const NewPatient = () => {
   const handleOwnerSelect = (owner) => {
     setSelectedOwner(owner);
     setOwnerSelectionState("selected");
+  };
+
+  const handleCreateNewOwner = () => {
+    setShowCreateModal(true);
+  };
+
+  const handleCreateContact = async (formData) => {
+    try {
+      const { data, error } = await supabase
+        .from("owners")
+        .insert([formData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSelectedOwner(data);
+      setOwnerSelectionState("selected");
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error("Error creating new owner:", error);
+      throw error;
+    }
   };
 
   const calculateAge = (dob) => {
@@ -270,10 +224,6 @@ const NewPatient = () => {
     }
 
     return publicURL;
-  };
-
-  const handleCreateNewOwner = () => {
-    setOwnerSelectionState("creating");
   };
 
   const handleOwnerCreated = (newOwner) => {
@@ -414,10 +364,11 @@ const NewPatient = () => {
         </div>
       )}
   
-      {ownerSelectionState === "creating" && (
-        <NewOwnerForm
-          onCreateOwner={handleOwnerCreated}
-          onCancel={handleCancelNewOwner}
+     {showCreateModal && (
+        <CreateContactModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onCreateContact={handleCreateContact}
         />
       )}
   

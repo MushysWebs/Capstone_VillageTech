@@ -203,7 +203,7 @@ const CreateContactModal = ({ isOpen, onClose, onCreateContact }) => {
               Cancel
             </button>
             <button type="submit" className="submit-button">
-              Create Contact
+              Create
             </button>
           </div>
         </form>
