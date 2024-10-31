@@ -1,7 +1,6 @@
-// TotalSalesCard.js
 import React from 'react';
 import { Card, Typography, Box } from '@mui/material';
-import './FinancialReports.css'; // Import your CSS file
+import './FinancialReports.css';
 
 const TotalSalesCard = ({ totalSales }) => {
   return (
@@ -11,7 +10,7 @@ const TotalSalesCard = ({ totalSales }) => {
           Total Sales Today
         </Typography>
         <Typography variant="h4" component="div" className="users-count">
-          ${totalSales.toFixed(2)} {/* Format the number to two decimal places */}
+          ${totalSales.toFixed(2)}
         </Typography>
       </Box>
     </Card>
