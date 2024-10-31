@@ -54,7 +54,7 @@ const AddMedicationModal = ({ isOpen, onClose, onAddMedication }) => {
                 <h2>Add Medication</h2>
                 <form>
                     <label>
-                        Name:
+                        Medication:
                         <input
                             type="text"
                             value={name}
