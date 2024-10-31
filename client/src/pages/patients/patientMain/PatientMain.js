@@ -30,6 +30,12 @@ const PatientMain = ({ globalSearchTerm }) => {
   }, []);
 
   useEffect(() => {
+    setIsEditing(false);
+    setEditedPatient(null);
+    setProfilePicture(null);
+  }, [selectedPatient]);
+
+  useEffect(() => {
     const filtered = patients.filter(
       (patient) =>
         (patient.name?.toLowerCase() || "").includes(
