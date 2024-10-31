@@ -20,11 +20,10 @@ const PatientMain = ({ globalSearchTerm }) => {
   const [profilePicture, setProfilePicture] = useState(null);
   const fileInputRef = useRef(null);
   const supabase = useSupabaseClient();
-  const defaultProfilePicUrl = supabase
-  .storage
-  .from('contacts')
-  .getPublicUrl('profile_pictures/defaultPPic.png').data.publicUrl;
-  
+  const defaultProfilePicUrl = supabase.storage
+    .from("contacts")
+    .getPublicUrl("profile_pictures/defaultPPic.png").data.publicUrl;
+
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -109,27 +108,28 @@ const PatientMain = ({ globalSearchTerm }) => {
     const file = event.target.files[0];
     if (file) {
       try {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}_${file.name}`;
         const filePath = `patient/patient_pictures/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('patient')
+          .from("patient")
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl }, error: urlError } = supabase.storage
-          .from('patient')
-          .getPublicUrl(filePath);
+        const {
+          data: { publicUrl },
+          error: urlError,
+        } = supabase.storage.from("patient").getPublicUrl(filePath);
 
         if (urlError) throw urlError;
 
         setProfilePicture(publicUrl);
-        setEditedPatient(prev => ({ ...prev, image_url: publicUrl }));
+        setEditedPatient((prev) => ({ ...prev, image_url: publicUrl }));
       } catch (error) {
-        console.error('Error uploading file:', error);
-        setError('Failed to upload profile picture. Please try again.');
+        console.error("Error uploading file:", error);
+        setError("Failed to upload profile picture. Please try again.");
       }
     }
   };
@@ -154,7 +154,7 @@ const PatientMain = ({ globalSearchTerm }) => {
         .from("patients")
         .update({
           ...editedPatient,
-          image_url: profilePicture || editedPatient.image_url
+          image_url: profilePicture || editedPatient.image_url,
         })
         .eq("id", editedPatient.id)
         .select()
@@ -162,10 +162,8 @@ const PatientMain = ({ globalSearchTerm }) => {
 
       if (error) throw error;
 
-      setPatients(prevPatients =>
-        prevPatients.map(patient =>
-          patient.id === data.id ? data : patient
-        )
+      setPatients((prevPatients) =>
+        prevPatients.map((patient) => (patient.id === data.id ? data : patient))
       );
 
       setSelectedPatient(data);
@@ -180,33 +178,39 @@ const PatientMain = ({ globalSearchTerm }) => {
   };
 
   const handleDeletePatient = async () => {
-    if (window.confirm('Are you sure you want to delete this patient? This will also delete all their appointments and clinical records. This action cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this patient? This will also delete all their appointments and clinical records. This action cannot be undone."
+      )
+    ) {
       try {
         // delete all appointments associated with this patient
         const { error: appointmentsError } = await supabase
           .from("appointments")
           .delete()
           .eq("patient_id", selectedPatient.id);
-  
+
         if (appointmentsError) throw appointmentsError;
-  
+
         // delete all clinical records associated with this patient
         const { error: clinicalRecordsError } = await supabase
           .from("clinical_records")
           .delete()
           .eq("patient_id", selectedPatient.id);
-  
+
         if (clinicalRecordsError) throw clinicalRecordsError;
-  
+
         // then delete the patient
         const { error: patientError } = await supabase
           .from("patients")
           .delete()
           .eq("id", selectedPatient.id);
-  
+
         if (patientError) throw patientError;
-  
-        setPatients(patients.filter(patient => patient.id !== selectedPatient.id));
+
+        setPatients(
+          patients.filter((patient) => patient.id !== selectedPatient.id)
+        );
         setSelectedPatient(null);
       } catch (error) {
         console.error("Error deleting patient:", error);
@@ -214,7 +218,6 @@ const PatientMain = ({ globalSearchTerm }) => {
       }
     }
   };
-
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -317,161 +320,192 @@ const PatientMain = ({ globalSearchTerm }) => {
           {selectedPatient && (
             <div className="patientMain-details">
               <div className="patientMain-details-header">
-  <div className="p-profile-picture-container" onClick={handleProfilePictureClick}>
-    <img
-      src={profilePicture || selectedPatient.image_url || "/api/placeholder/300/300"}
-      alt={selectedPatient.name}
-      className="patientMain-avatar-large"
-    />
-    {isEditing && (
-      <div className="p-profile-picture-overlay">
-        <Camera size={24} />
-        <span>Change Photo</span>
-      </div>
-    )}
-    <input 
-      type="file"
-      ref={fileInputRef}
-      onChange={handleFileChange}
-      style={{ display: 'none' }}
-      accept="image/*"
-    />
-  </div>
+                <div
+                  className="p-profile-picture-container"
+                  onClick={handleProfilePictureClick}
+                >
+                  <img
+                    src={
+                      profilePicture ||
+                      selectedPatient.image_url ||
+                      "/api/placeholder/300/300"
+                    }
+                    alt={selectedPatient.name}
+                    className="patientMain-avatar-large"
+                  />
+                  {isEditing && (
+                    <div className="p-profile-picture-overlay">
+                      <Camera size={24} />
+                      <span>Change Photo</span>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                    accept="image/*"
+                  />
+                </div>
 
-  <div className="patientMain-header-info">
-    {isEditing ? (
-      <input
-        type="text"
-        name="name"
-        value={editedPatient.name || ""}
-        onChange={handleInputChange}
-        className="patient-name-input"
-      />
-    ) : (
-      <h2>{selectedPatient.name}</h2>
-    )}
-    
-    <div className="patient-details-grid">
-      <div className="detail-item">
-        <strong>Owner:</strong>
-        {isEditing ? (
-          <input
-            type="text"
-            name="owner"
-            value={owner ? `${owner.first_name} ${owner.last_name}` : ""}
-            readOnly
-          />
-        ) : (
-          <span>{owner ? `${owner.first_name} ${owner.last_name}` : "N/A"}</span>
-        )}
-      </div>
+                <div className="patientMain-header-info">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="name"
+                      value={editedPatient.name || ""}
+                      onChange={handleInputChange}
+                      className="patient-name-input"
+                    />
+                  ) : (
+                    <h2>{selectedPatient.name}</h2>
+                  )}
 
-      <div className="detail-item">
-        <strong>Species:</strong>
-        {isEditing ? (
-          <input
-            type="text"
-            name="species"
-            value={editedPatient.species || ""}
-            onChange={handleInputChange}
-          />
-        ) : (
-          <span>{selectedPatient.species}</span>
-        )}
-      </div>
+                  <div className="patient-details-grid">
+                    <div className="detail-item">
+                      <strong>Owner:</strong>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="owner"
+                          value={
+                            owner
+                              ? `${owner.first_name} ${owner.last_name}`
+                              : ""
+                          }
+                          readOnly
+                        />
+                      ) : (
+                        <span>
+                          {owner
+                            ? `${owner.first_name} ${owner.last_name}`
+                            : "N/A"}
+                        </span>
+                      )}
+                    </div>
 
-      <div className="detail-item">
-        <strong>Breed:</strong>
-        {isEditing ? (
-          <input
-            type="text"
-            name="breed"
-            value={editedPatient.breed || ""}
-            onChange={handleInputChange}
-          />
-        ) : (
-          <span>{selectedPatient.breed}</span>
-        )}
-      </div>
+                    <div className="detail-item">
+                      <strong>Species:</strong>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="species"
+                          value={editedPatient.species || ""}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <span>{selectedPatient.species}</span>
+                      )}
+                    </div>
 
-      <div className="detail-item">
-        <strong>Age:</strong>
-        {isEditing ? (
-          <input
-            type="number"
-            name="age"
-            value={editedPatient.age || ""}
-            onChange={handleInputChange}
-          />
-        ) : (
-          <span>{selectedPatient.age} years</span>
-        )}
-      </div>
+                    <div className="detail-item">
+                      <strong>Breed:</strong>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="breed"
+                          value={editedPatient.breed || ""}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <span>{selectedPatient.breed}</span>
+                      )}
+                    </div>
 
-      <div className="detail-item">
-        <strong>Weight:</strong>
-        {isEditing ? (
-          <input
-            type="number"
-            name="weight"
-            value={editedPatient.weight || ""}
-            onChange={handleInputChange}
-          />
-        ) : (
-          <span>{selectedPatient.weight} Kg</span>
-        )}
-      </div>
+                    <div className="detail-item">
+                      <strong>Age:</strong>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          name="age"
+                          value={editedPatient.age || ""}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <span>{selectedPatient.age} years</span>
+                      )}
+                    </div>
 
-      <div className="detail-item">
-        <strong>Gender:</strong>
-        {isEditing ? (
-          <select
-            name="gender"
-            value={editedPatient.gender || ""}
-            onChange={handleInputChange}
-          >
-            <option value="Male/Neutered">Male/Neutered</option>
-            <option value="Male/Unneutered">Male/Unneutered</option>
-            <option value="Female/Spayed">Female/Spayed</option>
-            <option value="Female/Unspayed">Female/Unspayed</option>
-          </select>
-        ) : (
-          <span>{selectedPatient.gender}</span>
-        )}
-      </div>
+                    <div className="detail-item">
+                      <strong>Weight:</strong>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          name="weight"
+                          value={editedPatient.weight || ""}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <span>{selectedPatient.weight} Kg</span>
+                      )}
+                    </div>
 
-      <div className="detail-item">
-        <strong>Date of Birth:</strong>
-        <span>{formatDate(selectedPatient.date_of_birth)}</span>
-      </div>
-    </div>
-  </div>
-  <div className="patientMain-action-buttons">
-    {isEditing ? (
-      <>
-        <button className="add-appointment-button" onClick={handleSave}>
-          <Save size={18} />
-          Save
-        </button>
-        <button className="patient-cancel-button" onClick={handleCancel}>
-          <X size={18} />
-          Cancel
-        </button>
-      </>
-    ) : (
-      <>
-        <button className="add-appointment-button" onClick={handleAddAppointment}>
-          <Calendar size={18} />
-          Add Appointment
-        </button>
-        <button className="patient-edit-button" onClick={handleEdit}>
-          <Edit2 size={18} />
-          Edit
-        </button>
-      </>
-    )}
-  </div>
-</div>
+                    <div className="detail-item">
+                      <strong>Gender:</strong>
+                      {isEditing ? (
+                        <select
+                          name="gender"
+                          value={editedPatient.gender || ""}
+                          onChange={handleInputChange}
+                        >
+                          <option value="Male/Neutered">Male/Neutered</option>
+                          <option value="Male/Unneutered">
+                            Male/Unneutered
+                          </option>
+                          <option value="Female/Spayed">Female/Spayed</option>
+                          <option value="Female/Unspayed">
+                            Female/Unspayed
+                          </option>
+                        </select>
+                      ) : (
+                        <span>{selectedPatient.gender}</span>
+                      )}
+                    </div>
+
+                    <div className="detail-item">
+                      <strong>Date of Birth:</strong>
+                      <span>{formatDate(selectedPatient.date_of_birth)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="patientMain-action-buttons">
+                  {isEditing ? (
+                    <>
+                      <button
+                        className="add-appointment-button"
+                        onClick={handleSave}
+                      >
+                        <Save size={18} />
+                        Save
+                      </button>
+                      <button
+                        className="patient-cancel-button"
+                        onClick={handleCancel}
+                      >
+                        <X size={18} />
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="add-appointment-button"
+                        onClick={handleAddAppointment}
+                      >
+                        <Calendar size={18} />
+                        Add Appointment
+                      </button>
+                      <button
+                        className="patient-edit-button"
+                        onClick={handleEdit}
+                      >
+                        <Edit2 size={18} />
+                        Edit
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
 
               <div className="patientMain-info-section">
                 <div className="patientMain-additional-info">
@@ -586,59 +620,62 @@ const PatientMain = ({ globalSearchTerm }) => {
                   )}
                 </div>
 
-                <div className="patientMain-tags">
-                  <h3>Tags</h3>
-                  {isEditing ? (
-                    <>
-                      <p>
-                        <span>General Tag:</span>
-                        <input
-                          type="text"
-                          name="general_tag"
-                          value={editedPatient.general_tag || ""}
-                          onChange={handleInputChange}
-                        />
-                      </p>
-                      <p>
-                        <span>Reminder Tag:</span>
-                        <input
-                          type="text"
-                          name="reminder_tag"
-                          value={editedPatient.reminder_tag || ""}
-                          onChange={handleInputChange}
-                        />
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p>
-                        <strong>General Tag:</strong>{" "}
-                        {selectedPatient.general_tag}
-                      </p>
-                      <p>
-                        <strong>Reminder Tag:</strong>{" "}
-                        {selectedPatient.reminder_tag}
-                      </p>
-                    </>
-                  )}
+                <div className="patientMain-tags-notes">
+                  <div className="patientMain-tags">
+                    <h3>Tags</h3>
+                    {isEditing ? (
+                      <>
+                        <p>
+                          <span>General Tag:</span>
+                          <input
+                            type="text"
+                            name="general_tag"
+                            value={editedPatient.general_tag || ""}
+                            onChange={handleInputChange}
+                          />
+                        </p>
+                        <p>
+                          <span>Reminder Tag:</span>
+                          <input
+                            type="text"
+                            name="reminder_tag"
+                            value={editedPatient.reminder_tag || ""}
+                            onChange={handleInputChange}
+                          />
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p>
+                          <strong>General Tag:</strong>{" "}
+                          {selectedPatient.general_tag}
+                        </p>
+                        <p>
+                          <strong>Reminder Tag:</strong>{" "}
+                          {selectedPatient.reminder_tag}
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="patientMain-notes">
+                    <h3>Animal Notes</h3>
+                    {isEditing ? (
+                      <textarea
+                        name="notes"
+                        value={editedPatient?.notes || ""}
+                        onChange={handleInputChange}
+                        className="notes-textarea"
+                      />
+                    ) : (
+                      <p>{selectedPatient.notes || "No notes available"}</p>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="patientMain-notes">
-                <h3>Animal Notes</h3>
-                {isEditing ? (
-                  <textarea
-                    name="notes"
-                    value={editedPatient?.notes || ""}
-                    onChange={handleInputChange}
-                    className="notes-textarea"
-                  />
-                ) : (
-                  <p>{selectedPatient.notes || "No notes available"}</p>
-                )}
-              </div>
               <div className="delete-patient-container">
-                <button 
-                  className="delete-patient-button" 
+                <button
+                  className="delete-patient-button"
                   onClick={handleDeletePatient}
                 >
                   <Trash2 size={18} />
@@ -659,7 +696,6 @@ const PatientMain = ({ globalSearchTerm }) => {
               ownerId={selectedPatient?.owner_id || ""}
               onAppointmentAdded={(newAppointment) => {
                 setIsAddAppointmentModalOpen(false);
-                // Additional logic here if needed, e.g., refreshing appointment list
               }}
             />
             <button

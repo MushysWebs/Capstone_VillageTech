@@ -263,8 +263,8 @@
 .delete-patient-container {
   display: flex;
   justify-content: flex-end;
-  padding: 1rem 0;
-  margin-top: 1rem;
+
+
   border-top: 1px solid #e0e6ed;
 }
 
@@ -272,6 +272,7 @@
   background-color: #e74c3c;
   color: white;
   padding: 0.75rem 1.25rem;
+  margin-top: 10px;
   min-width: 160px;
   display: flex;
   align-items: center;
@@ -305,11 +306,6 @@
 
 
 
-.patientMain-info-section {
-  display: flex;
-  gap: 2rem;
-}
-
 .patientMain-additional-info h3,
 .patientMain-clinical-info h3,
 .patientMain-tags h3,
@@ -322,9 +318,49 @@
   margin-bottom: 1rem;
 }
 
+.patientMain-info-section {
+  display: flex;
+  overflow-y: auto;
+  gap: 5rem;
+  margin-top:-20px;
+}
+
+.patientMain-tags-notes {
+  display: flex;
+  gap: 5rem;
+  flex: 1;
+}
+
+.patientMain-tags,
+.patientMain-notes {
+  flex: 1;
+  gap: 10rem;
+}
+
+.patientMain-tags {
+  width: 50px;
+}
+
+.patientMain-tags h3,
+.patientMain-notes h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  min-height: 150px;
+}
+
+
 .patientMain-additional-info h3,
 .patientMain-clinical-info h3,
-.patientMain-tags h3,
 .patientMain-notes h3 {
   font-size: 1.2rem;
   font-weight: 500;
