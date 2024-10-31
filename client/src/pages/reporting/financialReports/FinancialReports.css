@@ -16,6 +16,7 @@ html, body {
     height: 100%; 
     overflow: hidden;
     padding: 20px;
+    flex: 1;
 }
 
 .top-section {
@@ -31,7 +32,7 @@ html, body {
 }
 
 .financial-report-card {
-    width: 400px;
+    width: 500px;
 }
 
 .total-sales-card,
@@ -56,12 +57,13 @@ html, body {
     margin: 20px;
     overflow-y: auto; 
     flex: 1; 
-    height: calc(100vh - 350px); 
+    max-height: 53%;
 }
 
 .table-container {
-    overflow-y: auto; 
+    overflow-y: auto;
 }
+
 
 .time-period-selector-button {
     background-color: #09ace0;
