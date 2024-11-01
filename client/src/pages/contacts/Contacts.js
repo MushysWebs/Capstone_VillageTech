@@ -286,6 +286,21 @@ const Contacts = ({ globalSearchTerm }) => {
   .from('contacts')
   .getPublicUrl('profile_pictures/defaultPPic.png').data.publicUrl;
 
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "Completed":
+        return "status-completed";
+      case "Pending":
+        return "status-pending";
+      case "Cancelled":
+        return "status-cancelled";
+      case "Estimate":
+        return "status-estimate";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="contacts-page">
       <div className="contacts-sidebar">
@@ -444,7 +459,14 @@ const Contacts = ({ globalSearchTerm }) => {
                           <td>{patient ? patient.name : 'Unknown'}</td>
                           <td>${invoice.invoice_total.toFixed(2)}</td>
                           <td>{formatDate(invoice.invoice_date)}</td>
-                          <td>{invoice.invoice_status || 'Pending'}</td>
+                          {/* <td>{invoice.invoice_status || 'Pending'}</td> */}
+                          <td>
+                          <button
+                            className={getStatusClass(invoice.invoice_status)}
+                          >
+                            {invoice.invoice_status}
+                          </button>
+                        </td>
                           <td>{invoice.last_update ? formatDate(invoice.last_update) : 'N/A'}</td>
                         </tr>
                       );
