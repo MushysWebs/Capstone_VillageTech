@@ -158,8 +158,8 @@
 
 .message-input {
   display: flex;
-  padding: 1px;
-  margin-bottom: 25px;
+  padding: 10px;
+  margin-bottom: 20px;
   border-top: 1px solid #e0e0e0;
 }
 
