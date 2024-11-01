@@ -266,7 +266,7 @@ const Financial = () => {
 
                         <td>
                           <button
-                            className="financial-complete"
+                            className="financial-pending"
                             onClick={() =>
                               updateInvoiceStatus(item, "Pending")
                             }
