@@ -44,7 +44,7 @@ const AddVitalModal = ({ isOpen, onClose, onAddVital }) => {
             />
           </label>
           <label>
-            Weight:
+            Weight (lbs):
             <input
               type="number"
               value={weight}
