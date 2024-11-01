@@ -54,7 +54,7 @@ const AddMedicationModal = ({ isOpen, onClose, onAddMedication }) => {
                 <h2>Add Medication</h2>
                 <form>
                     <label>
-                        Medication:
+                        Medication: 
                         <input
                             type="text"
                             value={name}
@@ -63,23 +63,25 @@ const AddMedicationModal = ({ isOpen, onClose, onAddMedication }) => {
                         />
                     </label>
                     <label>
-                        Dosage:
+                        Dosage: 
                         <input
                             type="text"
                             value={dosage}
                             onChange={(e) => setDosage(e.target.value)}
+                            required
                         />
                     </label>
                     <label>
-                        Frequency:
+                        Frequency: 
                         <input
                             type="text"
                             value={frequency}
                             onChange={(e) => setFrequency(e.target.value)}
+                            required
                         />
                     </label>
                     <label>
-                        Date Prescribed:
+                        Date Prescribed: 
                         <input
                             type="date"
                             value={datePrescribed}
@@ -88,7 +90,7 @@ const AddMedicationModal = ({ isOpen, onClose, onAddMedication }) => {
                         />
                     </label>
                     <label>
-                        End Date:
+                        End Date: 
                         <input
                             type="date"
                             value={endDate}
@@ -96,39 +98,43 @@ const AddMedicationModal = ({ isOpen, onClose, onAddMedication }) => {
                         />
                     </label>
                     <label>
-                        Reason:
+                        Reason: 
                         <input
                             type="text"
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
+                            required
                         />
                     </label>
                     <label>
-                        Prescribing Doctor:
+                        Prescribing Doctor: 
                         <input
                             type="text"
                             value={doctor}
                             onChange={(e) => setDoctor(e.target.value)}
+                            required
                         />
                     </label>
                     <label>
-                        Instructions:
+                        Instructions: 
                         <textarea
                             value={instructions}
                             onChange={(e) => setInstructions(e.target.value)}
+                            required
                         />
                     </label>
                     <label>
-                        Refills:
+                        Refills: 
                         <input
                             type="number"
                             value={refills}
                             onChange={(e) => setRefills(e.target.value)}
                             min="0"
+                            required
                         />
                     </label>
                     <label>
-                        Status:
+                        Status: 
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}

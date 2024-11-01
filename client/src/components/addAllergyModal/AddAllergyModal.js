@@ -29,7 +29,7 @@ const AddAllergyModal = ({ isOpen, onClose, onAddAllergy }) => {
         <h2>Add Allergy</h2>
         <form>
           <label>
-            Name:
+            Allergy:
             <input
               type="text"
               value={name}
@@ -41,9 +41,9 @@ const AddAllergyModal = ({ isOpen, onClose, onAddAllergy }) => {
             Reaction:
             <input
               type="text"
+              required
               value={reaction}
               onChange={(e) => setReaction(e.target.value)}
-              required
             />
           </label>
           <div className="modal-actions">
