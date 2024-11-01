@@ -67,6 +67,7 @@
   border-radius: 5px;
   background-color: white;
   cursor: pointer;
+  border-color: #09ace0;
 }
 
 .financial-edit-button:hover {
@@ -80,10 +81,25 @@
   border-radius: 5px;
   background-color: white;
   cursor: pointer;
+  border-color: #09cb8b;
 }
 
 .financial-complete:hover {
   background-color: #09cb8b;
+  color: white;
+}
+
+.financial-pending {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  border-color: #e6b249;
+}
+
+.financial-pending:hover {
+  background-color: #e6b249;
   color: white;
 }
 
@@ -155,6 +171,7 @@
   background-color: white;
   cursor: pointer;
   display: inline-block;
+  border-color: #e74c3c;
 }
 
 .financial-cancel-button:hover {
