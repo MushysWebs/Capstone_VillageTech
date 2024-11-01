@@ -14,6 +14,8 @@ const Admin = ({ globalSearchTerm }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedStaff, setEditedStaff] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeletingStaff, setIsDeletingStaff] = useState(false);
   const fileInputRef = useRef(null);
 
   const fetchStaff = async () => {
@@ -106,6 +108,8 @@ const Admin = ({ globalSearchTerm }) => {
     setIsEditing(false);
     setEditedStaff(null);
     setDeleteError(null);
+    setIsDeleteConfirmOpen(false);  
+    setIsDeletingStaff(false);    
   };
 
   const handleProfilePictureClick = () => {
@@ -147,24 +151,74 @@ const Admin = ({ globalSearchTerm }) => {
     }
   };
 
+  const handleSetInactive = async () => {
+    if (!selectedStaff) return;
+    setIsDeletingStaff(true);
+    setDeleteError(null);
+  
+    try {
+      const { error: updateError } = await supabase
+        .from('staff')
+        .update({ status: 'Inactive' })
+        .eq('id', selectedStaff.id);
+  
+      if (updateError) throw updateError;
+  
+      setStaffList(staffList.map(staff => 
+        staff.id === selectedStaff.id ? { ...staff, status: 'Inactive' } : staff
+      ));
+      setSelectedStaff(prev => ({ ...prev, status: 'Inactive' }));
+      setIsDeleteConfirmOpen(false);
+    } catch (error) {
+      console.error('Error setting staff to inactive:', error);
+      setDeleteError(`Unable to set staff to inactive: ${error.message}`);
+    } finally {
+      setIsDeletingStaff(false);
+    }
+  };
+
+  const handleDeleteConfirmOpen = () => {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteConfirmOpen(false);
+    setDeleteError(null);
+  };
+
   const handleDeleteStaff = async () => {
     if (!selectedStaff) return;
-
+    setIsDeletingStaff(true);
+    setDeleteError(null);
+  
     try {
-      const { error } = await supabase
+      const { error: appointmentDeleteError } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('staff_id', selectedStaff.id);
+  
+      if (appointmentDeleteError) throw appointmentDeleteError;
+  
+      const { error: staffDeleteError } = await supabase
         .from('staff')
         .delete()
         .eq('id', selectedStaff.id);
-
-      if (error) throw error;
-
+  
+      if (staffDeleteError) throw staffDeleteError;
+  
       setStaffList(staffList.filter(staff => staff.id !== selectedStaff.id));
       setSelectedStaff(null);
+      setIsDeleteConfirmOpen(false);
     } catch (error) {
-      console.error('Error deleting staff member:', error);
-      setDeleteError(`Failed to delete staff member: ${error.message}`);
+      console.error('Error deleting staff and appointments:', error);
+      setDeleteError(
+        `Unable to delete staff member and appointments: ${error.message}`
+      );
+    } finally {
+      setIsDeletingStaff(false);
     }
   };
+  
 
   return (
     <AuthGuard>
@@ -237,6 +291,8 @@ const Admin = ({ globalSearchTerm }) => {
               <button className="a-close-button" onClick={handleCloseInfoBox}>
                 <X size={24} />
               </button>
+              {!isDeleteConfirmOpen ? (
+                <>
               <div className="a-staff-details-header">
                 <div className="a-staff-avatar-container" onClick={handleProfilePictureClick}>
                   <img 
@@ -434,28 +490,86 @@ const Admin = ({ globalSearchTerm }) => {
                 </div>
               </div>
               <div className="a-staff-details-footer">
-                {isEditing ? (
-                  <button className="a-cancel-button" onClick={handleCancel}>
-                    <X size={18} />
-                    Cancel
-                  </button>
-                ) : (
-                  <button className="a-delete-button" onClick={handleDeleteStaff}>
-                    <Trash2 size={18} />
-                    Delete Staff Member
-                  </button>
-                )}
-              </div>
-              {deleteError && <p className="a-error-message">{deleteError}</p>}
-            </div>
+            {isEditing ? (
+              <button className="a-cancel-button" onClick={handleCancel}>
+                <X size={18} />
+                Cancel
+              </button>
+            ) : (
+              <button 
+                className="a-delete-button" 
+                onClick={handleDeleteConfirmOpen}
+                disabled={isDeletingStaff}
+              >
+                <Trash2 size={18} />
+                {isDeletingStaff ? 'Processing...' : 'Delete Staff Member'}
+              </button>
+            )}
+          </div>
+        </>
+      ) : (
+
+        <div className="a-delete-confirmation-container">
+        <h3>Staff Member Action</h3>
+        <p>Please select an action for {selectedStaff.full_name}:</p>
+        
+        <div className="a-action-options">
+          <div className="a-action-option">
+            <h4>Set to Inactive</h4>
+            <p>Staff member will be marked as inactive but all records will be preserved.</p>
+            <button 
+              className="a-inactive-button" 
+              onClick={handleSetInactive}
+              disabled={isDeletingStaff}
+            >
+              Set to Inactive
+            </button>
+          </div>
+    
+          <div className="a-action-option">
+            <h4>Delete Completely</h4>
+            <p className="a-delete-warning">
+              Warning: This will permanently delete the staff member and all associated appointments.
+              This action cannot be undone.
+            </p>
+            <button 
+              className="a-delete-button" 
+              onClick={handleDeleteStaff}
+              disabled={isDeletingStaff}
+            >
+              {isDeletingStaff ? 'Processing...' : 'Delete Permanently'}
+            </button>
+          </div>
+        </div>
+    
+        <div className="a-confirmation-footer">
+          <button 
+            className="a-cancel-button" 
+            onClick={handleDeleteCancel}
+            disabled={isDeletingStaff}
+          >
+            Cancel
+          </button>
+        </div>
+    
+        {deleteError && (
+          <div className="a-error-message">
+            <AlertCircle size={18} />
+            {deleteError}
           </div>
         )}
+      </div>
+    )}
+    </div>
+  </div>
+)}
 
-        <AddStaffModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          onAddStaff={addNewStaff}
-        />
+{/* Add Staff Modal */}
+<AddStaffModal
+  isOpen={isModalOpen}
+  onClose={closeModal}
+  onAddStaff={addNewStaff}
+/>
       </div>
     </AuthGuard>
   );
