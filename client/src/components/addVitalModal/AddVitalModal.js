@@ -46,17 +46,19 @@ const AddVitalModal = ({ isOpen, onClose, onAddVital }) => {
           <label>
             Weight:
             <input
-              type="text"
+              type="number"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
+              required
             />
           </label>
           <label>
-            Temperature:
+            Temperature (Celsius):   
             <input
               type="text"
               value={temperature}
               onChange={(e) => setTemperature(e.target.value)}
+              required
             />
           </label>
           <label>
@@ -65,6 +67,7 @@ const AddVitalModal = ({ isOpen, onClose, onAddVital }) => {
               type="text"
               value={heartRate}
               onChange={(e) => setHeartRate(e.target.value)}
+              required
             />
           </label>
           <div className="modal-actions">
