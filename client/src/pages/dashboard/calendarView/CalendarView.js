@@ -326,6 +326,12 @@ const CalendarView = ({ searchTerm, firstName }) => {
           }}
           appointmentId={selectedAppointmentId}
           mode={viewMode === 'list' ? 'list' : 'detail'}
+          onAppointmentUpdated={() => fetchAppointments()} 
+          onAppointmentDeleted={() => {
+            fetchAppointments();
+            setIsAppointmentDetailsOpen(false);
+            setSelectedAppointmentId(null);
+          }}
         />
       )}
 

@@ -20,7 +20,14 @@ import {
 } from 'lucide-react';
 import './AppointmentDetails.css';
 
-const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointmentId, mode: initialMode = 'detail' }) => {
+const AppointmentDetails = ({ 
+    isOpen, 
+    onClose, 
+    appointmentId: initialAppointmentId, 
+    mode: initialMode = 'detail',
+    onAppointmentUpdated,
+    onAppointmentDeleted
+  }) => {
   const [appointment, setAppointment] = useState(null);
   const [allAppointments, setAllAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
@@ -93,9 +100,9 @@ const [editedAppointment, setEditedAppointment] = useState(null);
         .from('appointments')
         .update({ status: 'Cancelled' })
         .eq('id', appointment.id);
-  
+
       if (error) throw error;
-  
+
       const { data: updatedData, error: fetchError } = await supabase
         .from('appointments')
         .select(`
@@ -124,15 +131,13 @@ const [editedAppointment, setEditedAppointment] = useState(null);
         `)
         .eq('id', appointment.id)
         .single();
-  
+
       if (fetchError) throw fetchError;
-  
+
       setAppointment(updatedData);
       setIsDeleteModalOpen(false);
-  
-      if (initialMode === 'list') {
-        fetchAllAppointments();
-      }
+
+      onAppointmentUpdated?.();
     } catch (error) {
       console.error('Error canceling appointment:', error);
       setDeleteError('Failed to cancel appointment. Please try again.');
@@ -150,17 +155,10 @@ const [editedAppointment, setEditedAppointment] = useState(null);
         .from('appointments')
         .delete()
         .eq('id', appointment.id);
-  
+
       if (error) throw error;
-  
-      if (initialMode === 'list') {
-        setCurrentMode('list');
-        setCurrentAppointmentId(null);
-        setAppointment(null);
-        fetchAllAppointments();
-      } else {
-        onClose(); 
-      }
+
+      onAppointmentDeleted?.();
       
       setIsDeleteModalOpen(false);
     } catch (error) {
@@ -363,13 +361,12 @@ const [editedAppointment, setEditedAppointment] = useState(null);
       setIsEditMode(false);
       setEditedAppointment(null);
   
-      if (initialMode === 'list') {
-        fetchAllAppointments();
-      }
+      onAppointmentUpdated?.();
     } catch (error) {
       console.error('Error updating appointment:', error);
     }
   };
+
 
   const handleCancelEdit = () => {
     setIsEditMode(false);
