@@ -1,0 +1,287 @@
+.addAppointment__overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+    backdrop-filter: blur(4px);
+  }
+  
+  .addAppointment__container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: auto;
+    transform: scale(0.95);
+    opacity: 0;
+    animation: modalEnter 0.3s ease forwards;
+  }
+  
+  @keyframes modalEnter {
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .addAppointment__header {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .addAppointment__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  .addAppointment__petImage {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #09ACE0;
+  }
+  
+  .addAppointment__form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-x: hidden;
+  }
+  
+  .addAppointment__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .addAppointment__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .addAppointment__ownerSearch {
+    position: relative;
+  }
+
+  .addAppointment__searchContainer {
+    background-color: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+  }
+
+  .addAppointment__searchInputWrapper {
+    position: relative;
+  }
+  
+  .addAppointment__searchInputWrapper {
+    position: relative;
+  }
+  
+  .addAppointment__searchIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+  }
+  
+  .addAppointment__input--withIcon {
+    padding-left: 2.5rem;
+  }
+  
+  .addAppointment__ownerList {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    margin-top: 4px;
+  }
+  
+  .addAppointment__ownerItem {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+  }
+  
+  .addAppointment__ownerItem:last-child {
+    border-bottom: none;
+  }
+  
+  .addAppointment__ownerItem:hover {
+    background-color: #f8fafc;
+  }
+  
+  .addAppointment__ownerIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e6f7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #09ACE0;
+    flex-shrink: 0;
+  }
+  
+  .addAppointment__ownerInfo {
+    flex: 1;
+  }
+  
+  .addAppointment__ownerName {
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 2px;
+  }
+  
+  .addAppointment__ownerDetails {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+  
+  .addAppointment__selectedOwner {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .addAppointment__input,
+  .addAppointment__select,
+  .addAppointment__textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #1e293b;
+    background-color: white;
+    transition: all 0.2s ease;
+  }
+  
+  .addAppointment__input:focus,
+  .addAppointment__select:focus,
+  .addAppointment__textarea:focus {
+    outline: none;
+    border-color: #09ACE0;
+    box-shadow: 0 0 0 2px rgba(9, 172, 224, 0.1);
+  }
+  
+  .addAppointment__ownerList {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+  }
+  
+  .addAppointment__ownerItem {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .addAppointment__ownerItem:hover {
+    background-color: #f8fafc;
+  }
+  
+  .addAppointment__textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .addAppointment__actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .addAppointment__button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    flex: 1;
+    justify-content: center;
+    border-color: transparent;
+  }
+  
+  .addAppointment__button--primary {
+    background-color: #09ACE0;
+    color: white;
+  }
+  
+  .addAppointment__button--primary:hover {
+    background-color: #0789b4;
+  }
+  
+  .addAppointment__button--secondary {
+    background-color: #fee2e2;
+    color: #ef4444;
+  }
+  
+  .addAppointment__button--secondary:hover {
+    background-color: #fecaca;
+  }
+  
+  .addAppointment__input:disabled,
+  .addAppointment__select:disabled {
+    background-color: #f8fafc;
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: 640px) {
+    .addAppointment__container {
+      margin: 1rem;
+    }
+  
+    .addAppointment__actions {
+      flex-direction: column;
+    }
+  }
