@@ -255,9 +255,6 @@ const Layout = () => {
               </div>
             </div>
             <div className="header-right">
-              <button className="header-button blue-button" draggable="false">
-                <span draggable="false">Save</span>
-              </button>
               <button className="user-button" draggable="false">
                 <i className="fas fa-user" draggable="false"></i>
               </button>
