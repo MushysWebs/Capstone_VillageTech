@@ -29,7 +29,10 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
   const [availableStaff, setAvailableStaff] = useState([]);
   const [currentAppointmentId, setCurrentAppointmentId] = useState(initialAppointmentId);
   const [isEditMode, setIsEditMode] = useState(false);
-    const [editedAppointment, setEditedAppointment] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+const [isProcessingDelete, setIsProcessingDelete] = useState(false);
+const [deleteError, setDeleteError] = useState(null);
+const [editedAppointment, setEditedAppointment] = useState(null);
   const [dateRange, setDateRange] = useState({
     start: format(new Date(), 'yyyy-MM-dd'),
     end: format(addDays(new Date(), 7), 'yyyy-MM-dd')
@@ -71,6 +74,103 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
       console.error('Error fetching staff:', error);
     }
   };
+  
+  const handleCancelAppointmentClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteError(null);
+  };
+  
+  const handleAppointmentCancel = async () => {
+    setIsProcessingDelete(true);
+    setDeleteError(null);
+    
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ status: 'Cancelled' })
+        .eq('id', appointment.id);
+  
+      if (error) throw error;
+  
+      const { data: updatedData, error: fetchError } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          patients:patient_id (
+            id,
+            name,
+            species,
+            breed,
+            date_of_birth
+          ),
+          staff:staff_id (
+            id,
+            first_name,
+            last_name
+          ),
+          owners:patients(
+            owners(
+              id,
+              first_name,
+              last_name,
+              phone_number,
+              email
+            )
+          )
+        `)
+        .eq('id', appointment.id)
+        .single();
+  
+      if (fetchError) throw fetchError;
+  
+      setAppointment(updatedData);
+      setIsDeleteModalOpen(false);
+  
+      if (initialMode === 'list') {
+        fetchAllAppointments();
+      }
+    } catch (error) {
+      console.error('Error canceling appointment:', error);
+      setDeleteError('Failed to cancel appointment. Please try again.');
+    } finally {
+      setIsProcessingDelete(false);
+    }
+  };
+
+  const handleAppointmentDelete = async () => {
+    setIsProcessingDelete(true);
+    setDeleteError(null);
+    
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', appointment.id);
+  
+      if (error) throw error;
+  
+      if (initialMode === 'list') {
+        setCurrentMode('list');
+        setCurrentAppointmentId(null);
+        setAppointment(null);
+        fetchAllAppointments();
+      } else {
+        onClose(); 
+      }
+      
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      setDeleteError('Failed to delete appointment. Please try again.');
+    } finally {
+      setIsProcessingDelete(false);
+    }
+  };
+  
   
 
   const formatDuration = (start, end) => {
@@ -851,10 +951,11 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
                     Edit Appointment
                 </button>
                 <button 
-                    className="appointmentDetails__actionButton appointmentDetails__actionButton--danger"
+                onClick={handleCancelAppointmentClick}
+                className="appointmentDetails__actionButton appointmentDetails__actionButton--danger"
                 >
-                    <Trash2 size={18} />
-                    Cancel Appointment
+                <Trash2 size={18} />
+                Cancel Appointment
                 </button>
                 </>
             )}
@@ -867,6 +968,61 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
           )}
         </div>
       </div>
+      {isDeleteModalOpen && (
+        <div className="appointmentDetails__deleteModal">
+            <div className="appointmentDetails__deleteContent">
+            <h3 className="appointmentDetails__deleteTitle">
+                Appointment Action
+            </h3>
+            <p>Please select an action for this appointment:</p>
+            
+            <div className="appointmentDetails__deleteOptions">
+                <div className="appointmentDetails__deleteOption">
+                <h4>Cancel Appointment</h4>
+                <p>Appointment will be marked as cancelled but record will be preserved.</p>
+                <button 
+                    onClick={handleAppointmentCancel}
+                    disabled={isProcessingDelete}
+                    className="appointmentDetails__actionButton appointmentDetails__actionButton--secondary"
+                >
+                    {isProcessingDelete ? 'Processing...' : 'Cancel Appointment'}
+                </button>
+                </div>
+
+                <div className="appointmentDetails__deleteOption">
+                <h4>Delete Permanently</h4>
+                <p className="appointmentDetails__deleteWarning">
+                    Warning: This will permanently delete the appointment record.
+                    This action cannot be undone.
+                </p>
+                <button 
+                    onClick={handleAppointmentDelete}
+                    disabled={isProcessingDelete}
+                    className="appointmentDetails__actionButton appointmentDetails__actionButton--danger"
+                >
+                    {isProcessingDelete ? 'Processing...' : 'Delete Permanently'}
+                </button>
+                </div>
+            </div>
+
+            <div className="appointmentDetails__deleteActions">
+                <button 
+                onClick={handleCancelDelete}
+                disabled={isProcessingDelete}
+                className="appointmentDetails__actionButton appointmentDetails__actionButton--secondary"
+                >
+                Keep Appointment
+                </button>
+            </div>
+
+            {deleteError && (
+                <div className="appointmentDetails__error">
+                {deleteError}
+                </div>
+            )}
+            </div>
+        </div>
+        )}
     </div>
   );
 };
