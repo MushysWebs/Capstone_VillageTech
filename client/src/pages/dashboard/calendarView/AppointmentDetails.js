@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { format, isAfter, isBefore, startOfDay, endOfDay, addDays } from 'date-fns';
-import { X, ChevronLeft, Calendar, User, Stethoscope, Phone, Clock, Filter, Search, SortAsc } from 'lucide-react';
+import { format, isAfter, isBefore, startOfDay, endOfDay, addDays, differenceInMinutes } from 'date-fns';
+import { 
+  X, 
+  ChevronLeft, 
+  Calendar, 
+  User, 
+  Stethoscope, 
+  Phone, 
+  Clock, 
+  Filter, 
+  Search, 
+  SortAsc,
+  FileText,
+  Edit,
+  MessageCircle,
+  Trash2 
+} from 'lucide-react';
 import './AppointmentDetails.css';
 
 const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointmentId, mode: initialMode = 'detail' }) => {
@@ -36,6 +51,20 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
       filterAndSortAppointments();
     }
   }, [allAppointments, dateRange, sortConfig, searchTerm, filterStatus]);
+
+  const formatDuration = (start, end) => {
+    const diffMinutes = differenceInMinutes(end, start);
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+    
+    if (hours === 0) {
+      return `${minutes} minutes`;
+    } else if (minutes === 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    } else {
+      return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} min`;
+    }
+  };
 
   const filterAndSortAppointments = () => {
     let filtered = [...allAppointments];
@@ -505,35 +534,59 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
               </div>
             </div>
           ) : appointment ? (
-            <>
+            <div className="appointmentDetails__detailView">
+              <div className="appointmentDetails__headerBar">
+                <div className="appointmentDetails__headerMain">
+                  <h1 className="appointmentDetails__headerTitle">{appointment.title}</h1>
+                  <div className="appointmentDetails__headerTime">
+                    <Clock size={20} />
+                    {formatDateTime(appointment.start_time)}
+                  </div>
+                </div>
+                <span className={`appointmentDetails__headerStatus appointmentDetails__status--${appointment.status.toLowerCase()}`}>
+                  {appointment.status}
+                </span>
+              </div>
+          
               <div className="appointmentDetails__grid">
                 <div className="appointmentDetails__section">
                   <h3 className="appointmentDetails__sectionTitle">
-                    <Calendar size={20} />
-                    Appointment Info
+                    <span className="appointmentDetails__sectionIcon">
+                      <Calendar size={20} />
+                    </span>
+                    Appointment Details
                   </h3>
                   <div className="appointmentDetails__infoGrid">
-                    <span className="appointmentDetails__label">Title</span>
-                    <span className="appointmentDetails__value">{appointment.title}</span>
-                    <span className="appointmentDetails__label">Status</span>
-                    <span className={getStatusStyle(appointment.status)}>
-                      {appointment.status}
+                    <span className="appointmentDetails__label">
+                      <Clock size={16} />
+                      Start Time
                     </span>
-                    <span className="appointmentDetails__label">Start Time</span>
                     <span className="appointmentDetails__value">
-                      {formatDateTime(appointment.start_time)}
+                      {format(new Date(appointment.start_time), 'MMM d, yyyy h:mm a')}
                     </span>
-                    <span className="appointmentDetails__label">End Time</span>
+                    <span className="appointmentDetails__label">
+                      <Clock size={16} />
+                      End Time
+                    </span>
                     <span className="appointmentDetails__value">
-                      {formatDateTime(appointment.end_time)}
+                      {format(new Date(appointment.end_time), 'MMM d, yyyy h:mm a')}
+                    </span>
+                    <span className="appointmentDetails__label">
+                      <Clock size={16} />
+                      Duration
+                    </span>
+                    <span className="appointmentDetails__value">
+                      {formatDuration(new Date(appointment.start_time), new Date(appointment.end_time))}
                     </span>
                   </div>
                 </div>
-
+          
                 <div className="appointmentDetails__section">
                   <h3 className="appointmentDetails__sectionTitle">
-                    <User size={20} />
-                    Patient Info
+                    <span className="appointmentDetails__sectionIcon">
+                      <User size={20} />
+                    </span>
+                    Patient Information
                   </h3>
                   <div className="appointmentDetails__infoGrid">
                     <span className="appointmentDetails__label">Name</span>
@@ -548,13 +601,21 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
                     <span className="appointmentDetails__value">
                       {appointment.patients?.breed}
                     </span>
+                    <span className="appointmentDetails__label">Birth Date</span>
+                    <span className="appointmentDetails__value">
+                      {appointment.patients?.date_of_birth ? 
+                        format(new Date(appointment.patients.date_of_birth), 'MMM d, yyyy') : 
+                        'Not provided'}
+                    </span>
                   </div>
                 </div>
-
+          
                 <div className="appointmentDetails__section">
                   <h3 className="appointmentDetails__sectionTitle">
-                    <Stethoscope size={20} />
-                    Staff Info
+                    <span className="appointmentDetails__sectionIcon">
+                      <Stethoscope size={20} />
+                    </span>
+                    Staff Information
                   </h3>
                   <div className="appointmentDetails__infoGrid">
                     <span className="appointmentDetails__label">Doctor</span>
@@ -563,11 +624,13 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
                     </span>
                   </div>
                 </div>
-
+          
                 <div className="appointmentDetails__section">
                   <h3 className="appointmentDetails__sectionTitle">
-                    <Phone size={20} />
-                    Owner Info
+                    <span className="appointmentDetails__sectionIcon">
+                      <Phone size={20} />
+                    </span>
+                    Owner Information
                   </h3>
                   <div className="appointmentDetails__infoGrid">
                     <span className="appointmentDetails__label">Name</span>
@@ -585,16 +648,36 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
                   </div>
                 </div>
               </div>
-
+          
               {appointment.description && (
                 <div className="appointmentDetails__description">
-                  <h3 className="appointmentDetails__sectionTitle">Description</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">
+                  <h3 className="appointmentDetails__sectionTitle">
+                    <span className="appointmentDetails__sectionIcon">
+                      <FileText size={20} />
+                    </span>
+                    Description
+                  </h3>
+                  <p className="appointmentDetails__descriptionContent">
                     {appointment.description}
                   </p>
                 </div>
               )}
-            </>
+          
+              <div className="appointmentDetails__actions">
+                <button className="appointmentDetails__actionButton appointmentDetails__actionButton--primary">
+                  <Edit size={18} />
+                  Edit Appointment
+                </button>
+                <button className="appointmentDetails__actionButton appointmentDetails__actionButton--secondary">
+                  <MessageCircle size={18} />
+                  Contact Owner
+                </button>
+                <button className="appointmentDetails__actionButton appointmentDetails__actionButton--danger">
+                  <Trash2 size={18} />
+                  Cancel Appointment
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="text-center text-gray-500">
               No appointment details available
