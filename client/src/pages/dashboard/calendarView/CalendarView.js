@@ -10,6 +10,7 @@ import {
   areIntervalsOverlapping
 } from 'date-fns';
 import AddAppointment from './AddAppointment';
+import AppointmentDetails from './AppointmentDetails';
 import ClockInOut from '../../../components/clockInOut/ClockInOut';
 import './CalendarView.css';
 
@@ -19,7 +20,10 @@ const TIME_SLOT_PADDING = 10;
 const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
+  const [isAppointmentDetailsOpen, setIsAppointmentDetailsOpen] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('calendar'); 
   const supabase = useSupabaseClient();
   const scrollWrapperRef = useRef(null);
 
@@ -29,6 +33,11 @@ const CalendarView = ({ searchTerm, firstName }) => {
     scrollToCurrentTime();
     
   }, [currentDate]);
+
+  const handleAppointmentClick = (appointmentId) => {
+    setSelectedAppointmentId(appointmentId);
+    setIsAppointmentDetailsOpen(true);
+  };
 
   const scrollToCurrentTime = () => {
     if (scrollWrapperRef.current && isSameDay(currentDate, new Date())) {
@@ -179,6 +188,7 @@ const CalendarView = ({ searchTerm, firstName }) => {
           <div
             key={app.id}
             className="calendarView__appointment"
+            onClick={() => handleAppointmentClick(app.id)}
             style={{ 
               left: `${left}px`, 
               width: `${width}px`,
@@ -228,7 +238,15 @@ const CalendarView = ({ searchTerm, firstName }) => {
           >
             + Create Appointment
           </button>
-          <button className="calendarView__actionButton">View Appointments</button>
+          <button 
+            className="calendarView__actionButton" 
+            onClick={() => {
+              setViewMode('list');
+              setIsAppointmentDetailsOpen(true);
+            }}
+          >
+            View Appointments
+          </button>
         </div>
         <div className="calendarView__rightControls">
           <button 
@@ -271,6 +289,19 @@ const CalendarView = ({ searchTerm, firstName }) => {
           </div>
         </div>
       </div>
+
+      {isAppointmentDetailsOpen && (
+        <AppointmentDetails
+          isOpen={isAppointmentDetailsOpen}
+          onClose={() => {
+            setIsAppointmentDetailsOpen(false);
+            setSelectedAppointmentId(null);
+            setViewMode('calendar');
+          }}
+          appointmentId={selectedAppointmentId}
+          mode={viewMode === 'list' ? 'list' : 'detail'}
+        />
+      )}
 
       {isAddModalOpen && (
         <AddAppointment
