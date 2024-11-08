@@ -15,7 +15,8 @@ import {
   FileText,
   Edit,
   MessageCircle,
-  Trash2 
+  Trash2,
+  Check
 } from 'lucide-react';
 import './AppointmentDetails.css';
 
@@ -25,7 +26,10 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentMode, setCurrentMode] = useState(initialMode);
+  const [availableStaff, setAvailableStaff] = useState([]);
   const [currentAppointmentId, setCurrentAppointmentId] = useState(initialAppointmentId);
+  const [isEditMode, setIsEditMode] = useState(false);
+    const [editedAppointment, setEditedAppointment] = useState(null);
   const [dateRange, setDateRange] = useState({
     start: format(new Date(), 'yyyy-MM-dd'),
     end: format(addDays(new Date(), 7), 'yyyy-MM-dd')
@@ -51,6 +55,23 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
       filterAndSortAppointments();
     }
   }, [allAppointments, dateRange, sortConfig, searchTerm, filterStatus]);
+
+  const fetchAvailableStaff = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('staff')
+        .select('id, first_name, last_name')
+        .eq('role', 'Veterinarian') 
+        .eq('status', 'Active')    
+        .order('last_name');
+        
+      if (error) throw error;
+      setAvailableStaff(data);
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+    }
+  };
+  
 
   const formatDuration = (start, end) => {
     const diffMinutes = differenceInMinutes(end, start);
@@ -181,6 +202,87 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
   };
+
+  const handleEditClick = () => {
+    setIsEditMode(true);
+    setEditedAppointment({ 
+      ...appointment,
+      staff_id: appointment.staff?.id
+    });
+    fetchAvailableStaff();
+  };
+
+  const handleSaveClick = async () => {
+    try {
+      const { error: updateError } = await supabase
+        .from('appointments')
+        .update({
+          title: editedAppointment.title,
+          start_time: editedAppointment.start_time,
+          end_time: editedAppointment.end_time,
+          status: editedAppointment.status,
+          staff_id: editedAppointment.staff_id,
+          description: editedAppointment.description
+        })
+        .eq('id', editedAppointment.id);
+  
+      if (updateError) throw updateError;
+  
+      const { data: updatedData, error: fetchError } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          patients:patient_id (
+            id,
+            name,
+            species,
+            breed,
+            date_of_birth
+          ),
+          staff:staff_id (
+            id,
+            first_name,
+            last_name
+          ),
+          owners:patients(
+            owners(
+              id,
+              first_name,
+              last_name,
+              phone_number,
+              email
+            )
+          )
+        `)
+        .eq('id', editedAppointment.id)
+        .single();
+  
+      if (fetchError) throw fetchError;
+  
+      setAppointment(updatedData);
+      setIsEditMode(false);
+      setEditedAppointment(null);
+  
+      if (initialMode === 'list') {
+        fetchAllAppointments();
+      }
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setEditedAppointment(null);
+  };
+  
+  const handleInputChange = (field, value) => {
+    setEditedAppointment(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
 
   const handleAppointmentClick = (apt) => {
     setCurrentAppointmentId(apt.id);
@@ -537,7 +639,16 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
             <div className="appointmentDetails__detailView">
               <div className="appointmentDetails__headerBar">
                 <div className="appointmentDetails__headerMain">
-                  <h1 className="appointmentDetails__headerTitle">{appointment.title}</h1>
+                <h1 className="appointmentDetails__headerTitle">
+                    {isEditMode ? (
+                        <input
+                        type="text"
+                        value={editedAppointment.title}
+                        onChange={(e) => handleInputChange('title', e.target.value)}
+                        className="appointmentDetails__input"
+                        />
+                    ) : appointment.title}
+                    </h1>
                   <div className="appointmentDetails__headerTime">
                     <Clock size={20} />
                     {formatDateTime(appointment.start_time)}
@@ -558,27 +669,53 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
                   </h3>
                   <div className="appointmentDetails__infoGrid">
                     <span className="appointmentDetails__label">
-                      <Clock size={16} />
-                      Start Time
+                        <Clock size={16} />
+                        Start Time
                     </span>
                     <span className="appointmentDetails__value">
-                      {format(new Date(appointment.start_time), 'MMM d, yyyy h:mm a')}
+                        {isEditMode ? (
+                        <input
+                            type="datetime-local"
+                            value={format(new Date(editedAppointment.start_time), "yyyy-MM-dd'T'HH:mm")}
+                            onChange={(e) => handleInputChange('start_time', e.target.value)}
+                            className="appointmentDetails__input"
+                        />
+                        ) : format(new Date(appointment.start_time), 'MMM d, yyyy h:mm a')}
                     </span>
                     <span className="appointmentDetails__label">
-                      <Clock size={16} />
-                      End Time
+                        <Clock size={16} />
+                        End Time
                     </span>
                     <span className="appointmentDetails__value">
-                      {format(new Date(appointment.end_time), 'MMM d, yyyy h:mm a')}
+                        {isEditMode ? (
+                        <input
+                            type="datetime-local"
+                            value={format(new Date(editedAppointment.end_time), "yyyy-MM-dd'T'HH:mm")}
+                            onChange={(e) => handleInputChange('end_time', e.target.value)}
+                            className="appointmentDetails__input"
+                        />
+                        ) : format(new Date(appointment.end_time), 'MMM d, yyyy h:mm a')}
                     </span>
-                    <span className="appointmentDetails__label">
-                      <Clock size={16} />
-                      Duration
-                    </span>
+                    <span className="appointmentDetails__label">Status</span>
                     <span className="appointmentDetails__value">
-                      {formatDuration(new Date(appointment.start_time), new Date(appointment.end_time))}
+                        {isEditMode ? (
+                        <select
+                            value={editedAppointment.status}
+                            onChange={(e) => handleInputChange('status', e.target.value)}
+                            className="appointmentDetails__input"
+                        >
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        ) : (
+                        <span className={`appointmentDetails__status appointmentDetails__status--${appointment.status.toLowerCase()}`}>
+                            {appointment.status}
+                        </span>
+                        )}
                     </span>
-                  </div>
+                    </div>
                 </div>
           
                 <div className="appointmentDetails__section">
@@ -611,18 +748,32 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
                 </div>
           
                 <div className="appointmentDetails__section">
-                  <h3 className="appointmentDetails__sectionTitle">
+                <h3 className="appointmentDetails__sectionTitle">
                     <span className="appointmentDetails__sectionIcon">
-                      <Stethoscope size={20} />
+                    <Stethoscope size={20} />
                     </span>
                     Staff Information
-                  </h3>
-                  <div className="appointmentDetails__infoGrid">
+                </h3>
+                <div className="appointmentDetails__infoGrid">
                     <span className="appointmentDetails__label">Doctor</span>
                     <span className="appointmentDetails__value">
-                      Dr. {appointment.staff?.first_name} {appointment.staff?.last_name}
+                    {isEditMode ? (
+                        <select
+                        value={editedAppointment.staff_id}
+                        onChange={(e) => handleInputChange('staff_id', e.target.value)}
+                        className="appointmentDetails__input"
+                        >
+                        {availableStaff.map(staff => (
+                            <option key={staff.id} value={staff.id}>
+                            Dr. {staff.first_name} {staff.last_name}
+                            </option>
+                        ))}
+                        </select>
+                    ) : (
+                        `Dr. ${appointment.staff?.first_name} ${appointment.staff?.last_name}`
+                    )}
                     </span>
-                  </div>
+                </div>
                 </div>
           
                 <div className="appointmentDetails__section">
@@ -649,34 +800,65 @@ const AppointmentDetails = ({ isOpen, onClose, appointmentId: initialAppointment
                 </div>
               </div>
           
-              {appointment.description && (
+              {(appointment.description || isEditMode) && (
                 <div className="appointmentDetails__description">
-                  <h3 className="appointmentDetails__sectionTitle">
+                    <h3 className="appointmentDetails__sectionTitle">
                     <span className="appointmentDetails__sectionIcon">
-                      <FileText size={20} />
+                        <FileText size={20} />
                     </span>
                     Description
-                  </h3>
-                  <p className="appointmentDetails__descriptionContent">
-                    {appointment.description}
-                  </p>
+                    </h3>
+                    {isEditMode ? (
+                    <textarea
+                        value={editedAppointment.description || ''}
+                        onChange={(e) => handleInputChange('description', e.target.value)}
+                        className="appointmentDetails__textarea"
+                        rows={4}
+                    />
+                    ) : (
+                    <p className="appointmentDetails__descriptionContent">
+                        {appointment.description}
+                    </p>
+                    )}
                 </div>
-              )}
+                )}
           
-              <div className="appointmentDetails__actions">
-                <button className="appointmentDetails__actionButton appointmentDetails__actionButton--primary">
-                  <Edit size={18} />
-                  Edit Appointment
+          <div className="appointmentDetails__actions">
+            {isEditMode ? (
+                <>
+                <button 
+                    onClick={handleSaveClick}
+                    className="appointmentDetails__actionButton appointmentDetails__actionButton--primary"
+                >
+                    <Check size={18} />
+                    Save Changes
                 </button>
-                <button className="appointmentDetails__actionButton appointmentDetails__actionButton--secondary">
-                  <MessageCircle size={18} />
-                  Contact Owner
+                <button 
+                    onClick={handleCancelEdit}
+                    className="appointmentDetails__actionButton appointmentDetails__actionButton--secondary"
+                >
+                    <X size={18} />
+                    Cancel Edit
                 </button>
-                <button className="appointmentDetails__actionButton appointmentDetails__actionButton--danger">
-                  <Trash2 size={18} />
-                  Cancel Appointment
+                </>
+            ) : (
+                <>
+                <button 
+                    onClick={handleEditClick}
+                    className="appointmentDetails__actionButton appointmentDetails__actionButton--primary"
+                >
+                    <Edit size={18} />
+                    Edit Appointment
                 </button>
-              </div>
+                <button 
+                    className="appointmentDetails__actionButton appointmentDetails__actionButton--danger"
+                >
+                    <Trash2 size={18} />
+                    Cancel Appointment
+                </button>
+                </>
+            )}
+            </div>
             </div>
           ) : (
             <div className="text-center text-gray-500">
