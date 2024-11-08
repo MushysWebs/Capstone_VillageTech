@@ -53,7 +53,7 @@ const CalendarView = ({ searchTerm, firstName }) => {
     try {
       const start = startOfDay(currentDate);
       const end = addDays(startOfDay(currentDate), 1);
-
+  
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -65,7 +65,11 @@ const CalendarView = ({ searchTerm, firstName }) => {
           status,
           patients:patient_id (
             id,
-            name
+            name,
+            owners (
+              first_name,
+              last_name
+            )
           ),
           staff:staff_id (
             id,
@@ -76,9 +80,9 @@ const CalendarView = ({ searchTerm, firstName }) => {
         .gte('start_time', start.toISOString())
         .lt('start_time', end.toISOString())
         .order('start_time', { ascending: true });
-
+  
       if (error) throw error;
-
+  
       const formattedAppointments = data.map(app => ({
         id: app.id,
         title: app.title,
@@ -86,10 +90,11 @@ const CalendarView = ({ searchTerm, firstName }) => {
         end: new Date(app.end_time),
         patient: app.patients?.name || 'Unknown',
         doctor: app.staff ? `${app.staff.first_name} ${app.staff.last_name}` : 'Unknown',
+        owner: app.patients?.owners ? `${app.patients.owners.first_name} ${app.patients.owners.last_name}` : 'Unknown',
         description: app.description,
         status: app.status
       }));
-
+  
       setAppointments(formattedAppointments);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -201,8 +206,29 @@ const CalendarView = ({ searchTerm, firstName }) => {
             <div className="calendarView__appointmentTime">
               {`${displayStart} - ${displayEnd}`}
             </div>
-            <div className="calendarView__appointmentTitle">{app.title}</div>
-            <div className="calendarView__appointmentPatient">{app.patient}</div>
+            <div className="calendarView__appointmentTitle">
+              {app.title}
+            </div>
+            <div className="calendarView__appointmentDetails">
+              <div className="calendarView__appointmentInfo">
+                <i className="fas fa-paw calendarView__appointmentIcon"></i>
+                <span className="calendarView__appointmentLabel">Patient:</span>
+                {app.patient}
+              </div>
+              <div className="calendarView__appointmentInfo">
+                <i className="fas fa-user calendarView__appointmentIcon"></i>
+                <span className="calendarView__appointmentLabel">Owner:</span>
+                {app.owner}
+              </div>
+              <div className="calendarView__appointmentInfo">
+                <i className="fas fa-user-md calendarView__appointmentIcon"></i>
+                <span className="calendarView__appointmentLabel">Dr.</span>
+                {app.doctor.split(' ')[1]}
+              </div>
+            </div>
+            <div className="calendarView__appointmentStatus">
+              {app.status}
+            </div>
           </div>
         );
       });
