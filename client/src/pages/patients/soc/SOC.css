@@ -231,3 +231,20 @@
 .SOC-close-modal:hover {
   background-color: #d43535;
 }
+
+.SOC-edit-button {
+  background-color: #09ace0; 
+  border: none;
+  color: white;
+  padding: 2px 10px;
+  font-size: 1rem; 
+  border-radius: 6px; 
+  cursor: pointer;
+  text-align: center;
+  display: block; 
+  margin: 0 auto; 
+}
+
+.SOC-edit-button:hover {
+  background-color: #007bbf; 
+}
