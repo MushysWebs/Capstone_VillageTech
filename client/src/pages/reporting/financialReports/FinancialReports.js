@@ -87,9 +87,16 @@ const FinancialReports = () => {
   };
 
   useEffect(() => {
-    fetchAppointments();
-    fetchReceipts();
-    fetchTotalSalesToday();
+    const loadData = async () => {
+      await fetchAppointments();
+      await fetchReceipts();
+      await fetchTotalSalesToday();
+      console.log("Appointments:", appointments);
+      console.log("Receipts:", paidReceipts);
+      console.log("Total Sales Today:", totalSalesToday);
+    };
+  
+    loadData();
   }, []);
 
   return (
