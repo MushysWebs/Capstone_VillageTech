@@ -21,6 +21,7 @@ const SOC = () => {
   });
   const [showEventModal, setShowEventModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const commentToEdit = useRef(null);
 
   useEffect(() => {
@@ -82,25 +83,37 @@ const SOC = () => {
 
   const handleAddEvent = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
 
-    if (newEvent.type === "Vaccination") {
-      await supabase.from("vaccinations").insert({
-        patient_id: selectedPatient.id,
-        name: newEvent.event_name,
-        date_given: newEvent.fulfilled_at,
-        next_due: newEvent.next_due,
-        importance: "Core",
-      });
+    if (!newEvent.event_name) {
+      setErrorMessage("Event name is required.");
+      return;
     }
 
-    const { data, error } = await supabase
-      .from("soc")
-      .insert([{ ...newEvent, patient_id: selectedPatient.id }]);
+    const eventToInsert = {
+      ...newEvent,
+      next_due: newEvent.next_due || null, 
+      patient_id: selectedPatient.id,
+    };
 
-    if (error) {
-      console.error("Error adding event:", error.message);
-    } else {
-      alert("Event added successfully");
+    try {
+      if (newEvent.type === "Vaccination") {
+        const { error: vaccinationError } = await supabase
+          .from("vaccinations")
+          .insert({
+            patient_id: selectedPatient.id,
+            name: newEvent.event_name,
+            date_given: newEvent.fulfilled_at || null,
+            next_due: newEvent.next_due || null,
+            importance: "Core",
+          });
+        if (vaccinationError) throw vaccinationError;
+      }
+
+      const { error } = await supabase.from("soc").insert([eventToInsert]);
+      if (error) throw error;
+
+      alert("Event added successfully.");
       fetchSocEvents();
       fetchVaccinations();
       setNewEvent({
@@ -112,32 +125,42 @@ const SOC = () => {
         comments: "",
       });
       setShowEventModal(false);
+    } catch (error) {
+      setErrorMessage(
+        "Unable to add the event. Please ensure all required fields are filled out."
+      );
     }
   };
 
   const handleEditEvent = (event) => {
-    setNewEvent(event); // Set the selected event for editing
+    setNewEvent(event);
     setShowEventModal(true);
   };
 
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
-    const { error } = await supabase
-      .from("soc")
-      .update({
-        event_name: newEvent.event_name,
-        type: newEvent.type,
-        importance: newEvent.importance,
-        fulfilled_at: newEvent.fulfilled_at,
-        next_due: newEvent.next_due,
-        comments: newEvent.comments,
-      })
-      .eq("id", newEvent.id);
+    setErrorMessage("");
 
-    if (error) {
-      console.error("Error updating event:", error.message);
-    } else {
-      alert("Event updated successfully");
+    if (!newEvent.event_name) {
+      setErrorMessage("Event name is required.");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("soc")
+        .update({
+          event_name: newEvent.event_name,
+          type: newEvent.type,
+          importance: newEvent.importance,
+          fulfilled_at: newEvent.fulfilled_at || null,
+          next_due: newEvent.next_due || null,
+          comments: newEvent.comments,
+        })
+        .eq("id", newEvent.id);
+      if (error) throw error;
+
+      alert("Event updated successfully.");
       fetchSocEvents();
       setNewEvent({
         event_name: "",
@@ -148,58 +171,82 @@ const SOC = () => {
         comments: "",
       });
       setShowEventModal(false);
+    } catch (error) {
+      setErrorMessage(
+        "Unable to update the event. Please ensure all required fields are filled out."
+      );
     }
   };
 
   const handleAddComment = async (e) => {
     e.preventDefault();
-    const { error } = await supabase
-      .from("soc_comments")
-      .insert([{ patient_id: selectedPatient.id, comment: newComment }]);
+    setErrorMessage("");
 
-    if (error) {
-      console.error("Error adding comment:", error.message);
-    } else {
-      alert("Comment added successfully");
+    if (!newComment) {
+      setErrorMessage("Comment cannot be empty.");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("soc_comments")
+        .insert([{ patient_id: selectedPatient.id, comment: newComment }]);
+      if (error) throw error;
+
+      alert("Comment added successfully.");
       setNewComment("");
       fetchComments();
       setShowCommentModal(false);
+    } catch (error) {
+      setErrorMessage(
+        "Unable to add the comment. Please ensure all required fields are filled out."
+      );
     }
   };
 
   const handleEditComment = (comment) => {
     setNewComment(comment.comment);
     setShowCommentModal(true);
-    commentToEdit.current = comment.id; 
+    commentToEdit.current = comment.id;
   };
 
   const handleUpdateComment = async (e) => {
     e.preventDefault();
-    const { error } = await supabase
-      .from("soc_comments")
-      .update({ comment: newComment })
-      .eq("id", commentToEdit.current);
+    setErrorMessage("");
 
-    if (error) {
-      console.error("Error updating comment:", error.message);
-    } else {
-      alert("Comment updated successfully");
+    if (!newComment) {
+      setErrorMessage("Comment cannot be empty.");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("soc_comments")
+        .update({ comment: newComment })
+        .eq("id", commentToEdit.current);
+      if (error) throw error;
+
+      alert("Comment updated successfully.");
       fetchComments();
       setNewComment("");
       setShowCommentModal(false);
       commentToEdit.current = null;
+    } catch (error) {
+      setErrorMessage(
+        "Unable to update the comment. Please ensure all required fields are filled out."
+      );
     }
   };
-
+  
   return (
     <div className="SOC-main">
       <PatientSidebar />
-
+  
       <div className="SOC-page">
         <header className="SOC-patient-header">
           <PatientTabs />
         </header>
-
+  
         <div className="SOC-section-box">
           <h2 className="SOC-section-header">Standard of Care Events</h2>
           <table className="SOC-soc-table">
@@ -210,6 +257,7 @@ const SOC = () => {
                 <th>Importance</th>
                 <th>Fulfilled At</th>
                 <th>Next Due</th>
+
               </tr>
             </thead>
             <tbody>
@@ -224,12 +272,17 @@ const SOC = () => {
                       : "TBD"}
                   </td>
                   <td>
-                    {vac.next_due
+                    {vac.next_due && vac.next_due !== "N/A"
                       ? new Date(vac.next_due).toLocaleDateString()
-                      : "TBD"}
+                      : "N/A"}
                   </td>
                   <td>
-                    <button className="SOC-edit-button" onClick={() => handleEditEvent(vac)}>Edit</button>
+                    <button
+                      className="SOC-edit-button"
+                      onClick={() => handleEditEvent(vac)}
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -254,30 +307,47 @@ const SOC = () => {
                       : "TBD"}
                   </td>
                   <td>
-                    {event.next_due
+                    {event.next_due && event.next_due !== "N/A"
                       ? new Date(event.next_due).toLocaleDateString()
-                      : "TBD"}
+                      : "N/A"}
                   </td>
                   <td>
-                    <button className="SOC-edit-button" onClick={() => handleEditEvent(event)}>Edit</button>
+                    <button
+                      className="SOC-edit-button"
+                      onClick={() => handleEditEvent(event)}
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-
+  
           <button
-            onClick={() => setShowEventModal(true)}
+            onClick={() => {
+              setNewEvent({
+                event_name: "",
+                type: "Treatment",
+                importance: "Core",
+                fulfilled_at: "",
+                next_due: "",
+                comments: "",
+              });
+              setShowEventModal(true);
+            }}
             className="SOC-add-event-button"
           >
             + Add SOC Event
           </button>
-
+  
           {showEventModal && (
             <div className="SOC-modal">
               <div className="SOC-modal-content">
                 <h3>{newEvent.id ? "Edit SOC Event" : "Add New SOC Event"}</h3>
-                <form onSubmit={newEvent.id ? handleUpdateEvent : handleAddEvent}>
+                <form
+                  onSubmit={newEvent.id ? handleUpdateEvent : handleAddEvent}
+                >
                   <label htmlFor="event_name">Event Name</label>
                   <input
                     type="text"
@@ -289,7 +359,7 @@ const SOC = () => {
                     }
                     required
                   />
-
+  
                   <label htmlFor="type">Type (Vaccination or Treatment)</label>
                   <select
                     id="type"
@@ -301,7 +371,7 @@ const SOC = () => {
                     <option value="Treatment">Treatment</option>
                     <option value="Vaccination">Vaccination</option>
                   </select>
-
+  
                   <label htmlFor="importance">Importance</label>
                   <select
                     id="importance"
@@ -317,7 +387,7 @@ const SOC = () => {
                     <option value="Required">Required</option>
                     <option value="Non-Core">Non-Core</option>
                   </select>
-
+  
                   <label htmlFor="fulfilled_at">Fulfilled At</label>
                   <input
                     type="date"
@@ -325,11 +395,14 @@ const SOC = () => {
                     name="fulfilled_at"
                     value={newEvent.fulfilled_at}
                     onChange={(e) =>
-                      setNewEvent({ ...newEvent, fulfilled_at: e.target.value })
+                      setNewEvent({
+                        ...newEvent,
+                        fulfilled_at: e.target.value,
+                      })
                     }
                   />
-
-                  <label htmlFor="next_due">Next Due</label>
+  
+                  <label htmlFor="next_due">Next Due (Optional)</label>
                   <input
                     type="date"
                     id="next_due"
@@ -339,7 +412,11 @@ const SOC = () => {
                       setNewEvent({ ...newEvent, next_due: e.target.value })
                     }
                   />
-
+  
+                  {errorMessage && (
+                    <p className="SOC-error-message">{errorMessage}</p>
+                  )}
+  
                   <div className="SOC-button-container">
                     <button
                       type="submit"
@@ -348,6 +425,7 @@ const SOC = () => {
                       {newEvent.id ? "Update SOC Event" : "Add SOC Event"}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setShowEventModal(false)}
                       className="SOC-close-modal"
                     >
@@ -359,7 +437,7 @@ const SOC = () => {
             </div>
           )}
         </div>
-
+  
         <div className="SOC-comments-section">
           <h2 className="SOC-section-header">Comments</h2>
           {commentsData.length > 0 ? (
@@ -368,6 +446,7 @@ const SOC = () => {
                 <tr>
                   <th>Comment</th>
                   <th>Date Created</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -376,7 +455,10 @@ const SOC = () => {
                     <td>{comment.comment}</td>
                     <td>{new Date(comment.created_at).toLocaleDateString()}</td>
                     <td>
-                      <button className="SOC-edit-button" onClick={() => handleEditComment(comment)}>
+                      <button
+                        className="SOC-edit-button"
+                        onClick={() => handleEditComment(comment)}
+                      >
                         Edit
                       </button>
                     </td>
@@ -387,7 +469,7 @@ const SOC = () => {
           ) : (
             <p>No comments yet.</p>
           )}
-
+  
           <button
             onClick={() => {
               setNewComment("");
@@ -398,14 +480,16 @@ const SOC = () => {
           >
             + Add Comment
           </button>
-
+  
           {showCommentModal && (
             <div className="SOC-modal">
               <div className="SOC-modal-content">
                 <h3>{commentToEdit.current ? "Edit Comment" : "Add Comment"}</h3>
                 <form
                   onSubmit={
-                    commentToEdit.current ? handleUpdateComment : handleAddComment
+                    commentToEdit.current
+                      ? handleUpdateComment
+                      : handleAddComment
                   }
                 >
                   <label htmlFor="comment">Comment</label>
@@ -416,6 +500,9 @@ const SOC = () => {
                     onChange={(e) => setNewComment(e.target.value)}
                     required
                   />
+                  {errorMessage && (
+                    <p className="SOC-error-message">{errorMessage}</p>
+                  )}
                   <div className="SOC-button-container">
                     <button
                       type="submit"
@@ -424,6 +511,7 @@ const SOC = () => {
                       {commentToEdit.current ? "Update Comment" : "Add Comment"}
                     </button>
                     <button
+                      type="button"
                       onClick={() => setShowCommentModal(false)}
                       className="SOC-close-modal"
                     >
@@ -438,6 +526,7 @@ const SOC = () => {
       </div>
     </div>
   );
+  
 };
 
 export default SOC;
