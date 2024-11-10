@@ -248,3 +248,11 @@
 .SOC-edit-button:hover {
   background-color: #007bbf; 
 }
+
+.SOC-error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
