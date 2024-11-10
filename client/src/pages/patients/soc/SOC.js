@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { usePatient } from "../../../context/PatientContext";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
@@ -21,6 +21,7 @@ const SOC = () => {
   });
   const [showEventModal, setShowEventModal] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
+  const commentToEdit = useRef(null);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -102,6 +103,50 @@ const SOC = () => {
       alert("Event added successfully");
       fetchSocEvents();
       fetchVaccinations();
+      setNewEvent({
+        event_name: "",
+        type: "Treatment",
+        importance: "Core",
+        fulfilled_at: "",
+        next_due: "",
+        comments: "",
+      });
+      setShowEventModal(false);
+    }
+  };
+
+  const handleEditEvent = (event) => {
+    setNewEvent(event); // Set the selected event for editing
+    setShowEventModal(true);
+  };
+
+  const handleUpdateEvent = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase
+      .from("soc")
+      .update({
+        event_name: newEvent.event_name,
+        type: newEvent.type,
+        importance: newEvent.importance,
+        fulfilled_at: newEvent.fulfilled_at,
+        next_due: newEvent.next_due,
+        comments: newEvent.comments,
+      })
+      .eq("id", newEvent.id);
+
+    if (error) {
+      console.error("Error updating event:", error.message);
+    } else {
+      alert("Event updated successfully");
+      fetchSocEvents();
+      setNewEvent({
+        event_name: "",
+        type: "Treatment",
+        importance: "Core",
+        fulfilled_at: "",
+        next_due: "",
+        comments: "",
+      });
       setShowEventModal(false);
     }
   };
@@ -119,6 +164,30 @@ const SOC = () => {
       setNewComment("");
       fetchComments();
       setShowCommentModal(false);
+    }
+  };
+
+  const handleEditComment = (comment) => {
+    setNewComment(comment.comment);
+    setShowCommentModal(true);
+    commentToEdit.current = comment.id; 
+  };
+
+  const handleUpdateComment = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase
+      .from("soc_comments")
+      .update({ comment: newComment })
+      .eq("id", commentToEdit.current);
+
+    if (error) {
+      console.error("Error updating comment:", error.message);
+    } else {
+      alert("Comment updated successfully");
+      fetchComments();
+      setNewComment("");
+      setShowCommentModal(false);
+      commentToEdit.current = null;
     }
   };
 
@@ -159,6 +228,9 @@ const SOC = () => {
                       ? new Date(vac.next_due).toLocaleDateString()
                       : "TBD"}
                   </td>
+                  <td>
+                    <button className="SOC-edit-button" onClick={() => handleEditEvent(vac)}>Edit</button>
+                  </td>
                 </tr>
               ))}
               {socEvents.map((event) => (
@@ -186,6 +258,9 @@ const SOC = () => {
                       ? new Date(event.next_due).toLocaleDateString()
                       : "TBD"}
                   </td>
+                  <td>
+                    <button className="SOC-edit-button" onClick={() => handleEditEvent(event)}>Edit</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -201,13 +276,14 @@ const SOC = () => {
           {showEventModal && (
             <div className="SOC-modal">
               <div className="SOC-modal-content">
-                <h3>Add New SOC Event</h3>
-                <form onSubmit={handleAddEvent}>
+                <h3>{newEvent.id ? "Edit SOC Event" : "Add New SOC Event"}</h3>
+                <form onSubmit={newEvent.id ? handleUpdateEvent : handleAddEvent}>
                   <label htmlFor="event_name">Event Name</label>
                   <input
                     type="text"
                     id="event_name"
                     name="event_name"
+                    value={newEvent.event_name}
                     onChange={(e) =>
                       setNewEvent({ ...newEvent, event_name: e.target.value })
                     }
@@ -247,6 +323,7 @@ const SOC = () => {
                     type="date"
                     id="fulfilled_at"
                     name="fulfilled_at"
+                    value={newEvent.fulfilled_at}
                     onChange={(e) =>
                       setNewEvent({ ...newEvent, fulfilled_at: e.target.value })
                     }
@@ -257,6 +334,7 @@ const SOC = () => {
                     type="date"
                     id="next_due"
                     name="next_due"
+                    value={newEvent.next_due}
                     onChange={(e) =>
                       setNewEvent({ ...newEvent, next_due: e.target.value })
                     }
@@ -267,7 +345,7 @@ const SOC = () => {
                       type="submit"
                       className="SOC-add-event-button-modal"
                     >
-                      Add SOC Event
+                      {newEvent.id ? "Update SOC Event" : "Add SOC Event"}
                     </button>
                     <button
                       onClick={() => setShowEventModal(false)}
@@ -297,6 +375,11 @@ const SOC = () => {
                   <tr key={comment.id}>
                     <td>{comment.comment}</td>
                     <td>{new Date(comment.created_at).toLocaleDateString()}</td>
+                    <td>
+                      <button className="SOC-edit-button" onClick={() => handleEditComment(comment)}>
+                        Edit
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -306,7 +389,11 @@ const SOC = () => {
           )}
 
           <button
-            onClick={() => setShowCommentModal(true)}
+            onClick={() => {
+              setNewComment("");
+              setShowCommentModal(true);
+              commentToEdit.current = null;
+            }}
             className="SOC-add-comment-button"
           >
             + Add Comment
@@ -315,8 +402,12 @@ const SOC = () => {
           {showCommentModal && (
             <div className="SOC-modal">
               <div className="SOC-modal-content">
-                <h3>Add Comment</h3>
-                <form onSubmit={handleAddComment}>
+                <h3>{commentToEdit.current ? "Edit Comment" : "Add Comment"}</h3>
+                <form
+                  onSubmit={
+                    commentToEdit.current ? handleUpdateComment : handleAddComment
+                  }
+                >
                   <label htmlFor="comment">Comment</label>
                   <textarea
                     id="comment"
@@ -330,7 +421,7 @@ const SOC = () => {
                       type="submit"
                       className="SOC-add-comment-button-modal"
                     >
-                      Add Comment
+                      {commentToEdit.current ? "Update Comment" : "Add Comment"}
                     </button>
                     <button
                       onClick={() => setShowCommentModal(false)}
