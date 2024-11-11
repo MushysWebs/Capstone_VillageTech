@@ -80,7 +80,7 @@ const MedicationHistory = () => {
           { ...newMedication, id: data[0].id },
         ]);
       } else {
-        await fetchPatientData(); // Fallback to re-fetching
+        await fetchPatientData(); 
       }
       setMedicationModalOpen(false);
     } catch (error) {
@@ -93,16 +93,16 @@ const MedicationHistory = () => {
       const { data, error } = await supabase
         .from("vaccinations")
         .insert([{ patient_id: selectedPatient.id, ...newVaccine }])
-        .select("*"); // Ensure Supabase returns the inserted row
+        .select("*"); 
 
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setVaccines((prev) => [...prev, data[0]]); // Update state with the new vaccine
+        setVaccines((prev) => [...prev, data[0]]); 
       } else {
-        await fetchPatientData(); // Fallback to fetching all data
+        await fetchPatientData(); 
       }
-      setVaccineModalOpen(false); // Close the modal
+      setVaccineModalOpen(false);
     } catch (error) {
       console.error("Error adding vaccine:", error);
     }
@@ -119,7 +119,7 @@ const MedicationHistory = () => {
       if (data && data.length > 0) {
         setNotes((prev) => [...prev, { ...newNote, id: data[0].id }]);
       } else {
-        await fetchPatientData(); // Fallback to re-fetching
+        await fetchPatientData(); 
       }
       setNoteModalOpen(false);
     } catch (error) {

@@ -63,7 +63,7 @@ const HealthStatus = () => {
       if (data && data.length > 0) {
         setVitals((prev) => [...prev, { ...newVital, id: data[0].id }]);
       } else {
-        await fetchHealthStatusData(); // Fallback to re-fetching
+        await fetchHealthStatusData(); 
       }
       setVitalModalOpen(false);
     } catch (error) {
@@ -82,7 +82,7 @@ const HealthStatus = () => {
       if (data && data.length > 0) {
         setAllergies((prev) => [...prev, { ...newAllergy, id: data[0].id }]);
       } else {
-        await fetchHealthStatusData(); // Fallback to re-fetching
+        await fetchHealthStatusData(); 
       }
       setAllergyModalOpen(false);
     } catch (error) {
@@ -119,7 +119,6 @@ const HealthStatus = () => {
           <PatientTabs />
         </header>
 
-        {/* Patient Information Section */}
         <div className="health-status-section-box">
           <h2 className="health-status-section-header">Patient Information</h2>
           <div className="health-status-info-grid">
@@ -162,7 +161,6 @@ const HealthStatus = () => {
           </div>
         </div>
 
-        {/* Health Notes and Alerts Section */}
         <div className="health-status-section-box">
           <h2 className="health-status-section-header">
             Health Notes and Alerts
@@ -208,7 +206,6 @@ const HealthStatus = () => {
           )}
         </div>
 
-        {/* Vitals Section */}
         <div className="health-status-section-box">
           <h2 className="health-status-section-header">
             <Activity size={24} style={{ marginRight: "10px" }} />
@@ -250,7 +247,6 @@ const HealthStatus = () => {
           </table>
         </div>
 
-        {/* Allergies Section */}
         <div className="health-status-section-box">
           <h2 className="health-status-section-header">
             <AlertCircle size={24} style={{ marginRight: "10px" }} />
