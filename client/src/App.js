@@ -23,6 +23,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import FinancialReports from "./pages/reporting/financialReports/FinancialReports";
 import ReportHistory from "./pages/reporting/reportHistory/ReportHistory";
+import ResetPassword from "./pages/login/ResetPassword";
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <PatientProvider>
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route element={<PrivateRoute />}>
                 <Route element={<Layout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
