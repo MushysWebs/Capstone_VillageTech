@@ -1,4 +1,4 @@
-/* Main container styles */
+
 .health-status-main {
   display: flex;
   padding: 20px;
@@ -7,7 +7,7 @@
   margin-left: 22px;
 }
 
-/* Content area styles */
+
 .health-status-content {
   width: calc(100% - 270px);
   margin-left: 20px;
@@ -19,13 +19,11 @@
   padding-right: 28px;
 }
 
-/* Header styles */
 .health-status-header {
   margin-left: 0px;
   margin-bottom: 20px;
 }
 
-/* Section container styles */
 .health-status-section-box {
   background-color: white;
   border-radius: 12px;
@@ -35,7 +33,7 @@
   margin-bottom: 20px;
 }
 
-/* Section header styles */
+
 .health-status-section-header {
   font-size: 1.4rem;
   margin-bottom: 15px;
@@ -71,7 +69,7 @@
   color: #2c3e50;
 }
 
-/* Notes and alerts grid */
+
 .health-status-notes-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -96,7 +94,7 @@
   box-shadow: 0 0 0 2px rgba(9, 172, 224, 0.2);
 }
 
-/* Buttons for editing and saving */
+
 .health-status-action-button {
   background-color: #09ace0;
   color: white;
@@ -115,7 +113,7 @@
   background-color: #2980b9;
 }
 
-/* Table styles for vitals and allergies */
+
 .health-status-table {
   width: 100%;
   border-collapse: collapse;
@@ -145,7 +143,7 @@
   color: #757575;
 }
 
-/* Media query for responsiveness */
+
 @media (max-width: 768px) {
   .health-status-notes-grid {
     grid-template-columns: 1fr;
