@@ -3,46 +3,94 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import PatientTabs from "../../../components/PatientTabs";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import { usePatient } from "../../../context/PatientContext";
-import { Edit2, Save } from "lucide-react";
-import VaccineModal from "./VaccineModal"; 
+import { Edit2, Save, Activity, AlertCircle } from "lucide-react";
+import AddVitalModal from "../../../components/addVitalModal/AddVitalModal";
+import AddAllergyModal from "../../../components/addAllergyModal/AddAllergyModal";
 import "./HealthStatus.css";
 
 const HealthStatus = () => {
   const { selectedPatient } = usePatient();
   const [error, setError] = useState(null);
-  const [vaccinations, setVaccinations] = useState([]);
+  const [vitals, setVitals] = useState([]);
+  const [allergies, setAllergies] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [healthNotes, setHealthNotes] = useState("");
   const [alerts, setAlerts] = useState("");
-  const [showModal, setShowModal] = useState(false); 
+  const [isVitalModalOpen, setVitalModalOpen] = useState(false);
+  const [isAllergyModalOpen, setAllergyModalOpen] = useState(false);
   const supabase = useSupabaseClient();
 
   useEffect(() => {
-    fetchPatientData();
     if (selectedPatient) {
+      fetchHealthStatusData();
       setHealthNotes(selectedPatient.notes || "");
     }
   }, [selectedPatient]);
 
-  const fetchPatientData = async () => {
+  const fetchHealthStatusData = async () => {
     try {
-      const { data: vaccinations, error: vaccinationError } = await supabase
-        .from("vaccinations")
-        .select("*")
-        .eq("patient_id", selectedPatient?.id || 0); 
+      const [vitalData, allergyData] = await Promise.all([
+        supabase
+          .from("patient_vitals")
+          .select("*")
+          .eq("patient_id", selectedPatient?.id || 0),
+        supabase
+          .from("patient_allergies")
+          .select("*")
+          .eq("patient_id", selectedPatient?.id || 0),
+      ]);
 
-      if (vaccinationError) throw vaccinationError;
-      setVaccinations(vaccinations || []);
+      if (vitalData.error || allergyData.error) {
+        throw new Error("Error fetching health status data");
+      }
+
+      setVitals(vitalData.data || []);
+      setAllergies(allergyData.data || []);
     } catch (error) {
-      console.error("Error fetching patient data:", error);
-      setError("An error occurred while fetching patient data.");
+      console.error("Error fetching health status data:", error);
+      setError("Failed to fetch health status data.");
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
+  const handleAddVital = async (newVital) => {
+    try {
+      const { data, error } = await supabase
+        .from("patient_vitals")
+        .insert([{ patient_id: selectedPatient.id, ...newVital }]);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setVitals((prev) => [...prev, { ...newVital, id: data[0].id }]);
+      } else {
+        await fetchHealthStatusData(); // Fallback to re-fetching
+      }
+      setVitalModalOpen(false);
+    } catch (error) {
+      console.error("Error adding vital:", error);
+    }
   };
 
+  const handleAddAllergy = async (newAllergy) => {
+    try {
+      const { data, error } = await supabase
+        .from("patient_allergies")
+        .insert([{ patient_id: selectedPatient.id, ...newAllergy }]);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setAllergies((prev) => [...prev, { ...newAllergy, id: data[0].id }]);
+      } else {
+        await fetchHealthStatusData(); // Fallback to re-fetching
+      }
+      setAllergyModalOpen(false);
+    } catch (error) {
+      console.error("Error adding allergy:", error);
+    }
+  };
+
+  const handleEdit = () => setIsEditing(true);
   const handleSave = async () => {
     try {
       if (selectedPatient) {
@@ -52,17 +100,15 @@ const HealthStatus = () => {
           .eq("id", selectedPatient.id);
 
         if (error) throw error;
+        setIsEditing(false);
       }
-      setIsEditing(false);
     } catch (error) {
       console.error("Error saving health notes:", error);
       setError("Failed to save health notes.");
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
   return (
     <div className="health-status-main">
@@ -73,38 +119,54 @@ const HealthStatus = () => {
           <PatientTabs />
         </header>
 
+        {/* Patient Information Section */}
         <div className="health-status-section-box">
           <h2 className="health-status-section-header">Patient Information</h2>
           <div className="health-status-info-grid">
             <div className="health-status-info-item">
               <div className="health-status-info-label">Name</div>
-              <div className="health-status-info-value">{selectedPatient?.name || ""}</div>
+              <div className="health-status-info-value">
+                {selectedPatient?.name || ""}
+              </div>
             </div>
             <div className="health-status-info-item">
               <div className="health-status-info-label">Breed</div>
-              <div className="health-status-info-value">{selectedPatient?.breed || ""}</div>
+              <div className="health-status-info-value">
+                {selectedPatient?.breed || ""}
+              </div>
             </div>
             <div className="health-status-info-item">
               <div className="health-status-info-label">Patient ID</div>
-              <div className="health-status-info-value">{selectedPatient?.id || ""}</div>
+              <div className="health-status-info-value">
+                {selectedPatient?.id || ""}
+              </div>
             </div>
             <div className="health-status-info-item">
               <div className="health-status-info-label">Gender</div>
-              <div className="health-status-info-value">{selectedPatient?.gender || ""}</div>
+              <div className="health-status-info-value">
+                {selectedPatient?.gender || ""}
+              </div>
             </div>
             <div className="health-status-info-item">
               <div className="health-status-info-label">Color</div>
-              <div className="health-status-info-value">{selectedPatient?.color || ""}</div>
+              <div className="health-status-info-value">
+                {selectedPatient?.color || ""}
+              </div>
             </div>
             <div className="health-status-info-item">
               <div className="health-status-info-label">Weight</div>
-              <div className="health-status-info-value">{selectedPatient?.weight || ""} kg</div>
+              <div className="health-status-info-value">
+                {selectedPatient?.weight || ""} kg
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Health Notes and Alerts Section */}
         <div className="health-status-section-box">
-          <h2 className="health-status-section-header">Health Notes and Alerts</h2>
+          <h2 className="health-status-section-header">
+            Health Notes and Alerts
+          </h2>
           <div className="health-status-notes-grid">
             <div>
               <h3>Health Notes</h3>
@@ -128,67 +190,114 @@ const HealthStatus = () => {
             </div>
           </div>
           {isEditing ? (
-            <button className="health-status-action-button" onClick={handleSave}>
+            <button
+              className="health-status-action-button"
+              onClick={handleSave}
+            >
               <Save size={18} />
               Save
             </button>
           ) : (
-            <button className="health-status-action-button" onClick={handleEdit}>
+            <button
+              className="health-status-action-button"
+              onClick={handleEdit}
+            >
               <Edit2 size={18} />
               Edit
             </button>
           )}
         </div>
 
+        {/* Vitals Section */}
         <div className="health-status-section-box">
-          <div className="health-status-vaccination-header-container">
-            <div className="health-status-header-with-border">
-              <button className="health-status-add-vaccine-button" onClick={() => setShowModal(true)}>
-                +
-              </button>
-              <h2 className="health-status-section-header">Vaccinations</h2>
-            </div>
-          </div>
-          <div className="health-status-table-container">
-            <table className="health-status-vaccinations-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Date Given</th>
-                  <th>Next Due</th>
-                  <th>Dosage</th>
-                  <th>Frequency</th>
-                  <th>Doctor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vaccinations.length > 0 ? (
-                  vaccinations.map((vaccination) => (
-                    <tr key={vaccination.id}>
-                      <td>{vaccination.name}</td>
-                      <td>{formatDate(vaccination.date_given)}</td>
-                      <td>{formatDate(vaccination.next_due)}</td>
-                      <td>{vaccination.dosage}</td>
-                      <td>{vaccination.frequency}</td>
-                      <td>{vaccination.doctor}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="health-status-no-vaccinations">No vaccinations available</td>
+          <h2 className="health-status-section-header">
+            <Activity size={24} style={{ marginRight: "10px" }} />
+            Vitals
+          </h2>
+          <button
+            className="health-status-action-button"
+            onClick={() => setVitalModalOpen(true)}
+          >
+            Add Vital
+          </button>
+          <table className="health-status-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Temperature</th>
+                <th>Heart Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vitals.length > 0 ? (
+                vitals.map((vital) => (
+                  <tr key={vital.id}>
+                    <td>{formatDate(vital.date)}</td>
+                    <td>{`${vital.weight} lb`}</td>
+                    <td>{`${vital.temperature} °F`}</td>
+                    <td>{`${vital.heart_rate} BPM`}</td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="health-status-no-data">
+                    No vitals available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Allergies Section */}
+        <div className="health-status-section-box">
+          <h2 className="health-status-section-header">
+            <AlertCircle size={24} style={{ marginRight: "10px" }} />
+            Allergies
+          </h2>
+          <button
+            className="health-status-action-button"
+            onClick={() => setAllergyModalOpen(true)}
+          >
+            Add Allergy
+          </button>
+          <table className="health-status-table">
+            <thead>
+              <tr>
+                <th>Allergy</th>
+                <th>Reaction</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allergies.length > 0 ? (
+                allergies.map((allergy) => (
+                  <tr key={allergy.id}>
+                    <td>{allergy.name}</td>
+                    <td>{allergy.reaction}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2" className="health-status-no-data">
+                    No allergies available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <VaccineModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        patientId={selectedPatient?.id || null}
-        onAddVaccine={fetchPatientData}
+      <AddVitalModal
+        isOpen={isVitalModalOpen}
+        onClose={() => setVitalModalOpen(false)}
+        onAddVital={handleAddVital}
+      />
+      <AddAllergyModal
+        isOpen={isAllergyModalOpen}
+        onClose={() => setAllergyModalOpen(false)}
+        onAddAllergy={handleAddAllergy}
       />
     </div>
   );
