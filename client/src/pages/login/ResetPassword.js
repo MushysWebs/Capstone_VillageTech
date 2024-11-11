@@ -1,29 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import './ResetPassword.css';
 
 const ResetPassword = () => {
   const supabase = useSupabaseClient();
-  const location = useLocation();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [theme, setTheme] = useState('light');
-  const [token, setToken] = useState('');
-
-
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const tokenFromURL = query.get('access_token');
-    if (tokenFromURL) {
-      setToken(tokenFromURL);
-    } else {
-      setError('Invalid or missing token. Please request a new password reset.');
-    }
-  }, [location]);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -44,7 +31,7 @@ const ResetPassword = () => {
       if (error) throw error;
 
       setMessage('Your password has been reset successfully. Redirecting to login...');
-      setTimeout(() => navigate('/login'), 3000);
+      setTimeout(() => navigate('/'), 3000);
     } catch (err) {
       setError('Failed to reset password. Please try again.');
       console.error(err);
