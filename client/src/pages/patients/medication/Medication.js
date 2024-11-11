@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { usePatient } from "../../../context/PatientContext";
 import PatientTabs from "../../../components/PatientTabs";
-import { Search, AlertCircle, Activity, FileText } from "lucide-react";
+import { Search, FileText } from "lucide-react";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import AddMedicationModal from "../../../components/addMedicationModal/AddMedicationModal";
-import AddAllergyModal from "../../../components/addAllergyModal/AddAllergyModal";
-import AddVitalModal from "../../../components/addVitalModal/AddVitalModal";
 import AddNoteModal from "../../../components/addNoteModal/AddNoteModal";
+import VaccineModal from "./VaccineModal";
 import "./Medication.css";
 
 const MedicationHistory = () => {
@@ -15,15 +14,13 @@ const MedicationHistory = () => {
   const supabase = useSupabaseClient();
 
   const [medications, setMedications] = useState([]);
-  const [allergies, setAllergies] = useState([]);
-  const [vitals, setVitals] = useState([]);
+  const [vaccines, setVaccines] = useState([]);
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isMedicationModalOpen, setMedicationModalOpen] = useState(false);
-  const [isAllergyModalOpen, setAllergyModalOpen] = useState(false);
-  const [isVitalModalOpen, setVitalModalOpen] = useState(false);
   const [isNoteModalOpen, setNoteModalOpen] = useState(false);
+  const [isVaccineModalOpen, setVaccineModalOpen] = useState(false);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -34,17 +31,13 @@ const MedicationHistory = () => {
   const fetchPatientData = async () => {
     setLoading(true);
     try {
-      const [medData, allergyData, vitalData, noteData] = await Promise.all([
+      const [medData, vaccineData, noteData] = await Promise.all([
         supabase
           .from("medications")
           .select("*")
           .eq("patient_id", selectedPatient.id),
         supabase
-          .from("patient_allergies")
-          .select("*")
-          .eq("patient_id", selectedPatient.id),
-        supabase
-          .from("patient_vitals")
+          .from("vaccinations")
           .select("*")
           .eq("patient_id", selectedPatient.id),
         supabase
@@ -53,18 +46,12 @@ const MedicationHistory = () => {
           .eq("patient_id", selectedPatient.id),
       ]);
 
-      if (
-        medData.error ||
-        allergyData.error ||
-        vitalData.error ||
-        noteData.error
-      ) {
+      if (medData.error || vaccineData.error || noteData.error) {
         throw new Error("Error fetching patient data");
       }
 
       setMedications(medData.data || []);
-      setAllergies(allergyData.data || []);
-      setVitals(vitalData.data || []);
+      setVaccines(vaccineData.data || []);
       setNotes(noteData.data || []);
     } catch (error) {
       console.error("Error fetching patient data:", error);
@@ -101,41 +88,23 @@ const MedicationHistory = () => {
     }
   };
 
-  const handleAddAllergy = async (newAllergy) => {
+  const handleAddVaccine = async (newVaccine) => {
     try {
       const { data, error } = await supabase
-        .from("patient_allergies")
-        .insert([{ patient_id: selectedPatient.id, ...newAllergy }]);
+        .from("vaccinations")
+        .insert([{ patient_id: selectedPatient.id, ...newVaccine }])
+        .select("*"); // Ensure Supabase returns the inserted row
 
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setAllergies((prev) => [...prev, { ...newAllergy, id: data[0].id }]);
+        setVaccines((prev) => [...prev, data[0]]); // Update state with the new vaccine
       } else {
-        await fetchPatientData(); // Fallback to re-fetching
+        await fetchPatientData(); // Fallback to fetching all data
       }
-      setAllergyModalOpen(false);
+      setVaccineModalOpen(false); // Close the modal
     } catch (error) {
-      console.error("Error adding allergy:", error);
-    }
-  };
-
-  const handleAddVital = async (newVital) => {
-    try {
-      const { data, error } = await supabase
-        .from("patient_vitals")
-        .insert([{ patient_id: selectedPatient.id, ...newVital }]);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        setVitals((prev) => [...prev, { ...newVital, id: data[0].id }]);
-      } else {
-        await fetchPatientData(); // Fallback to re-fetching
-      }
-      setVitalModalOpen(false);
-    } catch (error) {
-      console.error("Error adding vital:", error);
+      console.error("Error adding vaccine:", error);
     }
   };
 
@@ -237,54 +206,24 @@ const MedicationHistory = () => {
         </div>
 
         <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <AlertCircle size={24} style={{ marginRight: "10px" }} />
-            Allergies
-          </h2>
+          <h2 className="medication-section-header">Vaccines</h2>
           <button
             className="medication-buttons"
-            onClick={() => setAllergyModalOpen(true)}
+            onClick={() => setVaccineModalOpen(true)}
           >
-            Add Allergy
+            Add Vaccine
           </button>
           {loading ? (
-            <p className="loading-message">Loading allergies...</p>
+            <p className="loading-message">Loading vaccines...</p>
           ) : (
-            renderTable(allergies, [
-              { key: "name", label: "Allergy" },
-              { key: "reaction", label: "Reaction" },
+            renderTable(vaccines, [
+              { key: "name", label: "Name" },
+              { key: "date_given", label: "Date Given" },
+              { key: "next_due", label: "Next Due" },
+              { key: "dosage", label: "Dosage" },
+              { key: "frequency", label: "Frequency" },
+              { key: "doctor", label: "Doctor" },
             ])
-          )}
-        </div>
-
-        <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <Activity size={24} style={{ marginRight: "10px" }} />
-            Vitals
-          </h2>
-          <button
-            className="medication-buttons"
-            onClick={() => setVitalModalOpen(true)}
-          >
-            Add Vital
-          </button>
-          {loading ? (
-            <p className="loading-message">Loading vitals...</p>
-          ) : (
-            renderTable(
-              vitals.map((vital) => ({
-                ...vital,
-                weight: `${vital.weight} lb`,
-                temperature: `${vital.temperature} °F`,
-                heart_rate: `${vital.heart_rate} BPM`,
-              })),
-              [
-                { key: "date", label: "Date" },
-                { key: "weight", label: "Weight" },
-                { key: "temperature", label: "Temperature" },
-                { key: "heart_rate", label: "Heart Rate" },
-              ]
-            )
           )}
         </div>
 
@@ -315,15 +254,11 @@ const MedicationHistory = () => {
         onClose={() => setMedicationModalOpen(false)}
         onAddMedication={handleAddMedication}
       />
-      <AddAllergyModal
-        isOpen={isAllergyModalOpen}
-        onClose={() => setAllergyModalOpen(false)}
-        onAddAllergy={handleAddAllergy}
-      />
-      <AddVitalModal
-        isOpen={isVitalModalOpen}
-        onClose={() => setVitalModalOpen(false)}
-        onAddVital={handleAddVital}
+      <VaccineModal
+        isOpen={isVaccineModalOpen}
+        onClose={() => setVaccineModalOpen(false)}
+        onAddVaccine={fetchPatientData}
+        patientId={selectedPatient?.id}
       />
       <AddNoteModal
         isOpen={isNoteModalOpen}
