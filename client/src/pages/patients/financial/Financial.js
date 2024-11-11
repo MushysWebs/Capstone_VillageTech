@@ -271,7 +271,7 @@ const Financial = () => {
                               updateInvoiceStatus(item, "Pending")
                             }
                           >
-                            Pending
+                            Convert to Invoice
                           </button>
                         </td>
                         <td>
