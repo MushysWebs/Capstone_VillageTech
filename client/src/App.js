@@ -8,6 +8,7 @@ import Layout from "./Layout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Contacts from "./pages/contacts/Contacts";
 import Admin from "./pages/admin/Admin";
+import Account from "./pages/admin/Account";
 import MessagingPage from "./pages/message/MessagingPage";
 import PrivateRoute from "./components/PrivateRoute";
 import NewPatient from "./pages/patients/newPatient/NewPatient";
@@ -39,6 +40,7 @@ function App() {
                 <Route element={<Layout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/account" element={<Account />} />
                   <Route path="/messages" element={<MessagingPage />} />
                   <Route path="/contacts" element={<Contacts />} />
                   <Route path="/patient" element={<PatientMain />} />

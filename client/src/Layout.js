@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 import './pages/dashboard/Dashboard.css';
 import AdminPage from './pages/admin/Admin';
+import Account from './pages/admin/Account';
 import Dashboard from './pages/dashboard/Dashboard';
 import Contacts from './pages/contacts/Contacts';
 import AuthGuard from './components/auth/AuthGuard';
@@ -132,6 +133,8 @@ const Layout = () => {
   const renderMainContent = () => {
     if (location.pathname === "/admin") {
       return <AdminPage globalSearchTerm={globalSearchTerm} />;
+    } else if (location.pathname === "/account") {
+      return <Account />;
     } else if (location.pathname === "/dashboard") {
       return <Dashboard globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === "/messages") {
@@ -229,16 +232,29 @@ const Layout = () => {
                   <span draggable="false">Messages</span>
                 </div>
               </Link>
-              <Link
-                to="/admin"
-                className={`header-button blue-button nunito-regular ${
-                  location.pathname === "/admin" ? "active" : ""
-                }`}
-                draggable="false"
-              >
-                <i className="fas fa-user-shield" draggable="false"></i>{" "}
-                <span draggable="false">Admin</span>
-              </Link>
+              {currentUserStaff?.role === 'Veterinarian' ? (
+                <Link
+                  to="/admin"
+                  className={`header-button blue-button nunito-regular ${
+                    location.pathname === "/admin" ? "active" : ""
+                  }`}
+                  draggable="false"
+                >
+                  <i className="fas fa-user-shield" draggable="false"></i>{" "}
+                  <span draggable="false">Admin</span>
+                </Link>
+              ) : (
+                <Link
+                  to="/account"
+                  className={`header-button blue-button nunito-regular ${
+                    location.pathname === "/account" ? "active" : ""
+                  }`}
+                  draggable="false"
+                >
+                  <i className="fas fa-user" draggable="false"></i>{" "}
+                  <span draggable="false">Account</span>
+                </Link>
+              )}
               <div className="search-container" style={searchContainerStyles}>
                 <i
                   className="fas fa-search search-icon"
