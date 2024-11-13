@@ -25,6 +25,7 @@ import {
   TrendingUp, 
   AccountBalance
 } from '@mui/icons-material';
+import { Check, Clock, X } from 'lucide-react';
 import './EndOfDayWizard.css';
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
@@ -40,7 +41,6 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       if (reportData) {
         // transform old report data to match current implementation of wizard
         const transformedData = {
-          employeesStatus: reportData.employee_status || reportData.employeesStatus || [],
           patientStats: reportData.patient_stats || [],
           financialSummary: reportData.financial_summary || {
             invoicesCreated: 0,
@@ -64,8 +64,11 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       setLoading(true);
       try {
         const today = new Date().toISOString().split('T')[0];
+        const todayEnd = new Date(today);
+        todayEnd.setDate(todayEnd.getDate() + 1);
+  
+        const appointmentStats = await calculateAppointmentStats(today, todayEnd.toISOString());
         
-        // fetch invoices created today
         const { data: invoices, error: invoiceError } = await supabase
           .from('invoices')
           .select('*')
@@ -77,16 +80,8 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
         const patientStats = await calculatePatientStats(invoices);
         const profitBreakdown = calculateProfitBreakdown(invoices);
   
-        // dummy data for employee status. TODO
-        const employeesStatus = [
-          { name: 'Still Clocked In', value: 5 },
-          { name: 'Clocked Out', value: 15 },
-          { name: 'Absent', value: 2 },
-          { name: 'Scheduled', value: 22 },
-        ];
-  
         setData({
-          employeesStatus,
+          appointmentStats,
           patientStats,
           financialSummary,
           profitBreakdown,
@@ -94,10 +89,21 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       } catch (error) {
         console.error('Error fetching data:', error);
         setData({
-          employeesStatus: [],
+          appointmentStats: {
+            totalScheduled: 0,
+            completed: 0,
+            cancelled: 0,
+            noShow: 0,
+            inProgress: 0,
+            walkIns: 0,
+            uniquePatients: 0,
+            completionRate: 0,
+            cancellationRate: 0,
+            noShowRate: 0
+          },
           patientStats: [
             { name: 'New Patients', value: 0 },
-            { name: 'Returning Patients', value: 0 },
+            { name: 'Returning', value: 0 },
           ],
           financialSummary: {
             invoicesCreated: 0,
@@ -110,6 +116,54 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const calculateAppointmentStats = async (todayStart, todayEnd) => {
+    try {
+      const { data: appointments, error: appointmentError } = await supabase
+        .from('appointments')
+        .select(`
+          id,
+          patient_id,
+          status,
+          start_time,
+          title,
+          description
+        `)
+        .gte('start_time', todayStart)
+        .lt('start_time', todayEnd);
+  
+      if (appointmentError) throw appointmentError;
+  
+      const stats = {
+        totalScheduled: appointments.length,
+        completed: appointments.filter(apt => apt.status === 'Completed').length,
+        cancelled: appointments.filter(apt => apt.status === 'Cancelled').length,
+        inProgress: appointments.filter(apt => apt.status === 'In Progress').length,
+        walkIns: appointments.filter(apt => apt.title.toLowerCase().includes('walk-in')).length,
+        uniquePatients: new Set(appointments.map(apt => apt.patient_id)).size
+      };
+  
+      stats.completionRate = (stats.completed / stats.totalScheduled) * 100;
+      stats.cancellationRate = (stats.cancelled / stats.totalScheduled) * 100;
+      stats.noShowRate = (stats.noShow / stats.totalScheduled) * 100;
+  
+      return stats;
+    } catch (error) {
+      console.error('Error calculating appointment stats:', error);
+      return {
+        totalScheduled: 0,
+        completed: 0,
+        cancelled: 0,
+        noShow: 0,
+        inProgress: 0,
+        walkIns: 0,
+        uniquePatients: 0,
+        completionRate: 0,
+        cancellationRate: 0,
+        noShowRate: 0
+      };
     }
   };
 
@@ -132,7 +186,6 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       // unique patient IDs from today's invoices
       const uniquePatientIds = [...new Set(todaysInvoices.map(inv => inv.patient_id))];
       
-      // For each patient seen today, check if they have any previous invoices
       const { data: historicalInvoices, error } = await supabase
         .from('invoices')
         .select('patient_id, invoice_date')
@@ -142,12 +195,10 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
   
       if (error) throw error;
   
-      // Create a set of patient IDs who have previous invoices
       const returningPatientIds = new Set(
         historicalInvoices.map(inv => inv.patient_id)
       );
   
-      // Count new vs returning patients
       let newPatients = 0;
       let returningPatients = 0;
   
@@ -161,13 +212,13 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
   
       return [
         { name: 'New Patients', value: newPatients },
-        { name: 'Returning Patients', value: returningPatients },
+        { name: 'Returning', value: returningPatients },
       ];
     } catch (error) {
       console.error('Error calculating patient stats:', error);
       return [
         { name: 'New Patients', value: 0 },
-        { name: 'Returning Patients', value: 0 },
+        { name: 'Returning', value: 0 },
       ];
     }
   };
@@ -233,7 +284,7 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
   
     const reportToSave = {
       date: new Date().toISOString().split('T')[0],
-      employee_status: data.employeesStatus,
+      appointment_stats: data.appointmentStats,
       patient_stats: data.patientStats,
       financial_summary: data.financialSummary,
       profit_breakdown: data.profitBreakdown,
@@ -253,49 +304,7 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       console.error('Error saving report:', error);
     }
   };
-  const renderEmployeeStatus = () => {
-    const employeeStats = data?.employee_status || data?.employeesStatus || [
-      { name: 'Still Clocked In', value: 0 },
-      { name: 'Clocked Out', value: 0 },
-      { name: 'Absent', value: 0 },
-      { name: 'Scheduled', value: 0 }
-    ];
-  
-    const statusMap = {
-      'Still Clocked In': { Icon: Person, color: '#4CAF50' },
-      'Clocked Out': { Icon: PersonOff, color: '#FFC107' },
-      'Absent': { Icon: EventBusy, color: '#F44336' },
-      'Scheduled': { Icon: Schedule, color: '#2196F3' }
-    };
-  
-    const formattedStats = Object.entries(statusMap).map(([label, config]) => ({
-      label,
-      value: employeeStats.find(stat => stat.name === label)?.value || 0,
-      Icon: config.Icon,
-      color: config.color
-    }));
-  
-    return (
-      <Grid item xs={12}>
-        <Card className="summary-card employee-status">
-          <Typography variant="h6" gutterBottom>Employee Status</Typography>
-          <Grid container spacing={2}>
-            {formattedStats.map((status, index) => (
-              <Grid item xs={6} sm={3} key={index}>
-                <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
-                  <Avatar style={{ backgroundColor: status.color, marginBottom: '8px' }}>
-                    <status.Icon />
-                  </Avatar>
-                  <Typography variant="h4">{status.value}</Typography>
-                  <Typography variant="body2" color="textSecondary" align="center">{status.label}</Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        </Card>
-      </Grid>
-    );
-  };
+
 
   const renderPatientStats = () => {
     const totalPatients = data.patientStats.reduce((acc, curr) => acc + curr.value, 0);
@@ -361,10 +370,10 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
                     <Refresh style={{ color: '#0088FE' }} />
                   </ListItemIcon>
                   <ListItemText 
-                    primary="Returning Patients" 
+                    primary="Returning" 
                     secondary={
                       <Typography variant="h4" component="span">
-                        {data.patientStats.find(stat => stat.name === 'Returning Patients').value}
+                        {data.patientStats.find(stat => stat.name === 'Returning').value}
                       </Typography>
                     }
                   />
@@ -403,6 +412,108 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       </Card>
     </Grid>
   );
+
+  const renderAppointmentStats = () => {
+    const appointmentData = data.appointmentStats;
+    const COLORS = {
+      Completed: '#16a34a',    // Green
+      'In Progress': '#ca8a04', // Yellow/Orange
+      Cancelled: '#dc2626'     // Red
+    };
+    
+    const pieData = [
+      { name: 'Completed', value: appointmentData.completed },
+      { name: 'In Progress', value: appointmentData.inProgress },
+      { name: 'Cancelled', value: appointmentData.cancelled }
+    ];
+  
+    return (
+      <Grid item xs={12}>
+        <Card className="summary-card appointment-stats">
+          <Typography variant="h6" gutterBottom>Appointment Statistics</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <List>
+                <ListItem>
+                  <ListItemIcon>
+                    <Schedule style={{ color: '#09ACE0' }} />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="Total Scheduled" 
+                    secondary={
+                      <Typography variant="h4" component="span">
+                        {appointmentData.totalScheduled}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <Check style={{ color: '#16a34a' }} />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="Completed" 
+                    secondary={
+                      <Typography variant="h4" component="span">
+                        {appointmentData.completed}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <Clock style={{ color: '#ca8a04' }} />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="In Progress" 
+                    secondary={
+                      <Typography variant="h4" component="span">
+                        {appointmentData.inProgress}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon>
+                    <X style={{ color: '#dc2626' }} />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="Cancelled" 
+                    secondary={
+                      <Typography variant="h4" component="span">
+                        {appointmentData.cancelled}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              </List>
+            </Grid>
+          </Grid>
+        </Card>
+      </Grid>
+    );
+  };
   
   const renderProfitBreakdown = () => {
     const expenses = data.profitBreakdown.filter(item => !item.name.includes('Revenue'));
@@ -478,12 +589,12 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
           <Typography>Generating report...</Typography>
         ) : (
           <Box className="end-of-day-content">
-            <Grid container spacing={3}>
-              {renderEmployeeStatus()}
-              {renderPatientStats()}
-              {renderFinancialSummary()}
-              {renderProfitBreakdown()}
-            </Grid>
+           <Grid container spacing={3}>
+            {renderAppointmentStats()}
+            {renderPatientStats()}
+            {renderFinancialSummary()}
+            {renderProfitBreakdown()}
+          </Grid>
           </Box>
         )}
         <Divider style={{ margin: '24px 0' }} />
