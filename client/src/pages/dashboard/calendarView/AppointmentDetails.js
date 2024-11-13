@@ -37,9 +37,10 @@ const AppointmentDetails = ({
   const [currentAppointmentId, setCurrentAppointmentId] = useState(initialAppointmentId);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-const [isProcessingDelete, setIsProcessingDelete] = useState(false);
-const [deleteError, setDeleteError] = useState(null);
-const [editedAppointment, setEditedAppointment] = useState(null);
+  const [isProcessingDelete, setIsProcessingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [editedAppointment, setEditedAppointment] = useState(null);
+  const [isStatusUpdating, setIsStatusUpdating] = useState(false);
   const [dateRange, setDateRange] = useState({
     start: format(new Date(), 'yyyy-MM-dd'),
     end: format(addDays(new Date(), 7), 'yyyy-MM-dd')
@@ -65,6 +66,107 @@ const [editedAppointment, setEditedAppointment] = useState(null);
       filterAndSortAppointments();
     }
   }, [allAppointments, dateRange, sortConfig, searchTerm, filterStatus]);
+
+  const handleQuickStatusChange = async (newStatus) => {
+    setIsStatusUpdating(true);
+    try {
+      const { error: updateError } = await supabase
+        .from('appointments')
+        .update({ status: newStatus })
+        .eq('id', appointment.id);
+  
+      if (updateError) throw updateError;
+  
+      const { data: updatedData, error: fetchError } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          patients:patient_id (
+            id,
+            name,
+            species,
+            breed,
+            date_of_birth
+          ),
+          staff:staff_id (
+            id,
+            first_name,
+            last_name
+          ),
+          owners:patients(
+            owners(
+              id,
+              first_name,
+              last_name,
+              phone_number,
+              email
+            )
+          )
+        `)
+        .eq('id', appointment.id)
+        .single();
+  
+      if (fetchError) throw fetchError;
+  
+      setAppointment(updatedData);
+      onAppointmentUpdated?.();
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+    } finally {
+      setIsStatusUpdating(false);
+    }
+  };
+
+  
+  const QuickStatusButtons = ({ appointment, onStatusChange, isStatusUpdating }) => {
+    const statusConfigs = [
+      { 
+        status: 'Completed', 
+        icon: Check,
+        color: '#16a34a', 
+        bgColor: '#dcfce7',
+        borderColor: '#86efac'
+      },
+      { 
+        status: 'In Progress', 
+        icon: Clock,
+        color: '#ca8a04', 
+        bgColor: '#fef9c3',
+        borderColor: '#fde047'
+      },
+      { 
+        status: 'Cancelled', 
+        icon: Trash2,
+        color: '#dc2626', 
+        bgColor: '#fee2e2',
+        borderColor: '#fca5a5'
+      }
+    ];
+  
+    return (
+      <div className="appointmentDetails__quickActions">
+        {statusConfigs.map(({ status, icon: Icon, color, bgColor, borderColor }) => (
+          <button
+            key={status}
+            onClick={() => onStatusChange(status)}
+            disabled={appointment.status === status || isStatusUpdating}
+            data-status={status}
+            className={`appointmentDetails__quickStatusButton ${
+              appointment.status === status ? 'active' : ''
+            } ${isStatusUpdating ? 'loading' : ''}`}
+            style={{
+              '--status-color': color,
+              '--status-bg': bgColor,
+              '--status-border': borderColor
+            }}
+          >
+            <Icon size={18} />
+            {isStatusUpdating ? 'Updating...' : status}
+          </button>
+        ))}
+      </div>
+    );
+  };
 
   const fetchAvailableStaff = async () => {
     try {
@@ -755,6 +857,13 @@ const [editedAppointment, setEditedAppointment] = useState(null);
                   {appointment.status}
                 </span>
               </div>
+
+              {!isEditMode && (
+                <QuickStatusButtons
+                  appointment={appointment}
+                  onStatusChange={handleQuickStatusChange}
+                />
+              )}
           
               <div className="appointmentDetails__grid">
                 <div className="appointmentDetails__section">
@@ -919,6 +1028,7 @@ const [editedAppointment, setEditedAppointment] = useState(null);
                     )}
                 </div>
                 )}
+                
           
           <div className="appointmentDetails__actions">
             {isEditMode ? (
