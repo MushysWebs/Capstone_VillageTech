@@ -1,3 +1,6 @@
+[![codecov](https://codecov.io/github/MushysWebs/Capstone_VillageTech/graph/badge.svg?token=Y5OY005Q3W)](https://codecov.io/github/MushysWebs/Capstone_VillageTech)
+
+
 # July 25, 2024
 AuthGuard has been implemented please run this command on server side to install jsonwebtoken
 
