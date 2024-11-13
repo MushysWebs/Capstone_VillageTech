@@ -41,6 +41,16 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
       if (reportData) {
         // transform old report data to match current implementation of wizard
         const transformedData = {
+          appointmentStats: reportData.appointment_stats || {
+            totalScheduled: 0,
+            completed: 0,
+            cancelled: 0,
+            inProgress: 0,
+            walkIns: 0,
+            uniquePatients: 0,
+            completionRate: 0,
+            cancellationRate: 0,
+          },
           patientStats: reportData.patient_stats || [],
           financialSummary: reportData.financial_summary || {
             invoicesCreated: 0,
@@ -147,7 +157,6 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
   
       stats.completionRate = (stats.completed / stats.totalScheduled) * 100;
       stats.cancellationRate = (stats.cancelled / stats.totalScheduled) * 100;
-      stats.noShowRate = (stats.noShow / stats.totalScheduled) * 100;
   
       return stats;
     } catch (error) {
@@ -156,13 +165,11 @@ const EndOfDayWizard = ({ open, onClose, reportData = null, readOnly = false }) 
         totalScheduled: 0,
         completed: 0,
         cancelled: 0,
-        noShow: 0,
         inProgress: 0,
         walkIns: 0,
         uniquePatients: 0,
         completionRate: 0,
         cancellationRate: 0,
-        noShowRate: 0
       };
     }
   };
