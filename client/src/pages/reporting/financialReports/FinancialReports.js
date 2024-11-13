@@ -7,34 +7,66 @@ import ReportingTabs from "../../../components/ReportingTabs";
 
 const FinancialReports = () => {
   const [appointments, setAppointments] = useState([]);
+  const [todayAppointments, setTodayAppointments] = useState([]);
+  const [tomorrowAppointments, setTomorrowAppointments] = useState([]);
   const [paidReceipts, setPaidReceipts] = useState([]);
   const [totalSalesToday, setTotalSalesToday] = useState(0);
   const supabase = useSupabaseClient();
 
-  const data1 = [
-    { name: "Day 1", users: 10 },
-    { name: "Day 2", users: 12 },
-    { name: "Day 3", users: 9 },
-    { name: "Day 4", users: 11 },
-    { name: "Day 5", users: 15 },
-    { name: "Day 6", users: 17 },
-    { name: "Day 7", users: 18 },
-    { name: "Day 8", users: 20 },
-  ];
-  const data2 = [
-    { name: "Day 1", users: 1 },
-    { name: "Day 2", users: 6 },
-    { name: "Day 3", users: 7 },
-    { name: "Day 4", users: 8 },
-    { name: "Day 5", users: 7 },
-    { name: "Day 6", users: 10 },
-    { name: "Day 7", users: 6 },
-    { name: "Day 9", users: 14 },
-  ];
+  const getDates = () => {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    return {
+      todayStart: today.toISOString().split('T')[0] + 'T00:00:00',
+      todayEnd: today.toISOString().split('T')[0] + 'T23:59:59',
+      tomorrowStart: tomorrow.toISOString().split('T')[0] + 'T00:00:00',
+      tomorrowEnd: tomorrow.toISOString().split('T')[0] + 'T23:59:59'
+    };
+  };
 
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split("T")[0];
+  };
+
+  const fetchTodayTomorrowAppointments = async () => {
+    try {
+      const dates = getDates();
+
+      const { data: todayData, error: todayError } = await supabase
+        .from('appointments')
+        .select('*')
+        .gte('start_time', dates.todayStart)
+        .lte('start_time', dates.todayEnd);
+
+      if (todayError) throw todayError;
+
+      const { data: tomorrowData, error: tomorrowError } = await supabase
+        .from('appointments')
+        .select('*')
+        .gte('start_time', dates.tomorrowStart)
+        .lte('start_time', dates.tomorrowEnd);
+
+      if (tomorrowError) throw tomorrowError;
+
+      const todayCount = todayData?.length || 0;
+      const tomorrowCount = tomorrowData?.length || 0;
+
+      setTodayAppointments({
+        count: todayCount,
+        data: getDailyBreakdown(todayData),
+      });
+
+      setTomorrowAppointments({
+        count: tomorrowCount,
+        data: getDailyBreakdown(tomorrowData),
+      });
+
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+    }
   };
 
   const fetchAppointments = async () => {
@@ -86,14 +118,34 @@ const FinancialReports = () => {
     }
   };
 
+  const getDailyBreakdown = (appointments) => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      return {
+        name: `Day ${7-i}`,
+        users: 0,
+        date: date.toISOString().split('T')[0]
+      };
+    }).reverse();
+
+    appointments?.forEach(apt => {
+      const aptDate = apt.start_time.split('T')[0];
+      const dayData = last7Days.find(day => day.date === aptDate);
+      if (dayData) {
+        dayData.users++;
+      }
+    });
+
+    return last7Days;
+  };
+
   useEffect(() => {
     const loadData = async () => {
+      await fetchTodayTomorrowAppointments();
       await fetchAppointments();
       await fetchReceipts();
       await fetchTotalSalesToday();
-      console.log("Appointments:", appointments);
-      console.log("Receipts:", paidReceipts);
-      console.log("Total Sales Today:", totalSalesToday);
     };
   
     loadData();
@@ -106,16 +158,14 @@ const FinancialReports = () => {
         <div className="top-section">
           <TotalSalesCard totalSales={totalSalesToday} />
           <FinancialReportCard
-            data={data1}
+            data={todayAppointments.data || []}
             title="Appointments Today"
-            count={appointments.length}
-            percentage="+25%"
+            count={todayAppointments.count || 0}
           />
           <FinancialReportCard
-            data={data2}
+            data={tomorrowAppointments.data || []}
             title="Appointments Tomorrow"
-            count="5"
-            percentage="+15%"
+            count={tomorrowAppointments.count || 0}
           />
         </div>
 
