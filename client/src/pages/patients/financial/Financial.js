@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { Link } from "react-router-dom";
 import { usePatient } from "../../../context/PatientContext";

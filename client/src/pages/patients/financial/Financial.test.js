@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Financial from "./Financial";
+import React from "react";
 import { usePatient } from "../../../context/PatientContext";
 import { supabase } from "../../../components/routes/supabaseClient";
 
