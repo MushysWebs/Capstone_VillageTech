@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import React from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { Link } from "react-router-dom";
@@ -26,11 +26,59 @@ const Financial = ({ globalSearchTerm }) => {
         if (error) {
             console.error("Error fetching estimate data:", error.message);
         } else {
-            console.log("Fetched estimates:", data); // Log fetched estimates
-            setEstimateData(data); // Update state with fetched estimates
+            console.log("Fetched estimates:", data); 
+            setEstimateData(data); 
         }
     }
 };
+
+const filterInvoices = (invoices, status, searchTerm) => {
+  if (!invoices) return [];
+
+  let filtered = invoices.filter(invoice => invoice.invoice_status === status);
+
+  if (searchTerm) {
+    const search = searchTerm.toLowerCase();
+    filtered = filtered.filter(invoice => 
+      invoice.invoice_id.toString().includes(search) ||
+      invoice.invoice_name.toLowerCase().includes(search) ||
+      selectedPatient.name.toLowerCase().includes(search) ||
+      invoice.invoice_total.toString().includes(search) ||
+      new Date(invoice.invoice_date).toLocaleDateString().toLowerCase().includes(search)
+    );
+  }
+
+  return filtered;
+};
+
+const renderNoResults = (section) => (
+  <tr>
+    <td colSpan="9" className="no-results-message">
+      No {section} found matching "{globalSearchTerm}"
+    </td>
+  </tr>
+);
+
+const filteredEstimates = useMemo(() => 
+  filterInvoices(invoiceData, "Estimate", globalSearchTerm),
+  [invoiceData, globalSearchTerm]
+);
+
+const filteredPendingInvoices = useMemo(() => 
+  filterInvoices(invoiceData, "Pending", globalSearchTerm),
+  [invoiceData, globalSearchTerm]
+);
+
+const filteredCompletedInvoices = useMemo(() => 
+  filterInvoices(invoiceData, "Completed", globalSearchTerm),
+  [invoiceData, globalSearchTerm]
+);
+
+const filteredCancelledInvoices = useMemo(() => 
+  filterInvoices(invoiceData, "Cancelled", globalSearchTerm),
+  [invoiceData, globalSearchTerm]
+);
+
 
   const fetchInvoiceData = async () => {
     if (selectedPatient) {
@@ -212,239 +260,225 @@ const Financial = ({ globalSearchTerm }) => {
     <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="financial-page">
         <div className="estimate-section">
-            <div className="estimate-header-container">
-              <button onClick={openModal}>+</button>
-              <h2 className="financial-h2">Estimates</h2>
-            </div>
-
-            <div className="table-container">
-              <table className="invoices-table">
-                <thead>
-                  <tr>
-                    <th>Number</th>
-                    <th>Name</th>
-                    <th>Patient</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Edit</th>
-                    <th>Update Status</th>
-                    <th>Cancel</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoiceData
-                    .filter((invoice) => invoice.invoice_status === "Estimate")
-                    .map((item) => (
-                      <tr key={item.invoice_id}>
-                        <td>{item.invoice_id}</td>
-                        <td>{item.invoice_name}</td>
-                        <td>{selectedPatient.name}</td>
-                        <td>{formatCurrency(item.invoice_total)}</td>
-                        <td>
-                          <button
-                            className={getStatusClass(item.invoice_status)}
-                          >
-                            {item.invoice_status}
-                          </button>
-                        </td>
-                        <td>
-                          {new Date(item.invoice_date).toLocaleDateString()}
-                        </td>
-                        <td>
-                          <button
-                            className="financial-edit-button"
-                            onClick={() => handleEditClick(item)}
-                          >
-                            Edit
-                          </button>
-                        </td>
-
-                        <td>
-                          <button
-                            className="financial-pending"
-                            onClick={() =>
-                              updateInvoiceStatus(item, "Pending")
-                            }
-                          >
-                            Convert to Invoice
-                          </button>
-                        </td>
-                        <td>
-                          <button
-                            className="financial-cancel-button"
-                            onClick={() => cancelInvoice(item)}
-                          >
-                            Cancel
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="estimate-header-container">
+            <button onClick={openModal}>+</button>
+            <h2 className="financial-h2">Estimates</h2>
           </div>
-
-          <div className="estimate-section">
-            <h2 className="financial-h2">Pending Invoices</h2>
-            <div className="table-container">
-              <table className="invoices-table">
-                <thead>
-                  <tr>
-                    <th>Number</th>
-                    <th>Name</th>
-                    <th>Patient</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Edit</th>
-                    <th>Update Status</th>
-                    <th>Cancel</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoiceData
-                    .filter((invoice) => invoice.invoice_status === "Pending")
-                    .map((item) => (
-                      <tr key={item.invoice_id}>
-                        <td>{item.invoice_id}</td>
-                        <td>{item.invoice_name}</td>
-                        <td>{selectedPatient.name}</td>
-                        <td>{formatCurrency(item.invoice_total)}</td>
-                        <td>
-                          <button
-                            className={getStatusClass(item.invoice_status)}
-                          >
-                            {item.invoice_status}
-                          </button>
-                        </td>
-                        <td>
-                          {new Date(item.invoice_date).toLocaleDateString()}
-                        </td>
-                        <td>
-                          <button
-                            className="financial-edit-button"
-                            onClick={() => handleEditClick(item)}
-                          >
-                            Edit
-                          </button>
-                        </td>
-
-                        <td>
-                          <button
-                            className="financial-complete"
-                            onClick={() =>
-                              updateInvoiceStatus(item, "Completed")
-                            }
-                          >
-                            Complete
-                          </button>
-                        </td>
-                        <td>
-                          <button
-                            className="financial-cancel-button"
-                            onClick={() => cancelInvoice(item)}
-                          >
-                            Cancel
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+  
+          <div className="table-container">
+            <table className="invoices-table">
+              <thead>
+                <tr>
+                  <th>Number</th>
+                  <th>Name</th>
+                  <th>Patient</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Edit</th>
+                  <th>Update Status</th>
+                  <th>Cancel</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEstimates.length > 0 ? (
+                  filteredEstimates.map((item) => (
+                    <tr key={item.invoice_id}>
+                      <td>{item.invoice_id}</td>
+                      <td>{item.invoice_name}</td>
+                      <td>{selectedPatient.name}</td>
+                      <td>{formatCurrency(item.invoice_total)}</td>
+                      <td>
+                        <button className={getStatusClass(item.invoice_status)}>
+                          {item.invoice_status}
+                        </button>
+                      </td>
+                      <td>{new Date(item.invoice_date).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          className="financial-edit-button"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="financial-pending"
+                          onClick={() => updateInvoiceStatus(item, "Pending")}
+                        >
+                          Convert to Invoice
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="financial-cancel-button"
+                          onClick={() => cancelInvoice(item)}
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  globalSearchTerm && renderNoResults("estimates")
+                )}
+              </tbody>
+            </table>
           </div>
-
-          <div className="estimate-section">
-            <h2 className="financial-h2">Completed</h2>
-            <div className="table-container">
-              <table className="invoices-table">
-                <thead>
-                  <tr>
-                    <th>Number</th>
-                    <th>Name</th>
-                    <th>Patient</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoiceData
-                    .filter((invoice) => invoice.invoice_status === "Completed")
-                    .map((item) => (
-                      <tr key={item.invoice_id}>
-                        <td>{item.invoice_id}</td>
-                        <td>{item.invoice_name}</td>
-                        <td>{selectedPatient.name}</td>
-                        <td>{formatCurrency(item.invoice_total)}</td>
-                        <td>
-                          <button
-                            className={getStatusClass(item.invoice_status)}
-                          >
-                            {item.invoice_status}
-                          </button>
-                        </td>
-                        <td>
-                          {new Date(item.invoice_date).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+        </div>
+  
+        <div className="estimate-section">
+          <h2 className="financial-h2">Pending Invoices</h2>
+          <div className="table-container">
+            <table className="invoices-table">
+              <thead>
+                <tr>
+                  <th>Number</th>
+                  <th>Name</th>
+                  <th>Patient</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Edit</th>
+                  <th>Update Status</th>
+                  <th>Cancel</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPendingInvoices.length > 0 ? (
+                  filteredPendingInvoices.map((item) => (
+                    <tr key={item.invoice_id}>
+                      <td>{item.invoice_id}</td>
+                      <td>{item.invoice_name}</td>
+                      <td>{selectedPatient.name}</td>
+                      <td>{formatCurrency(item.invoice_total)}</td>
+                      <td>
+                        <button className={getStatusClass(item.invoice_status)}>
+                          {item.invoice_status}
+                        </button>
+                      </td>
+                      <td>{new Date(item.invoice_date).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          className="financial-edit-button"
+                          onClick={() => handleEditClick(item)}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="financial-complete"
+                          onClick={() => updateInvoiceStatus(item, "Completed")}
+                        >
+                          Complete
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="financial-cancel-button"
+                          onClick={() => cancelInvoice(item)}
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  globalSearchTerm && renderNoResults("pending invoices")
+                )}
+              </tbody>
+            </table>
           </div>
-
-          <div className="estimate-section">
-            <h2 className="financial-h2">Cancelled</h2>
-            <div className="table-container">
-              <table className="invoices-table">
-                <thead>
-                  <tr>
-                    <th>Number</th>
-                    <th>Name</th>
-                    <th>Patient</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoiceData
-                    .filter((invoice) => invoice.invoice_status === "Cancelled")
-                    .map((item) => (
-                      <tr key={item.invoice_id}>
-                        <td>{item.invoice_id}</td>
-                        <td>{item.invoice_name}</td>
-                        <td>{selectedPatient.name}</td>
-                        <td>{formatCurrency(item.invoice_total)}</td>
-                        <td>
-                          <button
-                            className={getStatusClass(item.invoice_status)}
-                          >
-                            {item.invoice_status}
-                          </button>
-                        </td>
-                        <td>
-                          {new Date(item.invoice_date).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+        </div>
+  
+        <div className="estimate-section">
+          <h2 className="financial-h2">Completed</h2>
+          <div className="table-container">
+            <table className="invoices-table">
+              <thead>
+                <tr>
+                  <th>Number</th>
+                  <th>Name</th>
+                  <th>Patient</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCompletedInvoices.length > 0 ? (
+                  filteredCompletedInvoices.map((item) => (
+                    <tr key={item.invoice_id}>
+                      <td>{item.invoice_id}</td>
+                      <td>{item.invoice_name}</td>
+                      <td>{selectedPatient.name}</td>
+                      <td>{formatCurrency(item.invoice_total)}</td>
+                      <td>
+                        <button className={getStatusClass(item.invoice_status)}>
+                          {item.invoice_status}
+                        </button>
+                      </td>
+                      <td>{new Date(item.invoice_date).toLocaleDateString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  globalSearchTerm && renderNoResults("completed invoices")
+                )}
+              </tbody>
+            </table>
           </div>
-
+        </div>
+  
+        <div className="estimate-section">
+          <h2 className="financial-h2">Cancelled</h2>
+          <div className="table-container">
+            <table className="invoices-table">
+              <thead>
+                <tr>
+                  <th>Number</th>
+                  <th>Name</th>
+                  <th>Patient</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCancelledInvoices.length > 0 ? (
+                  filteredCancelledInvoices.map((item) => (
+                    <tr key={item.invoice_id}>
+                      <td>{item.invoice_id}</td>
+                      <td>{item.invoice_name}</td>
+                      <td>{selectedPatient.name}</td>
+                      <td>{formatCurrency(item.invoice_total)}</td>
+                      <td>
+                        <button className={getStatusClass(item.invoice_status)}>
+                          {item.invoice_status}
+                        </button>
+                      </td>
+                      <td>{new Date(item.invoice_date).toLocaleDateString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  globalSearchTerm && renderNoResults("cancelled invoices")
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+  
         <AddEstimateModal
-    selectedPatientId={selectedPatient?.id}
-    isOpen={isModalOpen}
-    onClose={closeModal}
-    onAddEstimate={handleAddEstimate} // Pass the function here
-    estimateToEdit={estimateToEdit}
-    />
-    </div>
-  </PatientLayout>
-);
-};
+          selectedPatientId={selectedPatient?.id}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onAddEstimate={handleAddEstimate}
+          estimateToEdit={estimateToEdit}
+        />
+      </div>
+    </PatientLayout>
+  );
+}
 
 export default Financial;

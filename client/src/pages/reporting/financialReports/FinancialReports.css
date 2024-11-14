@@ -148,3 +148,18 @@ body {
 .financial-reports {
   flex: 1;
 }
+
+.no-results-message {
+  padding: 1.5rem;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.dark .no-results-message {
+  background-color: #2c3e50;
+  color: #ecf0f1;
+}

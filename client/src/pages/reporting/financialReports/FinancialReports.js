@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import FinancialReportCard from "./FinancialReportCard";
 import TotalSalesCard from "./TotalSalesCard";
 import "./FinancialReports.css";
 import ReportingTabs from "../../../components/ReportingTabs";
 
-const FinancialReports = () => {
+const FinancialReports = ({ globalSearchTerm }) => {
   const [appointments, setAppointments] = useState([]);
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [tomorrowAppointments, setTomorrowAppointments] = useState([]);
@@ -25,6 +25,38 @@ const FinancialReports = () => {
       tomorrowEnd: tomorrow.toISOString().split('T')[0] + 'T23:59:59'
     };
   };
+
+  const filteredAppointments = useMemo(() => {
+    if (!globalSearchTerm) return appointments;
+
+    return appointments.filter(appointment => {
+      const searchTerm = globalSearchTerm.toLowerCase();
+      const startTime = new Date(appointment.start_time).toLocaleString().toLowerCase();
+      const endTime = new Date(appointment.end_time).toLocaleString().toLowerCase();
+      
+      return (
+        appointment.id.toString().includes(searchTerm) ||
+        appointment.title.toLowerCase().includes(searchTerm) ||
+        startTime.includes(searchTerm) ||
+        endTime.includes(searchTerm)
+      );
+    });
+  }, [appointments, globalSearchTerm]);
+
+  const filteredReceipts = useMemo(() => {
+    if (!globalSearchTerm) return paidReceipts;
+
+    return paidReceipts.filter(receipt => {
+      const searchTerm = globalSearchTerm.toLowerCase();
+      
+      return (
+        receipt.receipt_id.toString().includes(searchTerm) ||
+        receipt.invoice_id.toString().includes(searchTerm) ||
+        receipt.patient_id.toString().includes(searchTerm)
+      );
+    });
+  }, [paidReceipts, globalSearchTerm]);
+
 
   const getTodayDate = () => {
     const today = new Date();
@@ -176,72 +208,84 @@ const FinancialReports = () => {
             <div className="table-wrapper">
               <h3>Pending Appointments</h3>
               <div className="table-scroll">
-                <table className="appointments-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Title</th>
-                      <th>Start Time</th>
-                      <th>End Time</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {appointments.map((appointment) => (
-                      <tr key={appointment.id}>
-                        <td>{appointment.id}</td>
-                        <td>{appointment.title}</td>
-                        <td>
-                          {new Date(appointment.start_time).toLocaleString()}
-                        </td>
-                        <td>
-                          {new Date(appointment.end_time).toLocaleString()}
-                        </td>
-                        <td>{appointment.status}</td>
+                {filteredAppointments.length === 0 && globalSearchTerm ? (
+                  <div className="no-results-message">
+                    No appointments found matching "{globalSearchTerm}"
+                  </div>
+                ) : (
+                  <table className="appointments-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredAppointments.map((appointment) => (
+                        <tr key={appointment.id}>
+                          <td>{appointment.id}</td>
+                          <td>{appointment.title}</td>
+                          <td>
+                            {new Date(appointment.start_time).toLocaleString()}
+                          </td>
+                          <td>
+                            {new Date(appointment.end_time).toLocaleString()}
+                          </td>
+                          <td>{appointment.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
 
             <div className="table-wrapper">
               <h3>Paid Invoices</h3>
               <div className="table-scroll">
-                <table className="receipts-table">
-                  <thead>
-                    <tr>
-                      <th>Receipt ID</th>
-                      <th>Invoice ID</th>
-                      <th>Patient ID</th>
-                      <th>Total</th>
-                      <th>Date</th>
-                      <th>PDF URL</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paidReceipts.map((receipt) => (
-                      <tr key={receipt.receipt_id}>
-                        <td>{receipt.receipt_id}</td>
-                        <td>{receipt.invoice_id}</td>
-                        <td>{receipt.patient_id}</td>
-                        <td>{receipt.receipt_total.toFixed(2)}</td>
-                        <td>
-                          {new Date(receipt.receipt_date).toLocaleDateString()}
-                        </td>
-                        <td>
-                          <a
-                            href={receipt.receipt_pdf_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            View PDF
-                          </a>
-                        </td>
+                {filteredReceipts.length === 0 && globalSearchTerm ? (
+                  <div className="no-results-message">
+                    No invoices found matching "{globalSearchTerm}"
+                  </div>
+                ) : (
+                  <table className="receipts-table">
+                    <thead>
+                      <tr>
+                        <th>Receipt ID</th>
+                        <th>Invoice ID</th>
+                        <th>Patient ID</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>PDF URL</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredReceipts.map((receipt) => (
+                        <tr key={receipt.receipt_id}>
+                          <td>{receipt.receipt_id}</td>
+                          <td>{receipt.invoice_id}</td>
+                          <td>{receipt.patient_id}</td>
+                          <td>{receipt.receipt_total.toFixed(2)}</td>
+                          <td>
+                            {new Date(receipt.receipt_date).toLocaleDateString()}
+                          </td>
+                          <td>
+                            <a
+                              href={receipt.receipt_pdf_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              View PDF
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
