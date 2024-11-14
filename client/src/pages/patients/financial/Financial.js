@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 import { usePatient } from "../../../context/PatientContext";
 import "./Financial.css";
 import PatientLayout from "../../../components/patientLayout/PatientLayout";
-import PatientTabs from "../../../components/PatientTabs";
-import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import AddEstimateModal from "../../../components/addEstimateModal/AddEstimateModal";
 
 const Financial = ({ globalSearchTerm }) => {
