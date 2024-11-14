@@ -175,7 +175,7 @@ const Clinical = ({ globalSearchTerm }) => {
 
   return (
     <PatientLayout globalSearchTerm={globalSearchTerm}>
-      <div className="clinical-content">
+      <div className="clinical-page">
         {error && <div className="error-message">{error}</div>}
         <div className="section-box">
           <h2 className="section-header">Clinical Record</h2>

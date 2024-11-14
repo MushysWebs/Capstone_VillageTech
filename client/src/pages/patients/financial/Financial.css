@@ -7,7 +7,7 @@
 }
 
 .financial-page {
-  width: calc(100% - 270px);
+  width: calc(100% - 20px);
   margin-left: 20px;
   display: flex;
   flex-direction: column;
