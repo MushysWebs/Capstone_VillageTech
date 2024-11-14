@@ -564,7 +564,6 @@ const Admin = ({ globalSearchTerm }) => {
   </div>
 )}
 
-{/* Add Staff Modal */}
 <AddStaffModal
   isOpen={isModalOpen}
   onClose={closeModal}
