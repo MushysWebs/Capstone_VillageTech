@@ -142,7 +142,7 @@ const Layout = () => {
     } else if (location.pathname === "/contacts") {
       return <Contacts globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === "/newPatient") {
-      return <NewPatient />;
+      return <NewPatient globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === "/patient") {
       return <PatientMain globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === "/Financial") {
@@ -154,11 +154,11 @@ const Layout = () => {
     } else if (location.pathname === "/summaries") {
       return <Summaries />;
     } else if (location.pathname === "/medication") {
-      return <Medication />;
+      return <Medication globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === "/clinical") {
       return <Clinical />;
     } else if (location.pathname === "/reporting") {
-      return <FinancialReports />;
+      return <FinancialReports globalSearchTerm={globalSearchTerm} />;
     } else if (location.pathname === "/reporting/history") {
       return <ReportHistory />;
     } else if (location.pathname === "/payments") {

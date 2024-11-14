@@ -18,7 +18,6 @@ const MedicationHistory = ({ globalSearchTerm }) => {
   const [vaccines, setVaccines] = useState([]);
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [isMedicationModalOpen, setMedicationModalOpen] = useState(false);
   const [isNoteModalOpen, setNoteModalOpen] = useState(false);
   const [isVaccineModalOpen, setVaccineModalOpen] = useState(false);
@@ -128,9 +127,38 @@ const MedicationHistory = ({ globalSearchTerm }) => {
     }
   };
 
-  const filteredMedications = medications.filter((med) =>
-    med.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filterItems = (items, searchTerm, searchableFields) => {
+    if (!searchTerm) return items;
+    
+    return items.filter(item => 
+      searchableFields.some(field => {
+        const value = item[field];
+        return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
+      })
+    );
+  };
+
+  const filteredMedications = filterItems(medications, globalSearchTerm, [
+    'name',
+    'dosage',
+    'frequency',
+    'reason',
+    'doctor',
+    'instructions',
+    'status'
+  ]);
+
+  const filteredVaccines = filterItems(vaccines, globalSearchTerm, [
+    'name',
+    'doctor',
+    'dosage',
+    'frequency'
+  ]);
+
+  const filteredNotes = filterItems(notes, globalSearchTerm, [
+    'note',
+    'date'
+  ]);
 
   const renderTable = (data, columns) => (
     <table className="medication-table">
@@ -165,81 +193,101 @@ const MedicationHistory = ({ globalSearchTerm }) => {
     <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="medication-page">
         <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <Search size={24} style={{ marginRight: "10px" }} />
-            Medication History
-          </h2>
-          <input
-            type="text"
-            placeholder="Search medications..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-medication"
-          />
-          <button
-            className="medication-buttons"
-            onClick={() => setMedicationModalOpen(true)}
-          >
-            Add Medication
-          </button>
+          <div className="medication-section-header">
+            <h2>
+              <Search size={24} style={{ marginRight: "10px" }} />
+              Medication History
+            </h2>
+            <button
+              className="medication-buttons"
+              onClick={() => setMedicationModalOpen(true)}
+            >
+              Add Medication
+            </button>
+          </div>
           {loading ? (
             <p className="loading-message">Loading medications...</p>
           ) : (
-            renderTable(filteredMedications, [
-              { key: "name", label: "Medication" },
-              { key: "dosage", label: "Dosage" },
-              { key: "frequency", label: "Frequency" },
-              { key: "date_prescribed", label: "Date Prescribed" },
-              { key: "end_date", label: "End Date" },
-              { key: "reason", label: "Reason" },
-              { key: "doctor", label: "Prescribing Doctor" },
-              { key: "instructions", label: "Instructions" },
-              { key: "refills", label: "Refills" },
-              { key: "status", label: "Status" },
-            ])
+            <>
+              {renderTable(filteredMedications, [
+                { key: "name", label: "Medication" },
+                { key: "dosage", label: "Dosage" },
+                { key: "frequency", label: "Frequency" },
+                { key: "date_prescribed", label: "Date Prescribed" },
+                { key: "end_date", label: "End Date" },
+                { key: "reason", label: "Reason" },
+                { key: "doctor", label: "Prescribing Doctor" },
+                { key: "instructions", label: "Instructions" },
+                { key: "refills", label: "Refills" },
+                { key: "status", label: "Status" },
+              ])}
+              {filteredMedications.length === 0 && globalSearchTerm && (
+                <div className="no-results-message">
+                  No medications found matching "{globalSearchTerm}"
+                </div>
+              )}
+            </>
           )}
         </div>
 
         <div className="medication-section-box">
-          <h2 className="medication-section-header">Vaccines</h2>
-          <button
-            className="medication-buttons"
-            onClick={() => setVaccineModalOpen(true)}
-          >
-            Add Vaccine
-          </button>
+          <div className="medication-section-header">
+            <h2>Vaccines</h2>
+            <button
+              className="medication-buttons"
+              onClick={() => setVaccineModalOpen(true)}
+            >
+              Add Vaccine
+            </button>
+          </div>
           {loading ? (
             <p className="loading-message">Loading vaccines...</p>
           ) : (
-            renderTable(vaccines, [
-              { key: "name", label: "Name" },
-              { key: "date_given", label: "Date Given" },
-              { key: "next_due", label: "Next Due" },
-              { key: "dosage", label: "Dosage" },
-              { key: "frequency", label: "Frequency" },
-              { key: "doctor", label: "Doctor" },
-            ])
+            <>
+              {renderTable(filteredVaccines, [
+                { key: "name", label: "Name" },
+                { key: "date_given", label: "Date Given" },
+                { key: "next_due", label: "Next Due" },
+                { key: "dosage", label: "Dosage" },
+                { key: "frequency", label: "Frequency" },
+                { key: "doctor", label: "Doctor" },
+              ])}
+              {filteredVaccines.length === 0 && globalSearchTerm && (
+                <div className="no-results-message">
+                  No vaccines found matching "{globalSearchTerm}"
+                </div>
+              )}
+            </>
           )}
         </div>
 
         <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <FileText size={24} style={{ marginRight: "10px" }} />
-            Notes
-          </h2>
-          <button
-            className="medication-buttons"
-            onClick={() => setNoteModalOpen(true)}
-          >
-            Add Note
-          </button>
+          <div className="medication-section-header">
+            <h2>
+              <FileText size={24} style={{ marginRight: "10px" }} />
+              Notes
+            </h2>
+            <button
+              className="medication-buttons"
+              onClick={() => setNoteModalOpen(true)}
+            >
+              Add Note
+            </button>
+          </div>
           {loading ? (
             <p className="loading-message">Loading notes...</p>
           ) : (
-            renderTable(notes, [
-              { key: "date", label: "Date" },
-              { key: "note", label: "Note" },
-            ])
+            <>
+              {renderTable(filteredNotes, [
+                { key: "date", label: "Date" },
+                { key: "note", label: "Note" },
+              ])}
+              {filteredNotes.length === 0 && globalSearchTerm && (
+                <div className="no-results-message">
+                  No notes found matching "{globalSearchTerm}"
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -263,5 +311,6 @@ const MedicationHistory = ({ globalSearchTerm }) => {
     </PatientLayout>
   );
 };
+
 
 export default MedicationHistory;

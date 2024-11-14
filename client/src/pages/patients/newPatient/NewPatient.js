@@ -6,13 +6,28 @@ import { supabase } from "../../../components/routes/supabaseClient";
 import PatientTabs from "../../../components/PatientTabs";
 import CreateContactModal from "../../contacts/CreateContactModal";
 
-const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
+const OwnerSelection = ({ onSelectOwner, onCreateNewOwner, searchTerm }) => {
   const [owners, setOwners] = useState([]);
   const [selectedOwnerId, setSelectedOwnerId] = useState(null);
+  const [filteredOwners, setFilteredOwners] = useState([]);
 
   useEffect(() => {
     fetchOwners();
   }, []);
+
+  useEffect(() => {
+    if (owners.length > 0 && searchTerm) {
+      const filtered = owners.filter(owner => 
+        owner.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        owner.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        owner.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        owner.phone?.includes(searchTerm)
+      );
+      setFilteredOwners(filtered);
+    } else {
+      setFilteredOwners(owners);
+    }
+  }, [owners, searchTerm]);
 
   const fetchOwners = async () => {
     const { data, error } = await supabase
@@ -24,6 +39,7 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
       console.error("Error fetching owners:", error);
     } else {
       setOwners(data);
+      setFilteredOwners(data);
     }
   };
 
@@ -36,7 +52,7 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
     <div className="owner-selection">
       <h2>Select an Owner</h2>
       <div className="owner-list">
-        {owners.map((owner) => (
+        {filteredOwners.map((owner) => (
           <div
             key={owner.id}
             className={`owner-item ${
@@ -54,6 +70,11 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
             </span>
           </div>
         ))}
+        {filteredOwners.length === 0 && searchTerm && (
+          <div className="no-results">
+            No owners found matching "{searchTerm}"
+          </div>
+        )}
       </div>
       <button className="create-new-owner-button" onClick={onCreateNewOwner}>
         Create New Owner
@@ -62,7 +83,7 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
   );
 };
 
-const NewPatient = () => {
+const NewPatient = ({ globalSearchTerm }) => {
   const [ownerSelectionState, setOwnerSelectionState] = useState("selecting");
   const [selectedOwner, setSelectedOwner] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -352,6 +373,7 @@ const NewPatient = () => {
           <OwnerSelection
             onSelectOwner={handleOwnerSelect}
             onCreateNewOwner={handleCreateNewOwner}
+            searchTerm={globalSearchTerm}
           />
         </div>
       )}
