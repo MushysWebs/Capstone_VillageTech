@@ -5,6 +5,7 @@ import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import PatientLayout from "../../components/patientLayout/PatientLayout";
 import Receipt from "./Receipt";
 import { usePatient } from "../../context/PatientContext";
+import CreateInvoiceModal from "./CreateInvoiceModal";
 import "./Payments.css";
 
 const Payments = ({ globalSearchTerm }) => {
@@ -15,6 +16,7 @@ const Payments = ({ globalSearchTerm }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const supabase = useSupabaseClient();
   const stripe = useStripe();
   const elements = useElements();
@@ -25,6 +27,11 @@ const Payments = ({ globalSearchTerm }) => {
       currency: "CAD",
       minimumFractionDigits: 2,
     });
+  };
+
+  const handleInvoiceCreated = (newInvoice) => {
+    setInvoiceData([...invoiceData, newInvoice]);
+    setSelectedInvoice(newInvoice);
   };
 
   const fetchInvoiceData = async () => {
@@ -225,7 +232,16 @@ const Payments = ({ globalSearchTerm }) => {
     <PatientLayout globalSearchTerm={globalSearchTerm} showTabs={false}>
       <div className="payments-page">
         <div className="invoice-section">
-          <h2 className="payments-h2">Pending Invoices</h2>
+          <div className="invoice-header-container">
+            <button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="create-invoice-button"
+            >
+              + New Invoice
+            </button>
+            <h2 className="payments-h2">Pending Invoices</h2>
+          </div>
+
           <div className="table-container">
             <table className="invoices-table">
               <thead>
@@ -358,6 +374,12 @@ const Payments = ({ globalSearchTerm }) => {
             )}
           </div>
         )}
+      <CreateInvoiceModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          selectedPatientId={selectedPatient?.id}
+          onInvoiceCreated={handleInvoiceCreated}
+        />
       </div>
     </PatientLayout>
   );
