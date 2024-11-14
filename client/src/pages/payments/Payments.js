@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
-import PatientSidebar from "../../components/patientSidebar/PatientSidebar";
+import PatientLayout from "../../components/patientLayout/PatientLayout";
 import Receipt from "./Receipt";
 import { usePatient } from "../../context/PatientContext";
 import "./Payments.css";
 
-const Payments = () => {
+const Payments = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const [invoiceData, setInvoiceData] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -222,8 +222,7 @@ const Payments = () => {
   };
 
   return (
-    <div className="payments-main">
-      <PatientSidebar />
+    <PatientLayout globalSearchTerm={globalSearchTerm} showTabs={false}>
       <div className="payments-page">
         <div className="invoice-section">
           <h2 className="payments-h2">Pending Invoices</h2>
@@ -360,7 +359,7 @@ const Payments = () => {
           </div>
         )}
       </div>
-    </div>
+    </PatientLayout>
   );
 };
 

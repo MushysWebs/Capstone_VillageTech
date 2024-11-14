@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
 import { usePatient } from "../../../context/PatientContext";
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import PatientTabs from '../../../components/PatientTabs';
 import PatientSidebar from '../../../components/patientSidebar/PatientSidebar';
 import "./Summaries.css";
 
-const Summaries = () => {
+const Summaries = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const [ownerDetails, setOwnerDetails] = useState({});
   const [patientDetails, setPatientDetails] = useState({});
@@ -78,14 +79,9 @@ const Summaries = () => {
   };
 
   return (
-    <div className="summaries-main">
-      <PatientSidebar />
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="summaries-page">
-        <header className="patient-header">
-          <PatientTabs />
-        </header>
-        <main>
-          <div className="summaries-section">
+        <div className="summaries-section">
             <div className="summaries-header-container">
               <h2 className="financial-h2">Owner Details</h2>
             </div>
@@ -187,10 +183,9 @@ const Summaries = () => {
               </tbody>
             </table>
           </div>
-        </main>
       </div>
-    </div>
-  )};
-  
+      </PatientLayout>
+    );
+  };
 
 export default Summaries;

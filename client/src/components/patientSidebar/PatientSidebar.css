@@ -16,11 +16,20 @@
   margin-left: 5px;
 }
 
+
 .sidebarHeader {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
+  margin-bottom: 15px;
+}
+
+.sidebarName {
+  font-size: 24px;
+  color: #666;
+  margin: 0;
+  text-align: center;
 }
 
 .sidebarImg img {
@@ -32,14 +41,6 @@
   border-radius: 10px;
 }
 
-.sidebarName {
-  font-size: 24px;
-  color: #666;
-  margin: 0;
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-}
 
 .sidebarInfo {
   text-align: left;
@@ -148,6 +149,25 @@
 
 .demeanor-container p {
   margin: 0;
+}
+
+.switch-list-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #09ACE0;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.switch-list-button:hover {
+  background-color: #f0f9ff;
 }
 
 .Sidebar h3,

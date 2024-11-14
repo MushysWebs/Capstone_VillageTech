@@ -4,11 +4,12 @@ import { supabase } from "../../../components/routes/supabaseClient";
 import { Link } from "react-router-dom";
 import { usePatient } from "../../../context/PatientContext";
 import "./Financial.css";
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import PatientTabs from "../../../components/PatientTabs";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import AddEstimateModal from "../../../components/addEstimateModal/AddEstimateModal";
 
-const Financial = () => {
+const Financial = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const [estimateData, setEstimateData] = useState([]);
   const [invoiceData, setInvoiceData] = useState([]);
@@ -201,8 +202,7 @@ const Financial = () => {
   };
 
   return (
-    <div className="financial-main">
-      <PatientSidebar />
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="financial-page">
         <header className="patient-header">
           <PatientTabs />
@@ -429,18 +429,17 @@ const Financial = () => {
               </table>
             </div>
           </div>
-        </main>
 
         <AddEstimateModal
-          selectedPatientId={selectedPatient?.id}
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          onAddEstimate={handleAddEstimate} // Pass the function here
-          estimateToEdit={estimateToEdit}
-        />
-      </div>
+    selectedPatientId={selectedPatient?.id}
+    isOpen={isModalOpen}
+    onClose={closeModal}
+    onAddEstimate={handleAddEstimate} // Pass the function here
+    estimateToEdit={estimateToEdit}
+    />
     </div>
-  );
+  </PatientLayout>
+);
 };
 
 export default Financial;
