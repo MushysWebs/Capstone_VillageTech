@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import "./PatientSidebar.css"; // Keeping this import unchanged
+import "./PatientSidebar.css";
 import { usePatient } from "../../context/PatientContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Users } from 'lucide-react';
 
-const PatientSidebar = () => {
+const PatientSidebar = ({ onSwitchToList }) => {
   const { selectedPatient } = usePatient();
-  console.log("Selected Patient in Sidebar:", selectedPatient);
   const [appointments, setAppointments] = useState([]);
   const [socEvents, setSocEvents] = useState([]);
   const [staffMap, setStaffMap] = useState({});
@@ -89,7 +89,6 @@ const PatientSidebar = () => {
   };
 
   if (!selectedPatient) {
-    console.log("No selected patient", selectedPatient);
     return <div>No patient selected</div>;
   }
 
@@ -104,6 +103,7 @@ const PatientSidebar = () => {
     preferred_doctor: preferredDoctor = "",
   } = selectedPatient;
 
+
   return (
     <div className="Sidebar">
       <div className="sidebarHeader">
@@ -114,7 +114,13 @@ const PatientSidebar = () => {
             className="contact-header-avatar"
           />
         </div>
-        <h2 className="sidebarName">{patientName}</h2>
+        <div className="header-content">
+          <button className="switch-list-button" onClick={onSwitchToList}>
+            <Users size={16} />
+            <span>Back</span>
+          </button>
+          <h2 className="sidebarName">{patientName}</h2>
+        </div>
       </div>
 
       <div className="sidebarInfo">

@@ -4,9 +4,10 @@ import PatientTabs from '../../../components/PatientTabs';
 import PatientSidebar from '../../../components/patientSidebar/PatientSidebar';
 import { usePatient } from '../../../context/PatientContext';
 import { Edit2, Save } from 'lucide-react';
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import "./Clinical.css";
 
-const Clinical = () => {
+const Clinical = ({ globalSearchTerm }) => {
   const { selectedPatient, setSelectedPatient } = usePatient();
   const [clinicalData, setClinicalData] = useState({});
   const [medications, setMedications] = useState([]);
@@ -173,19 +174,11 @@ const Clinical = () => {
   };
 
   return (
-    <div className="clinical-main">
-      <PatientSidebar />
-
-      <div className="clinical-page">
-        <header className="patient-header">
-          <PatientTabs />
-        </header>
-
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
+      <div className="clinical-content">
         {error && <div className="error-message">{error}</div>}
-
         <div className="section-box">
           <h2 className="section-header">Clinical Record</h2>
-          <div className="info-grid">
             <div className="info-item">
               <div className="info-label">Animal Name</div>
               {isEditing ? (
@@ -329,8 +322,7 @@ const Clinical = () => {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+    </PatientLayout>
   );
 };
 
