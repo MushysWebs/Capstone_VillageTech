@@ -250,10 +250,6 @@ const CalendarView = ({ searchTerm, firstName }) => {
     <div className="calendarView">
       <div className="calendarView__header">
         <h1>Hello, {firstName}!</h1>
-        <div className="calendarView__headerButtons">
-          <ClockInOut />
-          <button className="calendarView__actionButton">View Hours</button>
-        </div>
       </div>
       
       <div className="calendarView__controls">

@@ -271,16 +271,6 @@ const Layout = () => {
               </div>
             </div>
             <div className="header-right">
-              <button className="user-button" draggable="false">
-                <i className="fas fa-user" draggable="false"></i>
-              </button>
-              <button
-                className="settings-button"
-                onClick={toggleTheme}
-                draggable="false"
-              >
-                <i className="fas fa-cog" draggable="false"></i>
-              </button>
               <span className="time-display" draggable="false">
                 {currentTime.toLocaleTimeString()}
               </span>
