@@ -1,44 +1,92 @@
-.patient-main {
+.layout-container {
   display: flex;
-  flex-direction: column;
-  height: calc(100% - 20px);
-  padding: 20px 40px 60px 40px;
-  overflow: hidden;
-}
-
-.patient-header {
-  margin-bottom: 20px;
-}
-
-.patientMain-section {
-  display: flex;
-  flex: 1;
+  width: 100%;
+  height: calc(100vh - 60px);
+  padding: 20px;
   gap: 20px;
-  height: calc(100% - 20px);
 }
 
-.sidebar-container {
+.layout-sidebar {
   width: 300px;
   flex-shrink: 0;
-}
-
-.patientMain-list {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-right: 1px solid #e0e6ed;
+  height: 100%;
   overflow-y: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 12px;
-  padding: 10px;
-  height: calc(100vh - 180px);
+  margin-left: 22px;
+  display: flex;
 }
 
-.patient-sidebar-container {
+.layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: calc(100% - 320px);
+}
+
+.layout-main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.selector-list {
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+  height: fit-content;
+}
+
+.selector-header {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.selector-header h2 {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0;
+}
+
+.selector-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.selector-item:hover {
+  background-color: #eef2f7;
+}
+
+.selector-item.active {
+  background-color: #09ace0;
+  color: white;
+}
+
+.selector-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 1rem;
+  object-fit: cover;
+}
+
+.selector-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.selector-container {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 180px);
 }
 
-.back-button {
+.selector-back {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -52,53 +100,46 @@
   transition: all 0.2s ease;
 }
 
-.back-button:hover {
+.selector-back:hover {
   background-color: #f0f9ff;
   border-radius: 6px;
 }
 
-.patientMain-item {
+.patient-header {
+  margin-bottom: 20px;
+}
+
+.layout-tabs {
   display: flex;
-  align-items: center;
-  padding: 0.75rem;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.patientMain-item:hover {
-  background-color: #eef2f7;
+.layout-tab {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e6e6e6;
+  color: black;
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-.patientMain-item.active {
-  background-color: #09ace0;
+.layout-tab:hover {
+  background-color: #bfbfbf;
+}
+
+.layout-tab.active {
+  background-color: #09ACE0;
   color: white;
 }
 
-.patientMain-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 1rem;
-  object-fit: cover;
-}
-
-.patientMain-name {
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.patient-page-content {
-  flex: 1;
-  overflow-y: auto;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  padding: 20px;
-}
-
 @media (max-width: 768px) {
-  .sidebar-container {
+  .layout-sidebar {
     width: 250px;
+  }
+  
+  .layout-content {
+    max-width: calc(100% - 270px);
   }
 }

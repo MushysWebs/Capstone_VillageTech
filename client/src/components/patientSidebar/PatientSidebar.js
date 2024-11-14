@@ -117,7 +117,7 @@ const PatientSidebar = ({ onSwitchToList }) => {
         <div className="header-content">
           <button className="switch-list-button" onClick={onSwitchToList}>
             <Users size={16} />
-            <span>Back</span>
+            <span>Reselect</span>
           </button>
           <h2 className="sidebarName">{patientName}</h2>
         </div>

@@ -3,7 +3,6 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { usePatient } from "../../context/PatientContext";
 import PatientSidebar from "../patientSidebar/PatientSidebar";
 import PatientTabs from "../PatientTabs";
-import { ArrowLeft } from 'lucide-react';
 import "./PatientLayout.css";
 
 const PatientLayout = ({ children, globalSearchTerm }) => {
@@ -52,40 +51,41 @@ const PatientLayout = ({ children, globalSearchTerm }) => {
   };
 
   return (
-    <div className="patient-main">
-      <header className="patient-header">
-        <PatientTabs />
-      </header>
-
-      <div className="patientMain-section">
-        <div className="sidebar-container">
+    <div className="layout-container">
+      <div className="layout-sidebar">
         {showSelector ? (
-          <div className="patientMain-list">
+          <div className="selector-list">
+            <div className="selector-header">
+              <h2>Patient List</h2>
+            </div>
             {filteredPatients.map((patient) => (
               <div
                 key={patient.id}
-                className={`patientMain-item ${
+                className={`selector-item ${
                   selectedPatient?.id === patient.id ? "active" : ""
                 }`}
-                onClick={() => handlePatientSelect(patient)}
+                onClick={() => {
+                  setSelectedPatient(patient);
+                  setShowSelector(false);
+                }}
               >
                 <img
                   src={patient.image_url || defaultProfilePicUrl}
-                  className="patientMain-avatar"
+                  className="selector-avatar"
                   alt={patient.name}
                 />
-                <span className="patientMain-name">{patient.name}</span>
+                <span className="selector-name">{patient.name}</span>
               </div>
             ))}
           </div>
         ) : (
-          <div className="patient-sidebar-container">
-            <PatientSidebar onSwitchToList={() => setShowSelector(true)} />
-          </div>
+          <PatientSidebar onSwitchToList={() => setShowSelector(true)} />
         )}
-        </div>
-        
-        <div className="patient-page-content">
+      </div>
+  
+      <div className="layout-content">
+        <PatientTabs />
+        <div className="layout-main">
           {children}
         </div>
       </div>
