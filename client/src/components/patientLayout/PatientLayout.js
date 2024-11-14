@@ -5,7 +5,7 @@ import PatientSidebar from "../patientSidebar/PatientSidebar";
 import PatientTabs from "../PatientTabs";
 import "./PatientLayout.css";
 
-const PatientLayout = ({ children, globalSearchTerm }) => {
+const PatientLayout = ({ children, globalSearchTerm, showTabs = true }) => {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const { selectedPatient, setSelectedPatient } = usePatient();
@@ -84,7 +84,7 @@ const PatientLayout = ({ children, globalSearchTerm }) => {
       </div>
   
       <div className="layout-content">
-        <PatientTabs />
+        {showTabs && <PatientTabs />}
         <div className="layout-main">
           {children}
         </div>
