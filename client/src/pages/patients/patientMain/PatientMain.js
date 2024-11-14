@@ -180,41 +180,104 @@ const PatientMain = ({ globalSearchTerm }) => {
   const handleDeletePatient = async () => {
     if (
       window.confirm(
-        "Are you sure you want to delete this patient? This will also delete all their appointments and clinical records. This action cannot be undone."
+        "Are you sure you want to delete this patient? This will also delete all their appointments, medications, vaccinations, SOC records, clinical records, and other related data. This action cannot be undone."
       )
     ) {
       try {
-        // delete all appointments associated with this patient
-        const { error: appointmentsError } = await supabase
-          .from("appointments")
+        const { error: socCommentsError } = await supabase
+          .from("soc_comments")
           .delete()
           .eq("patient_id", selectedPatient.id);
-
-        if (appointmentsError) throw appointmentsError;
-
-        // delete all clinical records associated with this patient
+  
+        if (socCommentsError) throw socCommentsError;
+  
+        const { error: socError } = await supabase
+          .from("soc")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (socError) throw socError;
+  
+        const { error: medicationsError } = await supabase
+          .from("medications")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (medicationsError) throw medicationsError;
+  
+        const { error: vaccinationsError } = await supabase
+          .from("vaccinations")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (vaccinationsError) throw vaccinationsError;
+  
+        const { error: notesError } = await supabase
+          .from("patient_notes")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (notesError) throw notesError;
+  
+        const { error: vitalsError } = await supabase
+          .from("patient_vitals")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (vitalsError) throw vitalsError;
+  
+        const { error: allergiesError } = await supabase
+          .from("patient_allergies")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (allergiesError) throw allergiesError;
+  
         const { error: clinicalRecordsError } = await supabase
           .from("clinical_records")
           .delete()
           .eq("patient_id", selectedPatient.id);
-
+  
         if (clinicalRecordsError) throw clinicalRecordsError;
+  
+        const { error: appointmentsError } = await supabase
+          .from("appointments")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (appointmentsError) throw appointmentsError;
 
-        // then delete the patient
+        const { error: estimatesError } = await supabase
+          .from("estimates")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (estimatesError) throw estimatesError;
+  
+        const { error: invoicesError } = await supabase
+          .from("invoices")
+          .delete()
+          .eq("patient_id", selectedPatient.id);
+  
+        if (invoicesError) throw invoicesError;
+  
         const { error: patientError } = await supabase
           .from("patients")
           .delete()
           .eq("id", selectedPatient.id);
-
+  
         if (patientError) throw patientError;
-
-        setPatients(
-          patients.filter((patient) => patient.id !== selectedPatient.id)
-        );
+  
+        setPatients(patients.filter((patient) => patient.id !== selectedPatient.id));
         setSelectedPatient(null);
+        
+        alert("Patient and all related records successfully deleted");
+        
       } catch (error) {
         console.error("Error deleting patient:", error);
-        setError("Failed to delete patient: " + error.message);
+        setError(
+          "Failed to delete patient: " + (error.message || "Unknown error occurred")
+        );
       }
     }
   };
