@@ -1,0 +1,309 @@
+.acc-container {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .acc-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .acc-header {
+    padding: 2rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .acc-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  
+  .acc-content {
+    padding: 2rem;
+  }
+  
+  .acc-profile-section {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 2rem;
+  }
+  
+  .acc-avatar-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .acc-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .acc-avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .acc-avatar-container:hover .acc-avatar-overlay {
+    opacity: 1;
+  }
+  
+  .acc-avatar-overlay svg {
+    color: white;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .acc-profile-info {
+    flex: 1;
+  }
+  
+  .acc-name {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #333;
+  }
+  
+  .acc-badge-container {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .acc-role-badge,
+  .acc-status-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .acc-role-badge {
+    background-color: #E6F7FF;
+    color: #09ACE0;
+  }
+  
+  .acc-status-badge {
+    background-color: #E6FFF6;
+    color: #09CB8B;
+  }
+  
+  .acc-status-badge.inactive {
+    background-color: #FFE6E6;
+    color: #ce7474;
+  }
+  
+  .acc-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .acc-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .acc-detail-item:hover {
+    background-color: #f0f1f2;
+  }
+  
+  .acc-detail-icon {
+    color: #09ACE0;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  
+  .acc-detail-content {
+    flex: 1;
+  }
+  
+  .acc-detail-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+  
+  .acc-detail-value {
+    color: #333;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .acc-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: flex-end;
+  }
+  
+  .acc-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .acc-edit-button {
+    background-color: #09ACE0;
+    color: white;
+    border: none;
+  }
+  
+  .acc-edit-button:hover {
+    background-color: #0789b4;
+  }
+  
+  .acc-save-button {
+    background-color: #09CB8B;
+    color: white;
+    border: none;
+  }
+  
+  .acc-save-button:hover {
+    background-color: #08b47d;
+  }
+  
+  .acc-cancel-button {
+    background-color: #f8f9fa;
+    color: #666;
+    border: 1px solid #ddd;
+  }
+  
+  .acc-cancel-button:hover {
+    background-color: #e9ecef;
+  }
+  
+  .acc-input {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+  }
+  
+  .acc-input:focus {
+    outline: none;
+    border-color: #09ACE0;
+  }
+  
+  .acc-name-input-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Dark mode styles */
+  .dark .acc-card {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+  }
+  
+  .dark .acc-header {
+    border-bottom-color: #34495e;
+  }
+  
+  .dark .acc-title {
+    color: #ecf0f1;
+  }
+  
+  .dark .acc-name {
+    color: #ecf0f1;
+  }
+  
+  .dark .acc-detail-item {
+    background-color: #34495e;
+  }
+  
+  .dark .acc-detail-item:hover {
+    background-color: #2c3e50;
+  }
+  
+  .dark .acc-detail-label {
+    color: #bdc3c7;
+  }
+  
+  .dark .acc-detail-value {
+    color: #ecf0f1;
+  }
+  
+  .dark .acc-input {
+    background-color: #34495e;
+    border-color: #4a5c6b;
+    color: #ecf0f1;
+  }
+  
+  .dark .acc-input:focus {
+    border-color: #3498db;
+  }
+  
+  .dark .acc-cancel-button {
+    background-color: #34495e;
+    border-color: #4a5c6b;
+    color: #ecf0f1;
+  }
+  
+  .dark .acc-cancel-button:hover {
+    background-color: #2c3e50;
+  }
+  
+  @media (max-width: 768px) {
+    .acc-profile-section {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+    }
+  
+    .acc-details-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .acc-name-input-group {
+      grid-template-columns: 1fr;
+    }
+  
+    .acc-actions {
+      flex-direction: column;
+    }
+  
+    .acc-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
