@@ -2,17 +2,15 @@ name: Run tests and upload coverage
 
 on: 
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-      
+        branches:
+        - PatientPage
+
 jobs:
   test:
+    name: Run tests and collect coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -20,17 +18,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Set environment variables
-        run: |
-          echo "REACT_APP_STRIPE_PUBLISHABLE_KEY=${{ secrets.REACT_APP_STRIPE_PUBLISHABLE_KEY }}" >> $GITHUB_ENV
-          echo "REACT_APP_SUPABASE_ANON_KEY=${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}" >> $GITHUB_ENV
-          echo "REACT_APP_SUPABASE_URL=${{ secrets.REACT_APP_SUPABASE_URL }}" >> $GITHUB_ENV
-          echo "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" >> $GITHUB_ENV
-          echo "SENDGRID_FROM_EMAIL=${{ secrets.SENDGRID_FROM_EMAIL }}" >> $GITHUB_ENV
-          echo "GMAIL_USER=${{ secrets.GMAIL_USER }}" >> $GITHUB_ENV
-          echo "GMAIL_PASS=${{ secrets.GMAIL_PASS }}" >> $GITHUB_ENV
+            node-version: 20
 
       - name: Install dependencies
         run: npm install
@@ -42,4 +30,3 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: './coverage/lcov.info'
