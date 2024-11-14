@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { usePatient } from "../../../context/PatientContext";
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import PatientTabs from "../../../components/PatientTabs";
 import { Search, FileText } from "lucide-react";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
@@ -9,7 +10,7 @@ import AddNoteModal from "../../../components/addNoteModal/AddNoteModal";
 import VaccineModal from "./VaccineModal";
 import "./Medication.css";
 
-const MedicationHistory = () => {
+const MedicationHistory = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const supabase = useSupabaseClient();
 
@@ -161,14 +162,8 @@ const MedicationHistory = () => {
   );
 
   return (
-    <div className="medication-main">
-      <PatientSidebar />
-
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="medication-page">
-        <header className="medication-patient-header">
-          <PatientTabs />
-        </header>
-
         <div className="medication-section-box">
           <h2 className="medication-section-header">
             <Search size={24} style={{ marginRight: "10px" }} />
@@ -265,7 +260,7 @@ const MedicationHistory = () => {
         onClose={() => setNoteModalOpen(false)}
         onAddNote={handleAddNote}
       />
-    </div>
+    </PatientLayout>
   );
 };
 

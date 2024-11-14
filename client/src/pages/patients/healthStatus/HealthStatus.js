@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import PatientTabs from "../../../components/PatientTabs";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import { usePatient } from "../../../context/PatientContext";
@@ -8,7 +9,7 @@ import AddVitalModal from "../../../components/addVitalModal/AddVitalModal";
 import AddAllergyModal from "../../../components/addAllergyModal/AddAllergyModal";
 import "./HealthStatus.css";
 
-const HealthStatus = () => {
+const HealthStatus = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const [error, setError] = useState(null);
   const [vitals, setVitals] = useState([]);
@@ -111,14 +112,9 @@ const HealthStatus = () => {
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
   return (
-    <div className="health-status-main">
-      <PatientSidebar />
-
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="health-status-content">
-        <header className="health-status-header">
-          <PatientTabs />
-        </header>
-
+        {error && <div className="error-message">{error}</div>}
         <div className="health-status-section-box">
           <h2 className="health-status-section-header">Patient Information</h2>
           <div className="health-status-info-grid">
@@ -294,8 +290,8 @@ const HealthStatus = () => {
         isOpen={isAllergyModalOpen}
         onClose={() => setAllergyModalOpen(false)}
         onAddAllergy={handleAddAllergy}
-      />
-    </div>
+        />
+    </PatientLayout>
   );
 };
 

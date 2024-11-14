@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../../components/routes/supabaseClient";
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import { usePatient } from "../../../context/PatientContext";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
 import "./SOC.css";
 import PatientTabs from "../../../components/PatientTabs";
 
-const SOC = () => {
+const SOC = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const [socEvents, setSocEvents] = useState([]);
   const [vaccinations, setVaccinations] = useState([]);
@@ -239,14 +240,8 @@ const SOC = () => {
   };
   
   return (
-    <div className="SOC-main">
-      <PatientSidebar />
-  
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="SOC-page">
-        <header className="SOC-patient-header">
-          <PatientTabs />
-        </header>
-  
         <div className="SOC-section-box">
           <h2 className="SOC-section-header">Standard of Care Events</h2>
           <table className="SOC-soc-table">
@@ -524,9 +519,8 @@ const SOC = () => {
           )}
         </div>
       </div>
-    </div>
+    </PatientLayout>
   );
-  
 };
 
 export default SOC;
