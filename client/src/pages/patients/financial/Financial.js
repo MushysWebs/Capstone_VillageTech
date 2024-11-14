@@ -18,19 +18,19 @@ const Financial = ({ globalSearchTerm }) => {
 
   const fetchEstimateData = async () => {
     if (selectedPatient) {
-      const { data, error } = await supabase
-        .from("estimates")
-        .select("*")
-        .eq("patient_id", selectedPatient.id)
-        .eq("is_active", true);
-      if (error) {
-        console.error("Error fetching estimate data:", error.message);
-      } else {
-        console.log("Fetched estimates:", data); // Log fetched estimates
-        setEstimateData(data); // Update state with fetched estimates
-      }
+        const { data, error } = await supabase
+            .from("estimates")
+            .select("*")
+            .eq("patient_id", selectedPatient.id)
+            .eq("is_active", true);
+        if (error) {
+            console.error("Error fetching estimate data:", error.message);
+        } else {
+            console.log("Fetched estimates:", data); // Log fetched estimates
+            setEstimateData(data); // Update state with fetched estimates
+        }
     }
-  };
+};
 
   const fetchInvoiceData = async () => {
     if (selectedPatient) {
@@ -51,7 +51,8 @@ const Financial = ({ globalSearchTerm }) => {
     console.log("Selected Patient:", selectedPatient);
     fetchEstimateData();
     fetchInvoiceData();
-  }, [selectedPatient]);
+}, [selectedPatient]);
+
 
   const openModal = () => {
     setEstimateToEdit(null);
@@ -63,45 +64,51 @@ const Financial = ({ globalSearchTerm }) => {
     setIsModalOpen(true);
   };
 
+
   const handleAddEstimate = async (newEstimate) => {
     try {
-      if (newEstimate.invoice_id) {
-        // Update existing invoice if invoice_id is present
-        const { data, error } = await supabase
-          .from("invoices")
-          .update({
-            invoice_name: newEstimate.invoice_name,
-            invoice_total: newEstimate.invoice_total,
-            invoice_paid: newEstimate.invoice_paid,
-            invoice_date: newEstimate.invoice_date,
-            invoice_status: newEstimate.invoice_status,
-            last_update: newEstimate.last_update,
-          })
-          .eq("invoice_id", newEstimate.invoice_id);
+        if (newEstimate.invoice_id) {
+            // Update existing invoice if invoice_id is present
+            const { data, error } = await supabase
+                .from("invoices")
+                .update({
+                    invoice_name: newEstimate.invoice_name,
+                    invoice_total: newEstimate.invoice_total,
+                    invoice_paid: newEstimate.invoice_paid,
+                    invoice_date: newEstimate.invoice_date,
+                    invoice_status: newEstimate.invoice_status,
+                    last_update: newEstimate.last_update,
+                })
+                .eq("invoice_id", newEstimate.invoice_id);
 
-        if (error) {
-          console.error("Error updating invoice:", error.message);
+            if (error) {
+                console.error("Error updating invoice:", error.message);
+            } else {
+                fetchInvoiceData(); // Refetch data after successful update
+            }
         } else {
-          fetchInvoiceData(); // Refetch data after successful update
-        }
-      } else {
-        // Insert new invoice if no invoice_id is present
-        const { data, error } = await supabase
-          .from("invoices")
-          .insert([newEstimate]);
+            // Insert new invoice if no invoice_id is present
+            const { data, error } = await supabase
+                .from("invoices")
+                .insert([newEstimate]);
 
-        if (error) {
-          console.error("Error adding new invoice:", error.message);
-        } else {
-          fetchInvoiceData(); // Refetch data after successful addition
+            if (error) {
+                console.error("Error adding new invoice:", error.message);
+            } else {
+                fetchInvoiceData(); // Refetch data after successful addition
+            }
         }
-      }
     } catch (error) {
-      console.error("Error saving estimate:", error.message);
+        console.error("Error saving estimate:", error.message);
     } finally {
-      closeModal();
+        closeModal();
     }
-  };
+};
+
+
+
+
+
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -204,12 +211,7 @@ const Financial = ({ globalSearchTerm }) => {
   return (
     <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="financial-page">
-        <header className="patient-header">
-          <PatientTabs />
-        </header>
-
-        <main>
-          <div className="estimate-section">
+        <div className="estimate-section">
             <div className="estimate-header-container">
               <button onClick={openModal}>+</button>
               <h2 className="financial-h2">Estimates</h2>
@@ -231,13 +233,13 @@ const Financial = ({ globalSearchTerm }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(invoiceData || [])
+                  {invoiceData
                     .filter((invoice) => invoice.invoice_status === "Estimate")
                     .map((item) => (
                       <tr key={item.invoice_id}>
                         <td>{item.invoice_id}</td>
                         <td>{item.invoice_name}</td>
-                        <td>{selectedPatient?.name || "Unknown"}</td>
+                        <td>{selectedPatient.name}</td>
                         <td>{formatCurrency(item.invoice_total)}</td>
                         <td>
                           <button
@@ -257,10 +259,13 @@ const Financial = ({ globalSearchTerm }) => {
                             Edit
                           </button>
                         </td>
+
                         <td>
                           <button
                             className="financial-pending"
-                            onClick={() => updateInvoiceStatus(item, "Pending")}
+                            onClick={() =>
+                              updateInvoiceStatus(item, "Pending")
+                            }
                           >
                             Convert to Invoice
                           </button>

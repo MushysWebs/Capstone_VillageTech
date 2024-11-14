@@ -179,6 +179,7 @@ const Clinical = ({ globalSearchTerm }) => {
         {error && <div className="error-message">{error}</div>}
         <div className="section-box">
           <h2 className="section-header">Clinical Record</h2>
+          <div className="info-grid">
             <div className="info-item">
               <div className="info-label">Animal Name</div>
               {isEditing ? (
@@ -321,6 +322,7 @@ const Clinical = ({ globalSearchTerm }) => {
               </div>
             ))}
           </div>
+        </div>
         </div>
     </PatientLayout>
   );
