@@ -4,13 +4,15 @@ on:
   push:
         branches:
         - main
-
+  pull_request:
+    branches:
+      - main
+      
 jobs:
   test:
-    name: Run tests and collect coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -24,9 +26,11 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npx jest --verbose --coverage
+        run: npm test -- --coverage
 
       - name: Upload results to Codecov
+        if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: './reports/junit.xml'
