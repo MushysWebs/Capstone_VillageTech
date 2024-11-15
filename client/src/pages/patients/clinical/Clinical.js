@@ -35,8 +35,15 @@ const Clinical = ({ globalSearchTerm }) => {
         .eq("patient_id", selectedPatient.id)
         .single();
 
-      if (error) throw error;
-      setClinicalData(data || {});
+      if (error) {
+        if (error.code === "PGRST116") {
+          setClinicalData({});
+        } else {
+          throw error;
+        }
+      } else {
+        setClinicalData(data || {});
+      }
     } catch (error) {
       console.error("Error fetching clinical data:", error);
       setError("Failed to fetch clinical data. Please try again later.");
@@ -81,8 +88,15 @@ const Clinical = ({ globalSearchTerm }) => {
         .eq("id", selectedPatient.owner_id)
         .single();
 
-      if (error) throw error;
-      setOwnerInfo(data || {});
+      if (error) {
+        if (error.code === "PGRST116") {
+          setOwnerInfo({});
+        } else {
+          throw error;
+        }
+      } else {
+        setOwnerInfo(data || {});
+      }
     } catch (error) {
       console.error("Error fetching owner info:", error);
       setError("Failed to fetch owner info. Please try again later.");
@@ -92,15 +106,13 @@ const Clinical = ({ globalSearchTerm }) => {
   const handleSave = async () => {
     try {
       if (clinicalData?.id) {
-        // Update existing clinical record
         const { error } = await supabase
           .from("clinical_records")
           .update({ ...clinicalData, xray_file: xrayFile })
           .eq("id", clinicalData.id);
-  
+
         if (error) throw error;
       } else {
-        // Insert a new clinical record for the selected patient
         const { error } = await supabase
           .from("clinical_records")
           .insert({
@@ -108,14 +120,13 @@ const Clinical = ({ globalSearchTerm }) => {
             abnormalities: clinicalData.abnormalities,
             diet: clinicalData.diet,
             xray_file: xrayFile,
-            created_at: new Date().toISOString(), // Adding created_at for the new record
+            created_at: new Date().toISOString(),
           });
-  
+
         if (error) throw error;
       }
-  
+
       if (selectedPatient?.id) {
-        // Update patient information if necessary
         const { error } = await supabase
           .from("patients")
           .update({
@@ -125,10 +136,10 @@ const Clinical = ({ globalSearchTerm }) => {
             gender: selectedPatient.gender,
           })
           .eq("id", selectedPatient.id);
-  
+
         if (error) throw error;
       }
-  
+
       setIsEditing(false);
       setError(null);
     } catch (error) {
@@ -136,7 +147,6 @@ const Clinical = ({ globalSearchTerm }) => {
       setError("Failed to save clinical data. Please try again.");
     }
   };
-  
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -193,22 +203,18 @@ const Clinical = ({ globalSearchTerm }) => {
                 <div className="info-value">{selectedPatient?.name || "N/A"}</div>
               )}
             </div>
-
             <div className="info-item">
               <div className="info-label">Owner</div>
               <div className="info-value">{`${ownerInfo?.first_name || ""} ${ownerInfo?.last_name || ""}` || "N/A"}</div>
             </div>
-
             <div className="info-item">
               <div className="info-label">Address</div>
               <div className="info-value">{ownerInfo?.address || "N/A"}</div>
             </div>
-
             <div className="info-item">
               <div className="info-label">Primary Phone</div>
               <div className="info-value">{ownerInfo?.phone_number || "N/A"}</div>
             </div>
-
             <div className="info-item">
               <div className="info-label">Species</div>
               {isEditing ? (
@@ -222,7 +228,6 @@ const Clinical = ({ globalSearchTerm }) => {
                 <div className="info-value">{selectedPatient?.species || "N/A"}</div>
               )}
             </div>
-
             <div className="info-item">
               <div className="info-label">Breed</div>
               {isEditing ? (
@@ -236,7 +241,6 @@ const Clinical = ({ globalSearchTerm }) => {
                 <div className="info-value">{selectedPatient?.breed || "N/A"}</div>
               )}
             </div>
-
             <div className="info-item">
               <div className="info-label">X-ray File</div>
               {isEditing ? (
@@ -253,7 +257,6 @@ const Clinical = ({ globalSearchTerm }) => {
                 </div>
               )}
             </div>
-
             <div className="info-item">
               <div className="info-label">Abnormalities</div>
               {isEditing ? (
@@ -267,7 +270,6 @@ const Clinical = ({ globalSearchTerm }) => {
                 <div className="info-value">{clinicalData?.abnormalities || "N/A"}</div>
               )}
             </div>
-
             <div className="info-item">
               <div className="info-label">Diet</div>
               {isEditing ? (
@@ -282,22 +284,18 @@ const Clinical = ({ globalSearchTerm }) => {
               )}
             </div>
           </div>
-
           <div className="clinical-edit-actions">
             {isEditing ? (
               <button className="save-button" onClick={handleSave}>
-                <Save size={18} />
-                Save
+                <Save size={18} /> Save
               </button>
             ) : (
               <button className="edit-button" onClick={handleEdit}>
-                <Edit2 size={18} />
-                Edit
+                <Edit2 size={18} /> Edit
               </button>
             )}
           </div>
         </div>
-
         <div className="section-box">
           <h2 className="section-header">Medications & Vaccines</h2>
           <div className="info-grid">
@@ -311,7 +309,6 @@ const Clinical = ({ globalSearchTerm }) => {
             ))}
           </div>
         </div>
-
         <div className="section-box">
           <h2 className="section-header">Treatments</h2>
           <div className="info-grid">
@@ -323,7 +320,7 @@ const Clinical = ({ globalSearchTerm }) => {
             ))}
           </div>
         </div>
-        </div>
+      </div>
     </PatientLayout>
   );
 };
