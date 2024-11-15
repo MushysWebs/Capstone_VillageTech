@@ -1,0 +1,117 @@
+.create-invoice-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .create-invoice-modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .create-invoice-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .create-invoice-modal-header h2 {
+    margin: 0;
+    color: #09ace0;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #09ace0;
+    padding-bottom: 10px;
+  }
+  
+  .create-invoice-close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+  }
+  
+  .create-invoice-form-group {
+    margin-bottom: 15px;
+  }
+  
+  .create-invoice-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  
+  .create-invoice-form-input {
+    width: 80%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .create-invoice-form-input:focus {
+    border-color: #09ace0;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(9, 172, 224, 0.1);
+  }
+  
+  .create-invoice-error-message {
+    color: #e74c3c;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fdf3f2;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .create-invoice-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .create-invoice-cancel-button {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  .create-invoice-cancel-button:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .create-invoice-submit-button {
+    padding: 8px 16px;
+    border: 1px solid #09ace0;
+    border-radius: 5px;
+    background-color: white;
+    color: #09ace0;
+    cursor: pointer;
+  }
+  
+  .create-invoice-submit-button:hover {
+    background-color: #09ace0;
+    color: white;
+  }
+  
+  .create-invoice-submit-button:disabled {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+  }

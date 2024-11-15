@@ -1,10 +1,10 @@
 .SOC-main {
   display: flex;
-  padding: 20px;
-  height: calc(100vh - 60px);
-  width: 95%;
-  margin: 0 auto;
-  overflow-y: hidden;
+    padding: 20px;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+    width: 97.5%;
+    margin-left: 22px;
 }
 
 .SOC-patient-sidebar {
@@ -25,6 +25,9 @@
   margin-bottom: 10px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  max-height: 100%; 
+  padding-right: 10px;
 }
 
 .SOC-section-box {
@@ -227,4 +230,29 @@
 
 .SOC-close-modal:hover {
   background-color: #d43535;
+}
+
+.SOC-edit-button {
+  background-color: #09ace0; 
+  border: none;
+  color: white;
+  padding: 2px 10px;
+  font-size: 1rem; 
+  border-radius: 6px; 
+  cursor: pointer;
+  text-align: center;
+  display: block; 
+  margin: 0 auto; 
+}
+
+.SOC-edit-button:hover {
+  background-color: #007bbf; 
+}
+
+.SOC-error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: bold;
 }

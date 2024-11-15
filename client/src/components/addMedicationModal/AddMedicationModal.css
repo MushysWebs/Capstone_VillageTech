@@ -55,20 +55,20 @@
   }
   
   .modal-actions button:first-of-type {
-    background-color: #09CB8B;
+    background-color: #09ACE0;
     color: white;
   }
   
   .modal-actions button:first-of-type:hover {
-    background-color: #08b47d;
+    background-color: #2980b9;
   }
   
   .modal-actions button:last-of-type {
-    background-color: #ff4d4f;
+    background-color: #FF4D4D;
     color: white;
   }
   
   .modal-actions button:last-of-type:hover {
-    background-color: #ff7875;
+    background-color: #e04938;
   }
   

@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { usePatient } from "../../../context/PatientContext";
 import "./NewPatient.css";
 import { supabase } from "../../../components/routes/supabaseClient";
-import PatientTabs from '../../../components/PatientTabs'
+import PatientTabs from "../../../components/PatientTabs";
+import CreateContactModal from "../../contacts/CreateContactModal";
 
-const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
+const OwnerSelection = ({ onSelectOwner, onCreateNewOwner, searchTerm }) => {
   const [owners, setOwners] = useState([]);
   const [selectedOwnerId, setSelectedOwnerId] = useState(null);
+  const [filteredOwners, setFilteredOwners] = useState([]);
 
   useEffect(() => {
     fetchOwners();
   }, []);
+
+  useEffect(() => {
+    if (owners.length > 0 && searchTerm) {
+      const filtered = owners.filter(owner => 
+        owner.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        owner.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        owner.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        owner.phone?.includes(searchTerm)
+      );
+      setFilteredOwners(filtered);
+    } else {
+      setFilteredOwners(owners);
+    }
+  }, [owners, searchTerm]);
 
   const fetchOwners = async () => {
     const { data, error } = await supabase
@@ -22,6 +39,7 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
       console.error("Error fetching owners:", error);
     } else {
       setOwners(data);
+      setFilteredOwners(data);
     }
   };
 
@@ -34,7 +52,7 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
     <div className="owner-selection">
       <h2>Select an Owner</h2>
       <div className="owner-list">
-        {owners.map((owner) => (
+        {filteredOwners.map((owner) => (
           <div
             key={owner.id}
             className={`owner-item ${
@@ -52,6 +70,11 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
             </span>
           </div>
         ))}
+        {filteredOwners.length === 0 && searchTerm && (
+          <div className="no-results">
+            No owners found matching "{searchTerm}"
+          </div>
+        )}
       </div>
       <button className="create-new-owner-button" onClick={onCreateNewOwner}>
         Create New Owner
@@ -60,80 +83,12 @@ const OwnerSelection = ({ onSelectOwner, onCreateNewOwner }) => {
   );
 };
 
-const NewOwnerForm = ({ onCreateOwner, onCancel }) => {
-  const [newOwner, setNewOwner] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone_number: "",
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewOwner((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { data, error } = await supabase
-      .from("owners")
-      .insert([newOwner])
-      .select();
-
-    if (error) {
-      console.error("Error creating new owner:", error);
-      alert("Failed to create new owner");
-    } else {
-      onCreateOwner(data[0]);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="new-owner-form">
-      <h2>Create New Owner</h2>
-      <input
-        type="text"
-        name="first_name"
-        value={newOwner.first_name}
-        onChange={handleInputChange}
-        placeholder="First Name"
-        required
-      />
-      <input
-        type="text"
-        name="last_name"
-        value={newOwner.last_name}
-        onChange={handleInputChange}
-        placeholder="Last Name"
-        required
-      />
-      <input
-        type="email"
-        name="email"
-        value={newOwner.email}
-        onChange={handleInputChange}
-        placeholder="Email"
-        required
-      />
-      <input
-        type="tel"
-        name="phone_number"
-        value={newOwner.phone_number}
-        onChange={handleInputChange}
-        placeholder="Phone Number"
-        required
-      />
-      <button type="submit">Create Owner</button>
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
-    </form>
-  );
-};
-
-const NewPatient = () => {
+const NewPatient = ({ globalSearchTerm }) => {
   const [ownerSelectionState, setOwnerSelectionState] = useState("selecting");
   const [selectedOwner, setSelectedOwner] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const navigate = useNavigate();
+  const { setSelectedPatient } = usePatient();
   const [patientDetails, setPatientDetails] = useState({
     patientName: "",
     microchipNumber: "",
@@ -167,9 +122,40 @@ const NewPatient = () => {
   const [errors, setErrors] = useState({});
   const [age, setAge] = useState(null);
 
+  const requiredFields = [
+    "patientName",
+    "weight",
+    "dateOfBirth",
+    "species",
+    "gender",
+  ];
+
   const handleOwnerSelect = (owner) => {
     setSelectedOwner(owner);
     setOwnerSelectionState("selected");
+  };
+
+  const handleCreateNewOwner = () => {
+    setShowCreateModal(true);
+  };
+
+  const handleCreateContact = async (formData) => {
+    try {
+      const { data, error } = await supabase
+        .from("owners")
+        .insert([formData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSelectedOwner(data);
+      setOwnerSelectionState("selected");
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error("Error creating new owner:", error);
+      throw error;
+    }
   };
 
   const calculateAge = (dob) => {
@@ -190,15 +176,15 @@ const NewPatient = () => {
 
   const validateInput = (name, value) => {
     let error = "";
-
-    if (name === "weight") {
-      if (value !== "" && isNaN(value)) {
-        error = "Must be a number";
-      }
-    } else if (value.trim() === "") {
+  
+    if (name === "gender" && value === "") {
+      error = "Please select a gender"; 
+    } else if (requiredFields.includes(name) && value.trim() === "") {
       error = "This field is required";
+    } else if (name === "weight" && isNaN(value)) {
+      error = "Must be a number";
     }
-
+  
     return error;
   };
 
@@ -222,17 +208,41 @@ const NewPatient = () => {
     setOtherDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
-
-      setOtherDetails((prevDetails) => ({ ...prevDetails, image: file }));
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+  
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${file.name}`;
+        const filePath = `patient/patient_pictures/${fileName}`;
+  
+        const { error: uploadError } = await supabase.storage
+          .from('patient')
+          .upload(filePath, file);
+  
+        if (uploadError) throw uploadError;
+  
+        const { data: { publicUrl }, error: urlError } = supabase.storage
+          .from('patient')
+          .getPublicUrl(filePath);
+  
+        if (urlError) throw urlError;
+  
+        setOtherDetails(prevDetails => ({ 
+          ...prevDetails, 
+          image: publicUrl 
+        }));
+  
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('Failed to upload profile picture. Please try again.');
+      }
     }
   };
 
@@ -241,67 +251,35 @@ const NewPatient = () => {
     setTags((prevTags) => ({ ...prevTags, [name]: value }));
   };
 
-  const handleImageUpload = async (file) => {
-    const fileName = `${Date.now()}_${file.name}`;
-    const { data, error } = await supabase.storage
-      .from("patient/patient_pictures")
-      .upload(fileName, file);
-
-    if (error) {
-      console.error("Error uploading image:", error.message);
-      return null;
-    }
-
-    const { publicURL, error: urlError } = supabase.storage
-      .from("patient/patient_pictures")
-      .getPublicUrl(fileName);
-
-    if (urlError) {
-      console.error("Error getting public URL:", urlError.message);
-      return null;
-    }
-
-    return publicURL;
-  };
-
-  const handleCreateNewOwner = () => {
-    setOwnerSelectionState("creating");
-  };
-
-  const handleOwnerCreated = (newOwner) => {
-    setSelectedOwner(newOwner);
-    setOwnerSelectionState("selected");
-  };
-
-  const handleCancelNewOwner = () => {
-    setOwnerSelectionState("selecting");
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    let validationErrors = {};
+    requiredFields.forEach((field) => {
+      if (!patientDetails[field] || patientDetails[field].trim() === "") {
+        validationErrors[field] = "This field is required";
+      }
+    });
+  
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      alert("Please fill out all required fields before submitting");
+      return;
+    }
+  
     const hasErrors = Object.values(errors).some((error) => error);
     if (hasErrors) {
       alert("Please correct the errors before submitting");
       return;
     }
-
+  
     try {
-      let imageUrl = null;
-
-      if (otherDetails.image) {
-        imageUrl = await handleImageUpload(otherDetails.image);
-      }
-
       const patientDataToInsert = {
         owner_id: selectedOwner.id,
         name: patientDetails.patientName,
         microchip_number: patientDetails.microchipNumber || null,
-        weight:
-          patientDetails.weight !== ""
-            ? parseFloat(patientDetails.weight)
-            : null,
-        age: patientDetails.age !== "" ? parseInt(patientDetails.age) : null,
+        weight: patientDetails.weight !== "" ? parseFloat(patientDetails.weight) : null,
+        age: age !== "" ? parseInt(age) : null,
         date_of_birth: patientDetails.dateOfBirth || null,
         gender: patientDetails.gender,
         species: patientDetails.species,
@@ -314,32 +292,28 @@ const NewPatient = () => {
         demeanor: patientDetails.demeanor,
         general_tag: tags.general,
         reminder_tag: tags.reminder,
-        image_url: imageUrl,
+        image_url: otherDetails.image || null,
       };
-
+  
       const { data: patientData, error: patientError } = await supabase
         .from("patients")
         .insert([patientDataToInsert])
         .select();
-
+  
       if (patientError) {
-        console.error(
-          "Error inserting patient:",
-          patientError.details || patientError.message || patientError
-        );
-        alert(
-          `Error adding new patient: ${
-            patientError.details || patientError.message
-          }`
-        );
+        console.error("Error inserting patient:", patientError.details || patientError.message || patientError);
+        alert(`Error adding new patient: ${patientError.details || patientError.message}`);
         return;
       }
-
+  
+      // show success notification
+      alert(`Successfully created new patient: ${patientDetails.patientName}`);
+      setSelectedPatient(patientData[0]);
+  
       setPatientDetails({
         patientName: "",
         microchipNumber: "",
         weight: "",
-        age: "",
         dateOfBirth: "",
         gender: "",
         species: "",
@@ -363,18 +337,21 @@ const NewPatient = () => {
       });
       setAnimalNotes("");
       setImagePreview(null);
+  
+      // navigate to PatientMain
+      navigate('/patient');
     } catch (error) {
       console.error("Error creating new patient:", error.message || error);
       alert(`Failed to create new patient: ${error.message}`);
     }
   };
-
+  
   return (
     <div className="new-patient-page">
-      <header className="patient-header">
+      <header className="patientMain-header">
         <PatientTabs />
       </header>
-
+  
       <div className="new-patient-header">
         {ownerSelectionState === "selected" ? (
           <div className="selected-owner-header">
@@ -390,23 +367,25 @@ const NewPatient = () => {
           <h1>New Patient</h1>
         )}
       </div>
-
+  
       {ownerSelectionState === "selecting" && (
         <div className="owner-selection-container">
           <OwnerSelection
             onSelectOwner={handleOwnerSelect}
             onCreateNewOwner={handleCreateNewOwner}
+            searchTerm={globalSearchTerm}
           />
         </div>
       )}
-
-      {ownerSelectionState === "creating" && (
-        <NewOwnerForm
-          onCreateOwner={handleOwnerCreated}
-          onCancel={handleCancelNewOwner}
+  
+      {showCreateModal && (
+        <CreateContactModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onCreateContact={handleCreateContact}
         />
       )}
-
+  
       {ownerSelectionState === "selected" && (
         <form
           className="new-patient-grid new-patient-form"
@@ -416,7 +395,7 @@ const NewPatient = () => {
             <h2>Pet Details</h2>
             {[
               {
-                label: "Patient Name",
+                label: "Patient Name *",
                 name: "patientName",
                 type: "text",
               },
@@ -426,17 +405,17 @@ const NewPatient = () => {
                 type: "text",
               },
               {
-                label: "Weight in KG",
+                label: "Weight in KG *",
                 name: "weight",
                 type: "text",
               },
               {
-                label: "Date of Birth",
+                label: "Date of Birth *",
                 name: "dateOfBirth",
                 type: "date",
               },
               {
-                label: "Species",
+                label: "Species *",
                 name: "species",
                 type: "text",
               },
@@ -453,7 +432,7 @@ const NewPatient = () => {
             ].map(({ label, name, type }) => (
               <div key={name} className="input-wrapper">
                 <label>
-                  {label}{" "}
+                  {label}
                   {errors[name] && (
                     <span className="error-message-inline">{errors[name]}</span>
                   )}
@@ -467,14 +446,15 @@ const NewPatient = () => {
                 />
               </div>
             ))}
-
-            <label>Gender</label>
+  
+            <label>Sex *</label>
             <select
               name="gender"
               value={patientDetails.gender}
               onChange={handleInputChange}
               className={errors.gender ? "input-error" : ""}
             >
+              <option value="">Select Gender</option>
               <option value="Male/Neutered">Male/Neutered</option>
               <option value="Male/Unneutered">Male/Unneutered</option>
               <option value="Female/Spayed">Female/Spayed</option>
@@ -484,7 +464,7 @@ const NewPatient = () => {
               <span className="error-message-inline">{errors.gender}</span>
             )}
           </div>
-
+  
           <div className="additional-info-section">
             <h2>Additional Information</h2>
             {[
@@ -518,7 +498,7 @@ const NewPatient = () => {
                 )}
               </div>
             ))}
-
+  
             <div className="notes-subsection">
               <h3>Animal Notes</h3>
               <textarea
@@ -536,7 +516,7 @@ const NewPatient = () => {
                 </span>
               )}
             </div>
-
+  
             <div className="tags-subsection">
               <h3>Tags</h3>
               {[
@@ -565,7 +545,7 @@ const NewPatient = () => {
               ))}
             </div>
           </div>
-
+  
           <div className="clinical-details-section">
             <h2>Clinical Details</h2>
             {[
@@ -588,7 +568,7 @@ const NewPatient = () => {
             ].map(({ label, name }) => (
               <div key={name} className="input-wrapper">
                 <label>
-                  {label}{" "}
+                  {label}
                   {errors[name] && (
                     <span className="error-message-inline">{errors[name]}</span>
                   )}
@@ -602,7 +582,7 @@ const NewPatient = () => {
                 />
               </div>
             ))}
-
+  
             <label>Upload Image</label>
             <input type="file" name="image" onChange={handleImageChange} />
             {imagePreview && (

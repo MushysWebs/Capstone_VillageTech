@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { usePatient } from "../../../context/PatientContext";
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import PatientTabs from "../../../components/PatientTabs";
-import { Search, AlertCircle, Activity, FileText } from "lucide-react";
+import { Search, FileText } from "lucide-react";
 import PatientSidebar from "../../../components/patientSidebar/PatientSidebar";
+import AddMedicationModal from "../../../components/addMedicationModal/AddMedicationModal";
+import AddNoteModal from "../../../components/addNoteModal/AddNoteModal";
+import VaccineModal from "./VaccineModal";
 import "./Medication.css";
 
-const MedicationHistory = () => {
+const MedicationHistory = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const supabase = useSupabaseClient();
 
   const [medications, setMedications] = useState([]);
-  const [allergies, setAllergies] = useState([]);
-  const [vitals, setVitals] = useState([]);
+  const [vaccines, setVaccines] = useState([]);
   const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isMedicationModalOpen, setMedicationModalOpen] = useState(false);
+  const [isNoteModalOpen, setNoteModalOpen] = useState(false);
+  const [isVaccineModalOpen, setVaccineModalOpen] = useState(false);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -26,29 +31,27 @@ const MedicationHistory = () => {
   const fetchPatientData = async () => {
     setLoading(true);
     try {
-      const [medicationData, allergyData, vitalData, noteData] =
-        await Promise.all([
-          supabase
-            .from("medications")
-            .select("*")
-            .eq("patient_id", selectedPatient.id),
-          supabase
-            .from("patient_allergies")
-            .select("*")
-            .eq("patient_id", selectedPatient.id),
-          supabase
-            .from("patient_vitals")
-            .select("*")
-            .eq("patient_id", selectedPatient.id),
-          supabase
-            .from("patient_notes")
-            .select("*")
-            .eq("patient_id", selectedPatient.id),
-        ]);
+      const [medData, vaccineData, noteData] = await Promise.all([
+        supabase
+          .from("medications")
+          .select("*")
+          .eq("patient_id", selectedPatient.id),
+        supabase
+          .from("vaccinations")
+          .select("*")
+          .eq("patient_id", selectedPatient.id),
+        supabase
+          .from("patient_notes")
+          .select("*")
+          .eq("patient_id", selectedPatient.id),
+      ]);
 
-      setMedications(medicationData.data || []);
-      setAllergies(allergyData.data || []);
-      setVitals(vitalData.data || []);
+      if (medData.error || vaccineData.error || noteData.error) {
+        throw new Error("Error fetching patient data");
+      }
+
+      setMedications(medData.data || []);
+      setVaccines(vaccineData.data || []);
       setNotes(noteData.data || []);
     } catch (error) {
       console.error("Error fetching patient data:", error);
@@ -57,9 +60,105 @@ const MedicationHistory = () => {
     }
   };
 
-  const filteredMedications = medications.filter((med) =>
-    med.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleAddMedication = async (newMedication) => {
+    try {
+      const { data, error } = await supabase
+        .from("medications")
+        .insert([
+          {
+            patient_id: selectedPatient.id,
+            type: "Medication",
+            ...newMedication,
+          },
+        ]);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setMedications((prev) => [
+          ...prev,
+          { ...newMedication, id: data[0].id },
+        ]);
+      } else {
+        await fetchPatientData(); 
+      }
+      setMedicationModalOpen(false);
+    } catch (error) {
+      console.error("Error adding medication:", error);
+    }
+  };
+
+  const handleAddVaccine = async (newVaccine) => {
+    try {
+      const { data, error } = await supabase
+        .from("vaccinations")
+        .insert([{ patient_id: selectedPatient.id, ...newVaccine }])
+        .select("*"); 
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setVaccines((prev) => [...prev, data[0]]); 
+      } else {
+        await fetchPatientData(); 
+      }
+      setVaccineModalOpen(false);
+    } catch (error) {
+      console.error("Error adding vaccine:", error);
+    }
+  };
+
+  const handleAddNote = async (newNote) => {
+    try {
+      const { data, error } = await supabase
+        .from("patient_notes")
+        .insert([{ patient_id: selectedPatient.id, ...newNote }]);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setNotes((prev) => [...prev, { ...newNote, id: data[0].id }]);
+      } else {
+        await fetchPatientData(); 
+      }
+      setNoteModalOpen(false);
+    } catch (error) {
+      console.error("Error adding note:", error);
+    }
+  };
+
+  const filterItems = (items, searchTerm, searchableFields) => {
+    if (!searchTerm) return items;
+    
+    return items.filter(item => 
+      searchableFields.some(field => {
+        const value = item[field];
+        return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
+      })
+    );
+  };
+
+  const filteredMedications = filterItems(medications, globalSearchTerm, [
+    'name',
+    'dosage',
+    'frequency',
+    'reason',
+    'doctor',
+    'instructions',
+    'status'
+  ]);
+
+  const filteredVaccines = filterItems(vaccines, globalSearchTerm, [
+    'name',
+    'doctor',
+    'dosage',
+    'frequency'
+  ]);
+
+  const filteredNotes = filterItems(notes, globalSearchTerm, [
+    'note',
+    'date'
+  ]);
 
   const renderTable = (data, columns) => (
     <table className="medication-table">
@@ -91,93 +190,127 @@ const MedicationHistory = () => {
   );
 
   return (
-    <div className="medication-main">
-      <PatientSidebar />
-
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="medication-page">
-        <header className="medication-patient-header">
-          <PatientTabs />
-        </header>
-
         <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <Search size={24} style={{ marginRight: "10px" }} />
-            Medication History
-          </h2>
-          <input
-            type="text"
-            placeholder="Search medications..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-medication"
-          />
+          <div className="medication-section-header">
+            <h2>
+              <Search size={24} style={{ marginRight: "10px" }} />
+              Medication History
+            </h2>
+            <button
+              className="medication-buttons"
+              onClick={() => setMedicationModalOpen(true)}
+            >
+              Add Medication
+            </button>
+          </div>
           {loading ? (
             <p className="loading-message">Loading medications...</p>
           ) : (
-            renderTable(filteredMedications, [
-              { key: "name", label: "Name" },
-              { key: "dosage", label: "Dosage" },
-              { key: "frequency", label: "Frequency" },
-              { key: "date_prescribed", label: "Date Prescribed" },
-              { key: "end_date", label: "End Date" },
-              { key: "reason", label: "Reason" },
-              { key: "doctor", label: "Prescribing Doctor" },
-              { key: "instructions", label: "Instructions" },
-              { key: "refills", label: "Refills" },
-              { key: "status", label: "Status" },
-            ])
+            <>
+              {renderTable(filteredMedications, [
+                { key: "name", label: "Medication" },
+                { key: "dosage", label: "Dosage" },
+                { key: "frequency", label: "Frequency" },
+                { key: "date_prescribed", label: "Date Prescribed" },
+                { key: "end_date", label: "End Date" },
+                { key: "reason", label: "Reason" },
+                { key: "doctor", label: "Prescribing Doctor" },
+                { key: "instructions", label: "Instructions" },
+                { key: "refills", label: "Refills" },
+                { key: "status", label: "Status" },
+              ])}
+              {filteredMedications.length === 0 && globalSearchTerm && (
+                <div className="no-results-message">
+                  No medications found matching "{globalSearchTerm}"
+                </div>
+              )}
+            </>
           )}
         </div>
 
         <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <AlertCircle size={24} style={{ marginRight: "10px" }} />
-            Allergies
-          </h2>
+          <div className="medication-section-header">
+            <h2>Vaccines</h2>
+            <button
+              className="medication-buttons"
+              onClick={() => setVaccineModalOpen(true)}
+            >
+              Add Vaccine
+            </button>
+          </div>
           {loading ? (
-            <p className="loading-message">Loading allergies...</p>
+            <p className="loading-message">Loading vaccines...</p>
           ) : (
-            renderTable(allergies, [
-              { key: "name", label: "Allergy" },
-              { key: "reaction", label: "Reaction" },
-            ])
+            <>
+              {renderTable(filteredVaccines, [
+                { key: "name", label: "Name" },
+                { key: "date_given", label: "Date Given" },
+                { key: "next_due", label: "Next Due" },
+                { key: "dosage", label: "Dosage" },
+                { key: "frequency", label: "Frequency" },
+                { key: "doctor", label: "Doctor" },
+              ])}
+              {filteredVaccines.length === 0 && globalSearchTerm && (
+                <div className="no-results-message">
+                  No vaccines found matching "{globalSearchTerm}"
+                </div>
+              )}
+            </>
           )}
         </div>
 
         <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <Activity size={24} style={{ marginRight: "10px" }} />
-            Vitals
-          </h2>
-          {loading ? (
-            <p className="loading-message">Loading vitals...</p>
-          ) : (
-            renderTable(vitals, [
-              { key: "date", label: "Date" },
-              { key: "weight", label: "Weight" },
-              { key: "temperature", label: "Temperature" },
-              { key: "heart_rate", label: "Heart Rate" },
-            ])
-          )}
-        </div>
-
-        <div className="medication-section-box">
-          <h2 className="medication-section-header">
-            <FileText size={24} style={{ marginRight: "10px" }} />
-            Notes
-          </h2>
+          <div className="medication-section-header">
+            <h2>
+              <FileText size={24} style={{ marginRight: "10px" }} />
+              Notes
+            </h2>
+            <button
+              className="medication-buttons"
+              onClick={() => setNoteModalOpen(true)}
+            >
+              Add Note
+            </button>
+          </div>
           {loading ? (
             <p className="loading-message">Loading notes...</p>
           ) : (
-            renderTable(notes, [
-              { key: "date", label: "Date" },
-              { key: "note", label: "Note" },
-            ])
+            <>
+              {renderTable(filteredNotes, [
+                { key: "date", label: "Date" },
+                { key: "note", label: "Note" },
+              ])}
+              {filteredNotes.length === 0 && globalSearchTerm && (
+                <div className="no-results-message">
+                  No notes found matching "{globalSearchTerm}"
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
-    </div>
+
+      <AddMedicationModal
+        isOpen={isMedicationModalOpen}
+        onClose={() => setMedicationModalOpen(false)}
+        onAddMedication={handleAddMedication}
+      />
+      <VaccineModal
+        isOpen={isVaccineModalOpen}
+        onClose={() => setVaccineModalOpen(false)}
+        onAddVaccine={fetchPatientData}
+        patientId={selectedPatient?.id}
+      />
+      <AddNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => setNoteModalOpen(false)}
+        onAddNote={handleAddNote}
+      />
+    </PatientLayout>
   );
 };
+
 
 export default MedicationHistory;

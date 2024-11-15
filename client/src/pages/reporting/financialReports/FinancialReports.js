@@ -1,112 +1,296 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import FinancialReportCard from "./FinancialReportCard";
-import TotalSalesCard from "./TotalSalesCard"; 
-import "./FinancialReports.css"; 
+import TotalSalesCard from "./TotalSalesCard";
+import "./FinancialReports.css";
 import ReportingTabs from "../../../components/ReportingTabs";
 
-const FinancialReports = () => {
-  const data1 = [
-    { name: "Grady Spurrill", users: 10 },
-    { name: "Day 2", users: 12 },
-    { name: "Day 3", users: 9 },
-    { name: "Day 4", users: 11 },
-    { name: "Day 5", users: 15 },
-    { name: "Day 6", users: 17 },
-    { name: "Day 7", users: 18 },
-    { name: "Day 8", users: 20 },
-  ];
+const FinancialReports = ({ globalSearchTerm }) => {
+  const [appointments, setAppointments] = useState([]);
+  const [todayAppointments, setTodayAppointments] = useState([]);
+  const [tomorrowAppointments, setTomorrowAppointments] = useState([]);
+  const [paidReceipts, setPaidReceipts] = useState([]);
+  const [totalSalesToday, setTotalSalesToday] = useState(0);
+  const supabase = useSupabaseClient();
 
-  const data2 = [
-    { name: "Day 1", users: 1 },
-    { name: "Day 2", users: 6 },
-    { name: "Day 3", users: 7 },
-    { name: "Day 4", users: 8 },
-    { name: "Day 5", users: 7 },
-    { name: "Day 6", users: 10 },
-    { name: "Day 7", users: 6 },
-    { name: "Day 9", users: 14 },
-  ];
+  const getDates = () => {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
 
-  const totalSales = 1253.67; // Set your total sales amount
-
-  const [selectedReport, setSelectedReport] = useState("appointmentsToday");
-  const [reportData, setReportData] = useState(data1);
-
-  const handleReportChange = (event) => {
-    const reportType = event.target.value;
-    setSelectedReport(reportType);
-    if (reportType === "appointmentsToday") {
-      setReportData(data1);
-    } else if (reportType === "appointmentsTomorrow") {
-      setReportData(data2);
-    }
-    // Add more conditions if you have more reports
+    return {
+      todayStart: today.toISOString().split('T')[0] + 'T00:00:00',
+      todayEnd: today.toISOString().split('T')[0] + 'T23:59:59',
+      tomorrowStart: tomorrow.toISOString().split('T')[0] + 'T00:00:00',
+      tomorrowEnd: tomorrow.toISOString().split('T')[0] + 'T23:59:59'
+    };
   };
+
+  const filteredAppointments = useMemo(() => {
+    if (!globalSearchTerm) return appointments;
+
+    return appointments.filter(appointment => {
+      const searchTerm = globalSearchTerm.toLowerCase();
+      const startTime = new Date(appointment.start_time).toLocaleString().toLowerCase();
+      const endTime = new Date(appointment.end_time).toLocaleString().toLowerCase();
+      
+      return (
+        appointment.id.toString().includes(searchTerm) ||
+        appointment.title.toLowerCase().includes(searchTerm) ||
+        startTime.includes(searchTerm) ||
+        endTime.includes(searchTerm)
+      );
+    });
+  }, [appointments, globalSearchTerm]);
+
+  const filteredReceipts = useMemo(() => {
+    if (!globalSearchTerm) return paidReceipts;
+
+    return paidReceipts.filter(receipt => {
+      const searchTerm = globalSearchTerm.toLowerCase();
+      
+      return (
+        receipt.receipt_id.toString().includes(searchTerm) ||
+        receipt.invoice_id.toString().includes(searchTerm) ||
+        receipt.patient_id.toString().includes(searchTerm)
+      );
+    });
+  }, [paidReceipts, globalSearchTerm]);
+
+
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  const fetchTodayTomorrowAppointments = async () => {
+    try {
+      const dates = getDates();
+
+      const { data: todayData, error: todayError } = await supabase
+        .from('appointments')
+        .select('*')
+        .gte('start_time', dates.todayStart)
+        .lte('start_time', dates.todayEnd);
+
+      if (todayError) throw todayError;
+
+      const { data: tomorrowData, error: tomorrowError } = await supabase
+        .from('appointments')
+        .select('*')
+        .gte('start_time', dates.tomorrowStart)
+        .lte('start_time', dates.tomorrowEnd);
+
+      if (tomorrowError) throw tomorrowError;
+
+      const todayCount = todayData?.length || 0;
+      const tomorrowCount = tomorrowData?.length || 0;
+
+      setTodayAppointments({
+        count: todayCount,
+        data: getDailyBreakdown(todayData),
+      });
+
+      setTomorrowAppointments({
+        count: tomorrowCount,
+        data: getDailyBreakdown(tomorrowData),
+      });
+
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+    }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("id, title, start_time, end_time, status");
+
+      if (error) throw error;
+
+      setAppointments(data);
+    } catch (err) {
+      console.error("Error fetching appointment data:", err.message);
+    }
+  };
+
+  const fetchReceipts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("receipts")
+        .select(
+          "receipt_id, invoice_id, patient_id, receipt_total, receipt_date, receipt_pdf_url"
+        );
+
+      if (error) throw error;
+      setPaidReceipts(data);
+    } catch (err) {
+      console.error("Error fetching receipt data:", err.message);
+    }
+  };
+
+  const fetchTotalSalesToday = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("receipts")
+        .select("receipt_total")
+        .gte("receipt_date", `${getTodayDate()}T00:00:00`)
+        .lte("receipt_date", `${getTodayDate()}T23:59:59`);
+
+      if (error) throw error;
+
+      const total = data.reduce(
+        (sum, receipt) => sum + receipt.receipt_total,
+        0
+      );
+      setTotalSalesToday(total);
+    } catch (err) {
+      console.error("Error fetching today's total sales:", err.message);
+    }
+  };
+
+  const getDailyBreakdown = (appointments) => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      return {
+        name: `Day ${7-i}`,
+        users: 0,
+        date: date.toISOString().split('T')[0]
+      };
+    }).reverse();
+
+    appointments?.forEach(apt => {
+      const aptDate = apt.start_time.split('T')[0];
+      const dayData = last7Days.find(day => day.date === aptDate);
+      if (dayData) {
+        dayData.users++;
+      }
+    });
+
+    return last7Days;
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchTodayTomorrowAppointments();
+      await fetchAppointments();
+      await fetchReceipts();
+      await fetchTotalSalesToday();
+    };
+  
+    loadData();
+  }, []);
 
   return (
     <div className="financial-reports-container">
       <ReportingTabs />
-    <div className="container">
-      <TotalSalesCard totalSales={totalSales} />
-
-      <div className="card-container">
-        <FinancialReportCard
-          data={data1}
-          title="Appointments Today"
-          count="34"
-          percentage="+25%"
-        />
-
-        <FinancialReportCard
-          data={data2}
-          title="Appointments Tomorrow"
-          count="5"
-          percentage="+15%"
-        />
-      </div>
-
-      <div className="reporting-section">
-        <div className="time-period-selector">
-          <button className="time-period-selector-button">Daily</button>
-          <button className="time-period-selector-button">Weekly</button>
-          <button className="time-period-selector-button">Monthly</button>
+      <div className="container">
+        <div className="top-section">
+          <TotalSalesCard totalSales={totalSalesToday} />
+          <FinancialReportCard
+            data={todayAppointments.data || []}
+            title="Appointments Today"
+            count={todayAppointments.count || 0}
+          />
+          <FinancialReportCard
+            data={tomorrowAppointments.data || []}
+            title="Appointments Tomorrow"
+            count={tomorrowAppointments.count || 0}
+          />
         </div>
-        
-        <h2 className="financial-h2">Reports</h2>
-        <select value={selectedReport} onChange={handleReportChange}>
-          <option value="appointmentsToday">Appointments Today</option>
-          <option value="appointmentsTomorrow">Appointments Tomorrow</option>
-          {/* Add more options here */}
-        </select>
 
-        <div className="table-container">
-          <table className="invoices-table">
-            <thead>
-              <tr>
-                <th>Number</th>
-                <th>Name</th>
-                <th>Patient</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.map((item, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{item.name}</td>
-                  <td>dummy data</td>
-                  <td>dummy data</td>
-                  <td>dummy data</td>
-                  <td>dummy data</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="reporting-section">
+          <h2 className="financial-h2">Reports</h2>
+
+          <div className="table-container">
+            <div className="table-wrapper">
+              <h3>Pending Appointments</h3>
+              <div className="table-scroll">
+                {filteredAppointments.length === 0 && globalSearchTerm ? (
+                  <div className="no-results-message">
+                    No appointments found matching "{globalSearchTerm}"
+                  </div>
+                ) : (
+                  <table className="appointments-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAppointments.map((appointment) => (
+                        <tr key={appointment.id}>
+                          <td>{appointment.id}</td>
+                          <td>{appointment.title}</td>
+                          <td>
+                            {new Date(appointment.start_time).toLocaleString()}
+                          </td>
+                          <td>
+                            {new Date(appointment.end_time).toLocaleString()}
+                          </td>
+                          <td>{appointment.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+
+            <div className="table-wrapper">
+              <h3>Paid Invoices</h3>
+              <div className="table-scroll">
+                {filteredReceipts.length === 0 && globalSearchTerm ? (
+                  <div className="no-results-message">
+                    No invoices found matching "{globalSearchTerm}"
+                  </div>
+                ) : (
+                  <table className="receipts-table">
+                    <thead>
+                      <tr>
+                        <th>Receipt ID</th>
+                        <th>Invoice ID</th>
+                        <th>Patient ID</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>PDF URL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredReceipts.map((receipt) => (
+                        <tr key={receipt.receipt_id}>
+                          <td>{receipt.receipt_id}</td>
+                          <td>{receipt.invoice_id}</td>
+                          <td>{receipt.patient_id}</td>
+                          <td>{receipt.receipt_total.toFixed(2)}</td>
+                          <td>
+                            {new Date(receipt.receipt_date).toLocaleDateString()}
+                          </td>
+                          <td>
+                            <a
+                              href={receipt.receipt_pdf_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              View PDF
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };

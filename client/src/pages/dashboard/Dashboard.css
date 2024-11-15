@@ -249,28 +249,42 @@
   font-size: 14px;
 }
 
-.notifications-panel {
-  background-color: white;
-  padding: 20px;
-  border-left: 1px solid #e0e0e0;
-  width: 300px;
-  overflow-y: auto;
+.message-button-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.notification {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e0e0e0;
+.message-notification-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #e9533f;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 2px;
+  font-size: 12px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  animation: notification-pulse 5s infinite;
 }
 
-.notification h3 {
-  margin-top: 0;
-  color: #09ACE0;
-}
-
-.notification p {
-  font-size: 14px;
-  margin: 5px 0;
+@keyframes notification-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .search-container {

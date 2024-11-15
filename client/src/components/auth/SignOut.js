@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCookies } from 'react-cookie';
 import { supabase } from '../routes/supabaseClient';
+import './SignOut.css'
 
 const SignoutButton = () => {
     const [cookies, setCookie, removeCookie] = useCookies(['AuthToken']);
@@ -13,13 +14,7 @@ const SignoutButton = () => {
     };
 
     return (
-        <button onClick={signOut} style={{
-            background: '#09ACE0',
-            color: 'white',
-            borderRadius: 3,
-            border: 'none',
-            padding: 8,
-        }}>
+        <button onClick={signOut} className='sign-out-button'>
             Sign Out
         </button>
     );

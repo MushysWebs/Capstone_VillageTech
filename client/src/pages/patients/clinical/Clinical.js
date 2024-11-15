@@ -4,9 +4,10 @@ import PatientTabs from '../../../components/PatientTabs';
 import PatientSidebar from '../../../components/patientSidebar/PatientSidebar';
 import { usePatient } from '../../../context/PatientContext';
 import { Edit2, Save } from 'lucide-react';
+import PatientLayout from "../../../components/patientLayout/PatientLayout";
 import "./Clinical.css";
 
-const Clinical = () => {
+const Clinical = ({ globalSearchTerm }) => {
   // Access selectedPatient and setSelectedPatient from PatientContext
   const { selectedPatient, setSelectedPatient } = usePatient();
 
@@ -194,16 +195,9 @@ const Clinical = () => {
 
 
   return (
-    <div className="clinical-main">
-      <PatientSidebar />
-
+    <PatientLayout globalSearchTerm={globalSearchTerm}>
       <div className="clinical-page">
-        <header className="patient-header">
-          <PatientTabs />
-        </header>
-
         {error && <div className="error-message">{error}</div>}
-
         <div className="section-box">
           <h2 className="section-header">Clinical Record</h2>
           <div className="info-grid">
@@ -350,8 +344,8 @@ const Clinical = () => {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+    </PatientLayout>
   );
 };
 

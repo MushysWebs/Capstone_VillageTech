@@ -10,13 +10,20 @@ import {
   areIntervalsOverlapping
 } from 'date-fns';
 import AddAppointment from './AddAppointment';
+import AppointmentDetails from './AppointmentDetails';
 import ClockInOut from '../../../components/clockInOut/ClockInOut';
 import './CalendarView.css';
+
+const HOUR_WIDTH = 140;
+const TIME_SLOT_PADDING = 10; 
 
 const CalendarView = ({ searchTerm, firstName }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
+  const [isAppointmentDetailsOpen, setIsAppointmentDetailsOpen] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('calendar'); 
   const supabase = useSupabaseClient();
   const scrollWrapperRef = useRef(null);
 
@@ -27,12 +34,17 @@ const CalendarView = ({ searchTerm, firstName }) => {
     
   }, [currentDate]);
 
+  const handleAppointmentClick = (appointmentId) => {
+    setSelectedAppointmentId(appointmentId);
+    setIsAppointmentDetailsOpen(true);
+  };
+
   const scrollToCurrentTime = () => {
     if (scrollWrapperRef.current && isSameDay(currentDate, new Date())) {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
-      const scrollPosition = (hours * 120) + ((minutes / 60) * 120) - (scrollWrapperRef.current.clientWidth / 2);
+      const scrollPosition = (hours * HOUR_WIDTH) + ((minutes / 60) * HOUR_WIDTH) - (scrollWrapperRef.current.clientWidth / 2);
       scrollWrapperRef.current.scrollLeft = Math.max(0, scrollPosition);
     }
   };
@@ -41,7 +53,7 @@ const CalendarView = ({ searchTerm, firstName }) => {
     try {
       const start = startOfDay(currentDate);
       const end = addDays(startOfDay(currentDate), 1);
-
+  
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -53,7 +65,11 @@ const CalendarView = ({ searchTerm, firstName }) => {
           status,
           patients:patient_id (
             id,
-            name
+            name,
+            owners (
+              first_name,
+              last_name
+            )
           ),
           staff:staff_id (
             id,
@@ -64,9 +80,9 @@ const CalendarView = ({ searchTerm, firstName }) => {
         .gte('start_time', start.toISOString())
         .lt('start_time', end.toISOString())
         .order('start_time', { ascending: true });
-
+  
       if (error) throw error;
-
+  
       const formattedAppointments = data.map(app => ({
         id: app.id,
         title: app.title,
@@ -74,10 +90,11 @@ const CalendarView = ({ searchTerm, firstName }) => {
         end: new Date(app.end_time),
         patient: app.patients?.name || 'Unknown',
         doctor: app.staff ? `${app.staff.first_name} ${app.staff.last_name}` : 'Unknown',
+        owner: app.patients?.owners ? `${app.patients.owners.first_name} ${app.patients.owners.last_name}` : 'Unknown',
         description: app.description,
         status: app.status
       }));
-
+  
       setAppointments(formattedAppointments);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -101,19 +118,24 @@ const CalendarView = ({ searchTerm, firstName }) => {
   };
 
   const renderTimeSlots = () => {
-    // create fixed 24-hour time slots
     const slots = [];
     for (let i = 0; i < 24; i++) {
       const displayHour = i.toString().padStart(2, '0');
       slots.push(
-        <div key={i} className="calendarView__timeSlot">
-          {`${(displayHour)}:00`}
+        <div 
+          key={i} 
+          className="calendarView__timeSlot"
+          style={{ 
+            width: `${HOUR_WIDTH}px`,
+            boxSizing: 'border-box'
+          }}
+        >
+          {`${displayHour}:00`}
         </div>
       );
     }
     return slots;
   };
-  
 
   const renderAppointments = () => {
     const dayAppointments = appointments.filter(app => isSameDay(app.start, currentDate));
@@ -140,18 +162,20 @@ const CalendarView = ({ searchTerm, firstName }) => {
     
     return overlappingGroups.flatMap(group => {
       const isOverlapping = group.length > 1;
+      
       return group.map((app, index) => {
         const start = new Date(app.start);
         const end = new Date(app.end);
-  
-        const startHour = start.getHours();
-        const startMinute = start.getMinutes();
-        const endHour = end.getHours();
-        const endMinute = end.getMinutes();
-  
-        // calculate position directly from hours (120px per hour)
-        const left = (startHour * 142) + (startMinute / 60 * 120);
-        const width = ((endHour - startHour) * 120) + ((endMinute - startMinute) / 60 * 120);
+        
+        // position and width based on time
+        const startMinutes = (start.getHours() * 60) + start.getMinutes();
+        const endMinutes = (end.getHours() * 60) + end.getMinutes();
+        const durationMinutes = endMinutes - startMinutes;
+        
+        // left position align with time slots
+        const left = (startMinutes / 60) * HOUR_WIDTH;
+        // width based on duration
+        const width = (durationMinutes / 60) * HOUR_WIDTH - 2; // -2px for borders
         
         let top = '0%';
         let height = '100%';
@@ -161,28 +185,50 @@ const CalendarView = ({ searchTerm, firstName }) => {
           top = `${index * rowHeight}%`;
           height = `${rowHeight}%`;
         }
-  
-        // format display time in 24-hour format
-        const displayStart = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
-        const displayEnd = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
-  
+        
+        const displayStart = format(start, 'HH:mm');
+        const displayEnd = format(end, 'HH:mm');
+
         return (
           <div
             key={app.id}
             className="calendarView__appointment"
+            onClick={() => handleAppointmentClick(app.id)}
             style={{ 
               left: `${left}px`, 
               width: `${width}px`,
               top,
               height,
-              maxHeight: '120px'
+              maxHeight: '120px',
+              boxSizing: 'border-box'
             }}
           >
             <div className="calendarView__appointmentTime">
               {`${displayStart} - ${displayEnd}`}
             </div>
-            <div className="calendarView__appointmentTitle">{app.title}</div>
-            <div className="calendarView__appointmentPatient">{app.patient}</div>
+            <div className="calendarView__appointmentTitle">
+              {app.title}
+            </div>
+            <div className="calendarView__appointmentDetails">
+              <div className="calendarView__appointmentInfo">
+                <i className="fas fa-paw calendarView__appointmentIcon"></i>
+                <span className="calendarView__appointmentLabel">Patient:</span>
+                {app.patient}
+              </div>
+              <div className="calendarView__appointmentInfo">
+                <i className="fas fa-user calendarView__appointmentIcon"></i>
+                <span className="calendarView__appointmentLabel">Owner:</span>
+                {app.owner}
+              </div>
+              <div className="calendarView__appointmentInfo">
+                <i className="fas fa-user-md calendarView__appointmentIcon"></i>
+                <span className="calendarView__appointmentLabel">Dr.</span>
+                {app.doctor.split(' ')[1]}
+              </div>
+            </div>
+            <div className="calendarView__appointmentStatus">
+              {app.status}
+            </div>
           </div>
         );
       });
@@ -193,9 +239,8 @@ const CalendarView = ({ searchTerm, firstName }) => {
   const renderCurrentTimeLine = () => {
     const now = new Date();
     if (isSameDay(now, currentDate)) {
-      const hour = now.getHours();
-      const minute = now.getMinutes();
-      const left = (hour * 142) + (minute / 60 * 120);
+      const minutes = (now.getHours() * 60) + now.getMinutes();
+      const left = (minutes / 60) * HOUR_WIDTH;
       return <div className="calendarView__currentTimeLine" style={{ left: `${left}px` }} />;
     }
     return null;
@@ -205,10 +250,6 @@ const CalendarView = ({ searchTerm, firstName }) => {
     <div className="calendarView">
       <div className="calendarView__header">
         <h1>Hello, {firstName}!</h1>
-        <div className="calendarView__headerButtons">
-          <ClockInOut />
-          <button className="calendarView__actionButton">View Hours</button>
-        </div>
       </div>
       
       <div className="calendarView__controls">
@@ -219,7 +260,15 @@ const CalendarView = ({ searchTerm, firstName }) => {
           >
             + Create Appointment
           </button>
-          <button className="calendarView__actionButton">View Appointments</button>
+          <button 
+            className="calendarView__actionButton" 
+            onClick={() => {
+              setViewMode('list');
+              setIsAppointmentDetailsOpen(true);
+            }}
+          >
+            View Appointments
+          </button>
         </div>
         <div className="calendarView__rightControls">
           <button 
@@ -262,6 +311,25 @@ const CalendarView = ({ searchTerm, firstName }) => {
           </div>
         </div>
       </div>
+
+      {isAppointmentDetailsOpen && (
+        <AppointmentDetails
+          isOpen={isAppointmentDetailsOpen}
+          onClose={() => {
+            setIsAppointmentDetailsOpen(false);
+            setSelectedAppointmentId(null);
+            setViewMode('calendar');
+          }}
+          appointmentId={selectedAppointmentId}
+          mode={viewMode === 'list' ? 'list' : 'detail'}
+          onAppointmentUpdated={() => fetchAppointments()} 
+          onAppointmentDeleted={() => {
+            fetchAppointments();
+            setIsAppointmentDetailsOpen(false);
+            setSelectedAppointmentId(null);
+          }}
+        />
+      )}
 
       {isAddModalOpen && (
         <AddAppointment

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import "./PatientSidebar.css"; // Keeping this import unchanged
+import "./PatientSidebar.css";
 import { usePatient } from "../../context/PatientContext";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Users } from 'lucide-react';
 
-const PatientSidebar = () => {
+const PatientSidebar = ({ onSwitchToList }) => {
   const { selectedPatient } = usePatient();
-  console.log("Selected Patient in Sidebar:", selectedPatient);
   const [appointments, setAppointments] = useState([]);
   const [socEvents, setSocEvents] = useState([]);
   const [staffMap, setStaffMap] = useState({});
@@ -26,14 +26,17 @@ const PatientSidebar = () => {
       const { data, error } = await supabase
         .from("appointments")
         .select("*")
-        .eq("patient_id", patientId);
-
+        .eq("patient_id", patientId)
+        .order("start_time", { ascending: false }) 
+        .limit(1); 
+  
       if (error) throw error;
       setAppointments(data);
     } catch (error) {
       console.error("Error fetching appointments:", error.message);
     }
   };
+  
 
   const fetchSocEvents = (patientId) => {
     const dummySocEvents = [{ event: "Vaccination", nextDue: "2024-12-10" }];
@@ -68,7 +71,7 @@ const PatientSidebar = () => {
       if (patientData && patientData.owner_id) {
         const { data: ownerData, error: ownerError } = await supabase
           .from("owners")
-          .select("first_name, last_name, phone_number")
+          .select("first_name, last_name, email, phone_number")
           .eq("id", patientData.owner_id)
           .single();
 
@@ -76,6 +79,7 @@ const PatientSidebar = () => {
 
         setOwner({
           name: `${ownerData.first_name} ${ownerData.last_name}`,
+          email: ownerData.email,
           phone: ownerData.phone_number,
         });
       }
@@ -85,7 +89,6 @@ const PatientSidebar = () => {
   };
 
   if (!selectedPatient) {
-    console.log("No selected patient", selectedPatient);
     return <div>No patient selected</div>;
   }
 
@@ -100,6 +103,7 @@ const PatientSidebar = () => {
     preferred_doctor: preferredDoctor = "",
   } = selectedPatient;
 
+
   return (
     <div className="Sidebar">
       <div className="sidebarHeader">
@@ -110,7 +114,13 @@ const PatientSidebar = () => {
             className="contact-header-avatar"
           />
         </div>
-        <h2 className="sidebarName">{patientName}</h2>
+        <div className="header-content">
+          <button className="switch-list-button" onClick={onSwitchToList}>
+            <Users size={16} />
+            <span>Reselect</span>
+          </button>
+          <h2 className="sidebarName">{patientName}</h2>
+        </div>
       </div>
 
       <div className="sidebarInfo">
@@ -147,6 +157,7 @@ const PatientSidebar = () => {
       <div className="sidebar-owner">
         <h3>Owner</h3>
         <p className="owner-name">{owner?.name || "N/A"}</p>
+        <p className="owner-email"> {owner?.email || "N/A"}</p>
         <p>{owner?.phone || "N/A"}</p>
       </div>
 

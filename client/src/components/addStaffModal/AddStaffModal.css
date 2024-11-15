@@ -1,103 +1,208 @@
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
   
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: scale(0.95);
+  opacity: 0;
+  animation: modalEnter 0.3s ease forwards;
+}
+
+
+@keyframes modalEnter {
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+  
+.modal-content h2 {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  margin: 0;
+  padding: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 1;
+}
+  
+.modal-content form {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+  
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background-color: white;
+  transition: all 0.2s ease;
+  line-height: 1.25;
+}
+
+.form-group input[type="tel"] {
+  -moz-appearance: textfield;
+}
+
+.form-group input[type="tel"]::-webkit-outer-spin-button,
+.form-group input[type="tel"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #09ACE0;
+  box-shadow: 0 0 0 2px rgba(9, 172, 224, 0.1);
+}
+
+.form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+.error-submit-cancel {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 2rem;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #fee2e2;
+  border-radius: 6px;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.submit-button {
+  flex: 1;
+  background-color: #09ACE0;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+  background-color: #0789b4;
+}
+
+.close-button {
+  flex: 1;
+  background-color: #fee2e2;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: #fecaca;
+}
+
+.dark .modal-content {
+  background-color: #1e293b;
+}
+
+.dark .modal-content h2 {
+  background-color: #1e293b;
+  color: white;
+  border-bottom-color: #334155;
+}
+
+.dark .form-group label {
+  color: #94a3b8;
+}
+
+.dark .form-group input,
+.dark .form-group select,
+.dark .form-group textarea {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: white;
+}
+
+.dark .form-group input:focus,
+.dark .form-group select:focus,
+.dark .form-group textarea:focus {
+  border-color: #09ACE0;
+}
+
+.dark .error-submit-cancel {
+  background-color: #1e293b;
+  border-top-color: #334155;
+}
+
+@media (max-width: 640px) {
   .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .modal-content h2 {
-    margin-top: 0;
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .form-group input,
-  .form-group select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    font-size: 14px;
-    color: #333;
-  }
-  
-  .form-group select {
-    cursor: pointer;
-  }
-  
-  .submit-button {
-    background-color: #09ACE0;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
+    width: 95%;
+    max-height: 90vh;
   }
 
-  .submit-button:hover{
-    background-color: #2980b9;
+  .button-container {
+    flex-direction: column;
   }
-  
-  .close-button {
-    background: none;
-    border: none;
-    color: #09ACE0;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  .close-button:hover {
-    color: #e74c3c;
-  }
-  
-  .dark .modal-content {
-    background-color: #363D3F;
-    color: white;
-  }
-  
-  .dark .form-group label {
-    color: white;
-  }
-  
-  .dark .form-group input,
-  .dark .form-group select {
-    background-color: #2a3132;
-    border-color: #4a5256;
-    color: white;
-  }
-  
-  .dark .submit-button {
-    background-color: #1a7a9e;
-  }
-  
+}

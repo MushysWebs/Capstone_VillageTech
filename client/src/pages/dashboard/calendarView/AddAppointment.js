@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { Search, User, Calendar, Clock, FileText, Stethoscope, X } from 'lucide-react';
+import './AddAppointment.css';
 
 const AddAppointment = ({ onClose, onAppointmentAdded, patientId, patientName, ownerId }) => {
   const [owners, setOwners] = useState([]);
@@ -98,11 +100,20 @@ const AddAppointment = ({ onClose, onAppointmentAdded, patientId, patientName, o
 
 
 
-  //TODO: UPDATE THIS TO VETS ONLY, BUT WE'RE USING ALL STAFF FOR NOW FOR CONVENIENCE
   const fetchStaff = async () => {
-    const { data, error } = await supabase.from('staff').select('id, first_name, last_name');
-    if (error) console.error('Error fetching staff:', error);
-    else setStaff(data);
+    try {
+      const { data, error } = await supabase
+        .from('staff')
+        .select('id, first_name, last_name')
+        .eq('role', 'Veterinarian')
+        .eq('status', 'Active')
+        .order('last_name');
+      
+      if (error) throw error;
+      setStaff(data);
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+    }
   };
 
   const filterOwners = (search) => {
@@ -158,101 +169,193 @@ const AddAppointment = ({ onClose, onAppointmentAdded, patientId, patientName, o
   };
 
   return (
-    <div className="calendarView__modal">
-      <div className="calendarView__modalContent">
-        <div className="calendarView__modalHeader">
-          <h2>Add New Appointment</h2>
+    <div className="addAppointment__overlay">
+      <div className="addAppointment__container">
+        <div className="addAppointment__header">
+          <h2 className="addAppointment__title">Add New Appointment</h2>
           {selectedPet && (
             <img 
               src={selectedPet.image_url || `/api/placeholder/60/60`}
               alt={selectedPet.name}
-              className="calendarView__petImage"
+              className="addAppointment__petImage"
             />
           )}
         </div>
-        <form onSubmit={handleSubmit} className="calendarView__form">
-          <div className="calendarView__ownerSelect">
+
+        <form onSubmit={handleSubmit} className="addAppointment__form">
+        <div className="addAppointment__searchContainer">
+        <div className="addAppointment__section">
+          <label className="addAppointment__label">
+            <User size={16} />
+            Owner Search
+          </label>
+          <div className="addAppointment__searchInputWrapper">
             <input
               type="text"
-              placeholder="Search and select owner"
+              placeholder="Search by name or phone number"
               value={ownerSearch}
               onChange={handleOwnerSearch}
-              className="calendarView__input"
+              className="addAppointment__input addAppointment__input--withIcon"
               disabled={!!ownerId}
             />
             {filteredOwners.length > 0 && !selectedOwner && !ownerId && (
-              <ul className="calendarView__ownerList">
+              <ul className="addAppointment__ownerList">
                 {filteredOwners.map(owner => (
-                  <li key={owner.id} onClick={() => handleOwnerSelect(owner)}>
-                    {`${owner.first_name} ${owner.last_name} - ${owner.phone_number}`}
+                  <li 
+                    key={owner.id} 
+                    onClick={() => handleOwnerSelect(owner)}
+                    className="addAppointment__ownerItem"
+                  >
+                    <div className="addAppointment__ownerIcon">
+                      <User size={20} />
+                    </div>
+                    <div className="addAppointment__ownerInfo">
+                      <div className="addAppointment__ownerName">
+                        {owner.first_name} {owner.last_name}
+                      </div>
+                      <div className="addAppointment__ownerDetails">
+                        📞 {owner.phone_number}
+                        {owner.email && ` • ✉️ ${owner.email}`}
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
             )}
           </div>
-          
-          <select
-            name="patient_id"
-            value={appointmentData.patient_id}
-            onChange={handleInputChange}
-            required
-            className="calendarView__select"
-            disabled={!!patientId || !selectedOwner}
-          >
-            <option value="">Select Pet</option>
-            {pets.map(pet => (
-              <option key={pet.id} value={pet.id}>{pet.name}</option>
-            ))}
-          </select>
+          {selectedOwner && (
+            <div className="addAppointment__selectedOwner">
+              <div className="addAppointment__ownerIcon">
+                <User size={20} />
+              </div>
+              <div className="addAppointment__ownerInfo">
+                <div className="addAppointment__ownerName">
+                  {selectedOwner.first_name} {selectedOwner.last_name}
+                </div>
+                <div className="addAppointment__ownerDetails">
+                  📞 {selectedOwner.phone_number}
+                  {selectedOwner.email && ` • ✉️ ${selectedOwner.email}`}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
+          <div className="addAppointment__section">
+            <label className="addAppointment__label">
+              <User size={16} />
+              Patient
+            </label>
+            <select
+              name="patient_id"
+              value={appointmentData.patient_id}
+              onChange={handleInputChange}
+              required
+              className="addAppointment__select"
+              disabled={!!patientId || !selectedOwner}
+            >
+              <option value="">Select Patient</option>
+              {pets.map(pet => (
+                <option key={pet.id} value={pet.id}>{pet.name}</option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            name="staff_id"
-            value={appointmentData.staff_id}
-            onChange={handleInputChange}
-            required
-            className="calendarView__select"
-          >
-            <option value="">Select Staff</option>
-            {staff.map(s => (
-              <option key={s.id} value={s.id}>{`${s.first_name} ${s.last_name}`}</option>
-            ))}
-          </select>
+          <div className="addAppointment__section">
+            <label className="addAppointment__label">
+              <Stethoscope size={16} />
+              Doctor
+            </label>
+            <select
+              name="staff_id"
+              value={appointmentData.staff_id}
+              onChange={handleInputChange}
+              required
+              className="addAppointment__select"
+            >
+              <option value="">Select Doctor</option>
+              {staff.map(s => (
+                <option key={s.id} value={s.id}>Dr. {`${s.first_name} ${s.last_name}`}</option>
+              ))}
+            </select>
+          </div>
 
-          <input
-            type="text"
-            name="title"
-            value={appointmentData.title}
-            onChange={handleInputChange}
-            placeholder="Appointment Title"
-            required
-            className="calendarView__input"
-          />
-          <input
-            type="datetime-local"
-            name="start_time"
-            value={appointmentData.start_time}
-            onChange={handleInputChange}
-            required
-            className="calendarView__input"
-          />
-          <input
-            type="datetime-local"
-            name="end_time"
-            value={appointmentData.end_time}
-            onChange={handleInputChange}
-            required
-            className="calendarView__input"
-          />
-          <textarea
-            name="description"
-            value={appointmentData.description}
-            onChange={handleInputChange}
-            placeholder="Description"
-            className="calendarView__textarea"
-          />
-          <button type="submit" className="calendarView__submitButton">Add Appointment</button>
-          <button type="button" onClick={onClose} className="calendarView__cancelButton">Cancel</button>
+          <div className="addAppointment__section">
+            <label className="addAppointment__label">
+              <Calendar size={16} />
+              Appointment Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={appointmentData.title}
+              onChange={handleInputChange}
+              placeholder="Enter appointment title"
+              required
+              className="addAppointment__input"
+            />
+          </div>
+
+          <div className="addAppointment__section">
+            <label className="addAppointment__label">
+              <Clock size={16} />
+              Start Time
+            </label>
+            <input
+              type="datetime-local"
+              name="start_time"
+              value={appointmentData.start_time}
+              onChange={handleInputChange}
+              required
+              className="addAppointment__input"
+            />
+          </div>
+
+          <div className="addAppointment__section">
+            <label className="addAppointment__label">
+              <Clock size={16} />
+              End Time
+            </label>
+            <input
+              type="datetime-local"
+              name="end_time"
+              value={appointmentData.end_time}
+              onChange={handleInputChange}
+              required
+              className="addAppointment__input"
+            />
+          </div>
+
+          <div className="addAppointment__section">
+            <label className="addAppointment__label">
+              <FileText size={16} />
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={appointmentData.description}
+              onChange={handleInputChange}
+              placeholder="Enter appointment details"
+              className="addAppointment__textarea"
+            />
+          </div>
+
+          <div className="addAppointment__actions">
+            <button 
+              type="submit" 
+              className="addAppointment__button addAppointment__button--primary"
+            >
+              Add Appointment
+            </button>
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="addAppointment__button addAppointment__button--secondary"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>

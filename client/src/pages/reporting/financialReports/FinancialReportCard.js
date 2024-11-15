@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, Typography, Box } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import './FinancialReports.css';  // Import your CSS file
+import './FinancialReports.css'; 
 
 const FinancialReportCard = ({ data, title, count, percentage }) => {
   return (
@@ -16,7 +16,7 @@ const FinancialReportCard = ({ data, title, count, percentage }) => {
             {count}
           </Typography>
           <Typography variant="body2" className="last-30-days">
-            Last 30 days
+            Last 7 days
           </Typography>
         </Box>
         <Box className="percentage-box">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button,
   Typography, CircularProgress, Container
@@ -8,7 +8,7 @@ import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import ReportingTabs from '../../../components/ReportingTabs';
 import './ReportHistory.css';
 
-const ReportHistory = () => {
+const ReportHistory = ({ globalSearchTerm }) => {
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -50,6 +50,28 @@ const ReportHistory = () => {
     setSelectedReport(null);
   };
 
+  const filteredReports = useMemo(() => {
+    if (!globalSearchTerm) return reports;
+
+    return reports.filter(report => {
+      const searchTerm = globalSearchTerm.toLowerCase();
+      const reportDate = new Date(report.date).toLocaleDateString().toLowerCase();
+      const createdAt = new Date(report.created_at).toLocaleString().toLowerCase();
+      
+      const isDateSearch = !isNaN(Date.parse(searchTerm)) || 
+                         searchTerm.includes('/') ||
+                         searchTerm.includes('-');
+
+      if (isDateSearch) {
+        return reportDate.includes(searchTerm) || 
+               createdAt.includes(searchTerm);
+      }
+
+      return reportDate.includes(searchTerm) || 
+             createdAt.includes(searchTerm);
+    });
+  }, [reports, globalSearchTerm]);
+
   return (
     <div className="financial-reports-container">
       <ReportingTabs />
@@ -59,8 +81,14 @@ const ReportHistory = () => {
           <CircularProgress />
         ) : error ? (
           <Typography color="error">{error}</Typography>
-        ) : reports.length === 0 ? (
-          <Typography>No reports available.</Typography>
+        ) : filteredReports.length === 0 ? (
+          <div className="no-reports-message">
+            {reports.length === 0 ? (
+              "No reports available."
+            ) : (
+              `No reports found matching "${globalSearchTerm}"`
+            )}
+          </div>
         ) : (
           <TableContainer component={Paper} className="report-table">
             <Table>
@@ -72,7 +100,7 @@ const ReportHistory = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {reports.map((report) => (
+                {filteredReports.map((report) => (
                   <TableRow key={report.id}>
                     <TableCell>{new Date(report.date).toLocaleDateString()}</TableCell>
                     <TableCell>{new Date(report.created_at).toLocaleString()}</TableCell>

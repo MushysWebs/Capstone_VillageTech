@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import PatientSidebar from "../../components/patientSidebar/PatientSidebar";
+import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
+import PatientLayout from "../../components/patientLayout/PatientLayout";
 import Receipt from "./Receipt";
 import { usePatient } from "../../context/PatientContext";
+import CreateInvoiceModal from "./CreateInvoiceModal";
 import "./Payments.css";
 
-const Payments = () => {
+const Payments = ({ globalSearchTerm }) => {
   const { selectedPatient } = usePatient();
   const [invoiceData, setInvoiceData] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -15,7 +16,7 @@ const Payments = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [receiptUrl, setReceiptUrl] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const supabase = useSupabaseClient();
   const stripe = useStripe();
   const elements = useElements();
@@ -26,6 +27,11 @@ const Payments = () => {
       currency: "CAD",
       minimumFractionDigits: 2,
     });
+  };
+
+  const handleInvoiceCreated = (newInvoice) => {
+    setInvoiceData([...invoiceData, newInvoice]);
+    setSelectedInvoice(newInvoice);
   };
 
   const fetchInvoiceData = async () => {
@@ -46,7 +52,6 @@ const Payments = () => {
   };
 
   useEffect(() => {
-    console.log("Stripe Publishable Key:", process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
     fetchInvoiceData();
   }, [selectedPatient, supabase]);
 
@@ -54,10 +59,6 @@ const Payments = () => {
     setSelectedInvoice(invoice);
     setSuccess(false);
     setPaymentMethod("");
-  };
-
-  const handlePaymentMethodChange = (method) => {
-    setPaymentMethod(method);
   };
 
   const markAsPaid = async () => {
@@ -69,6 +70,10 @@ const Payments = () => {
           .eq("invoice_id", selectedInvoice.invoice_id);
 
         if (error) throw error;
+
+        await generateAndSendReceipt();
+
+        setSuccess(true);
         fetchInvoiceData();
       } catch (err) {
         console.error("Error marking invoice as paid:", err.message);
@@ -90,8 +95,6 @@ const Payments = () => {
     const cardElement = elements.getElement(CardElement);
 
     try {
-      console.log("Creating payment intent...");
-
       const response = await fetch(
         `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/create_payment_intent`,
         {
@@ -109,8 +112,6 @@ const Payments = () => {
 
       const paymentIntentData = await response.json();
 
-      console.log("Payment intent response:", paymentIntentData);
-
       if (paymentIntentData.error) {
         setError(paymentIntentData.error.message);
         setLoading(false);
@@ -125,8 +126,6 @@ const Payments = () => {
         },
       });
 
-      console.log("Stripe payment result:", paymentResult);
-
       if (paymentResult.error) {
         setError(paymentResult.error.message);
         setLoading(false);
@@ -135,19 +134,8 @@ const Payments = () => {
         paymentResult.paymentIntent.status === "succeeded"
       ) {
         await markAsPaid();
-
-        // Delay receipt generation for first load
-        setTimeout(async () => {
-          const receiptFileUrl = generateReceiptPDFUrl();
-
-          await saveReceiptToDatabase(receiptFileUrl);
-
-          setReceiptUrl(receiptFileUrl);
-
-          setSuccess(true);
-
-          console.log("Receipt generated successfully");
-        }, 500); // Add a delay here to ensure all data is loaded
+        await generateAndSendReceipt();
+        setSuccess(true);
       } else {
         setError("Payment failed.");
       }
@@ -159,8 +147,29 @@ const Payments = () => {
     }
   };
 
-  const generateReceiptPDFUrl = () => {
-    return `https://example.com/receipt_${selectedInvoice?.invoice_id}.pdf`;
+  const generateAndSendReceipt = async () => {
+    try {
+      const pdfBlob = await pdf(
+        <Receipt invoice={selectedInvoice} patient={selectedPatient} />
+      ).toBlob();
+
+      const { data: pdfData, error: uploadError } = await supabase.storage
+        .from("receipts")
+        .upload(`receipts/receipt_${selectedInvoice.invoice_id}.pdf`, pdfBlob, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
+      console.log("Uploaded file path:", pdfData.path);
+
+      if (uploadError) throw uploadError;
+
+      const pdfUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/receipts/receipts/receipt_${selectedInvoice.invoice_id}.pdf`;
+
+      await saveReceiptToDatabase(pdfUrl);
+      await sendEmailReceipt(pdfUrl);
+    } catch (err) {
+      console.error("Error generating and sending receipt:", err.message);
+    }
   };
 
   const saveReceiptToDatabase = async (pdfUrl) => {
@@ -172,21 +181,67 @@ const Payments = () => {
         receipt_pdf_url: pdfUrl,
       });
 
-      if (error) {
-        throw error;
-      }
-      console.log("Receipt saved to database", data);
+      if (error) throw error;
     } catch (err) {
       console.error("Error saving receipt to database:", err.message);
     }
   };
 
+  const sendEmailReceipt = async (pdfUrl) => {
+    try {
+      const { data: ownerData, error: ownerError } = await supabase
+        .from("owners")
+        .select("email")
+        .eq("id", selectedPatient.owner_id)
+        .single();
+
+      if (ownerError || !ownerData || !ownerData.email) {
+        console.error("Owner email not found");
+        return;
+      }
+      console.log("Constructed PDF URL:", pdfUrl);
+
+      const ownerEmail = ownerData.email;
+
+      const response = await fetch(
+        `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/send-receipt`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            email: ownerEmail,
+            receiptData: { pdfUrl },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+
+      console.log("Receipt email sent successfully to:", ownerEmail);
+    } catch (error) {
+      console.error("Error sending email receipt:", error);
+    }
+  };
+
   return (
-    <div className="payments-main">
-      <PatientSidebar />
+    <PatientLayout globalSearchTerm={globalSearchTerm} showTabs={false}>
       <div className="payments-page">
         <div className="invoice-section">
-          <h2 className="payments-h2">Pending Invoices</h2>
+          <div className="invoice-header-container">
+            <button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="create-invoice-button"
+            >
+              + New Invoice
+            </button>
+            <h2 className="payments-h2">Pending Invoices</h2>
+          </div>
+
           <div className="table-container">
             <table className="invoices-table">
               <thead>
@@ -228,18 +283,46 @@ const Payments = () => {
                   Payment Options for Invoice #{selectedInvoice.invoice_id}
                 </h2>
                 <div className="payment-options">
-                  <button onClick={() => handlePaymentMethodChange("cash")}>
+                  <button onClick={() => setPaymentMethod("cash")}>
                     Pay with Cash
                   </button>
-                  <button onClick={() => handlePaymentMethodChange("card")}>
+                  <button onClick={() => setPaymentMethod("card")}>
                     Pay with Card
                   </button>
                 </div>
 
                 {paymentMethod === "card" && (
-                  <form onSubmit={handleSubmit}>
-                    <CardElement options={{ hidePostalCode: true }} />
-                    <button type="submit" disabled={!stripe || loading}>
+                  <form onSubmit={handleSubmit} autocomplete="off">
+                    <div className="card-input-wrapper">
+                      <CardElement
+                        options={{
+                          hidePostalCode: true,
+                          style: {
+                            base: {
+                              color: "#333",
+                              fontSize: "16px",
+                              iconColor: "#0a84ff",
+                              "::placeholder": {
+                                color: "#a0a0a0",
+                              },
+                            },
+                            invalid: {
+                              color: "#e63946",
+                              iconColor: "#e63946",
+                            },
+                            complete: {
+                              color: "#2d6a4f",
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+
+                    <button
+                      className="payment-pay-button"
+                      type="submit"
+                      disabled={!stripe || loading}
+                    >
                       {loading
                         ? "Processing..."
                         : `Pay ${formatCurrency(
@@ -247,6 +330,11 @@ const Payments = () => {
                           )}`}
                     </button>
                     {error && <div className="error-message">{error}</div>}
+                    <img
+                      src="/holygrail.png"
+                      alt="Accepted Cards"
+                      className="accepted-cards-image"
+                    />
                   </form>
                 )}
 
@@ -260,8 +348,6 @@ const Payments = () => {
 
             {success && (
               <div className="payment-success">
-                {console.log("Invoice:", selectedInvoice)}
-                {console.log("Patient:", selectedPatient)}
                 <h2 className="success-message" style={{ color: "green" }}>
                   Payment Successful!
                 </h2>
@@ -288,14 +374,15 @@ const Payments = () => {
             )}
           </div>
         )}
+      <CreateInvoiceModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          selectedPatientId={selectedPatient?.id}
+          onInvoiceCreated={handleInvoiceCreated}
+        />
       </div>
-    </div>
+    </PatientLayout>
   );
 };
 
 export default Payments;
-
-
-//needs email receipts
-//needs to be able to generate receipt from paying with cash
-//vercel is bugged and pay button doesnt work
