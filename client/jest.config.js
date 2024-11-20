@@ -1,11 +1,17 @@
 module.exports = {
-    testEnvironment: 'jsdom', // Use jsdom for DOM-related tests
-    transform: {
-      '^.+\\.(js|jsx)$': 'babel-jest', // Transform JS/JSX files
-    },
-    moduleNameMapper: {
-      '\\.(css|less|scss|sass)$': 'identity-obj-proxy', // Mock CSS imports
-    },
-    moduleFileExtensions: ['js', 'jsx'], // Recognize .js and .jsx files
-  };
-  
+  testEnvironment: 'jsdom',
+  moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '^@/(.*)$': '<rootDir>/src/$1'
+  },
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+  transform: {
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  },
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx}',
+    '!src/index.js',
+    '!src/reportWebVitals.js',
+    '!src/setupTests.js'
+  ]
+};

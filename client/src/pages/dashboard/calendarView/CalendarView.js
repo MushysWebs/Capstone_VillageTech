@@ -11,7 +11,6 @@ import {
 } from 'date-fns';
 import AddAppointment from './AddAppointment';
 import AppointmentDetails from './AppointmentDetails';
-import ClockInOut from '../../../components/clockInOut/ClockInOut';
 import './CalendarView.css';
 
 const HOUR_WIDTH = 140;

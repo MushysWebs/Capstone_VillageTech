@@ -168,6 +168,7 @@ const Account = () => {
                   onChange={handleFileChange} 
                   style={{ display: 'none' }} 
                   accept="image/*"
+                  data-testid="profile-input"
                 />
               </div>
 
